@@ -37,53 +37,53 @@
           slot(name="refs")
             div List of references not set
 
-    div(class="mt20px")
-      div Template example
-      CodeHighlight(
-        lang="pug"
-        class="h35px mb50px"
-        :code=`[
-          {
-            copy: true,
-            lang: 'bash',
-            title: 'PUG',
-            code: "curl -fsSL https://bun.com/install | bash # for macOS, Linux, and WSL'm"
-          },
-          {
-            copy: true,
-            lang: 'bash',
-            title: 'HTML',
-            code: 'powershell -c "irm bun.sh/install.ps1|iex"'
-          }
-        ]`
-      )
-
-    div
-      div Include in component
-      CodeHighlight(
-        lang="pug"
-        class="h35px mb50px"
-        :code=`[
-          {
-            copy: true,
-            lang: 'bash',
-            title: '@VST TS',
-            code: "curl -fsSL https://bun.com/install | bash # for macOS, Linux, and WSL'm"
-          },
-          {
-            copy: true,
-            lang: 'bash',
-            title: 'Composition API',
-            code: 'powershell -c "irm bun.sh/install.ps1|iex"'
-          },
-          {
-            copy: true,
-            lang: 'bash',
-            title: 'Options API',
-            code: 'powershell -c "irm bun.sh/install.ps1|iex"'
-          }
-        ]`
-      )
+    //div(class="mt20px")
+    //  div Template example
+    //  CodeHighlight(
+    //    lang="pug"
+    //    class="h35px mb50px"
+    //    :code=`[
+    //      {
+    //        copy: true,
+    //        lang: 'bash',
+    //        title: 'PUG',
+    //        code: "curl -fsSL https://bun.com/install | bash # for macOS, Linux, and WSL'm"
+    //      },
+    //      {
+    //        copy: true,
+    //        lang: 'bash',
+    //        title: 'HTML',
+    //        code: 'powershell -c "irm bun.sh/install.ps1|iex"'
+    //      }
+    //    ]`
+    //  )
+    //
+    //div
+    //  div Include in component
+    //  CodeHighlight(
+    //    lang="pug"
+    //    class="h35px mb50px"
+    //    :code=`[
+    //      {
+    //        copy: true,
+    //        lang: 'bash',
+    //        title: '@VST TS',
+    //        code: "curl -fsSL https://bun.com/install | bash # for macOS, Linux, and WSL'm"
+    //      },
+    //      {
+    //        copy: true,
+    //        lang: 'bash',
+    //        title: 'Composition API',
+    //        code: 'powershell -c "irm bun.sh/install.ps1|iex"'
+    //      },
+    //      {
+    //        copy: true,
+    //        lang: 'bash',
+    //        title: 'Options API',
+    //        code: 'powershell -c "irm bun.sh/install.ps1|iex"'
+    //      }
+    //    ]`
+    //  )
 </template>
 
 
@@ -101,6 +101,11 @@ import {VST, Prop, VueClass} from '../../core'
     // this.routes = [...GuidesRoutes, ...KitRoutes]
   }
 }
+
+export interface IElementDocBlockData {
+
+}
+
 </script>
 
 <style lang="sass" scoped>

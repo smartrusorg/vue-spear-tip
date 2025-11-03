@@ -9,7 +9,8 @@
       template(v-if="route.component")
         RouterLink(
           :to="route.path"
-        ) {{ route.name }}
+          v-html="route.name"
+        )
       div(v-else)
         span(v-html="route.name")
 </template>

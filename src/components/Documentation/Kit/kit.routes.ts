@@ -7,6 +7,7 @@ import DateKitField from './Fields/DateKitField.vue'
 import StringKitField from './Fields/StringKitField.vue'
 import TabsKit from '../../Elements/Tabs/TabsKit.vue'
 import TextKitField from './Fields/TextKitField.vue'
+import SwitchKitField from './Fields/SwitchKitField.vue'
 
 export default [
   {
@@ -63,14 +64,9 @@ export default [
     name: '<b>Fields</b>',
   },
   {
-    path: '/fields/string',
-    name: 'String',
-    component: StringKitField
-  },
-  {
-    path: '/fields/text',
-    name: 'Text',
-    component: TextKitField
+    path: '/fields/date',
+    name: 'Date',
+    component: DateKitField
   },
   {
     path: '/fields/select',
@@ -78,9 +74,19 @@ export default [
     component: SelectKitField
   },
   {
-    path: '/fields/date',
-    name: 'Date',
-    component: DateKitField
+    path: '/fields/string',
+    name: 'String',
+    component: StringKitField
+  },
+  {
+    path: '/fields/switch',
+    name: 'Switch <small>(Checkbox)</small>',
+    component: SwitchKitField
+  },
+  {
+    path: '/fields/text',
+    name: 'Text',
+    component: TextKitField
   },
   {
     name: '<hr style="border: solid #ccc; border-width: 1px 0 0">',

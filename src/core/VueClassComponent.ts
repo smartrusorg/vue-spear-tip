@@ -45,13 +45,13 @@ if (typeof globalThis.$VST._dynamic._vueComputed === 'undefined') {
  * Декоратор для создания компонента на основе класса VueClass
  * @param options - опции компонента или конструктор класса
  * @example
- * \@VueClassComponent({ // TODO нужно обновлять при разработке и получать при сборке, необходимо написать vite плагин
- *   makeGlobal: true, // <- сделать глобальным, если название совпадёт с системным, то будет проигнорировано
- * }) ComponentNameWebview extends Webview {
+ * \@VueClassComponent ComponentNameWebview extends VueClass {
  *
  * }
  * @example
- * \@VueClassComponent ComponentNameWebview extends Webview {
+ * \@VueClassComponent({
+ *
+ * }) ComponentNameWebview extends VueClass {
  *
  * }
  * @returns - декоратор для класса
@@ -65,9 +65,7 @@ function VueClassComponentDecorator<P = {}>(
   }
 
   // Если передан объект с опциями (используется как @VueClassComponent(options))
-  return function(constructor: new (...args: any[]) => any) {
-
-    // @ts-ignore
+  return function(constructor: new (...args: any[]) => any) { // @ts-ignore
     return createComponent(constructor, options)
   }
 }

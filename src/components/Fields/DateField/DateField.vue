@@ -43,7 +43,7 @@
         readonly
         @mousedown.prevent
       )
-    div(
+    .vst-date-field-calendar-icon(
       class="w22px h22px text-stone absolute t-13px l-12px z4 cursor-pointer hover:scale-130"
       v-if="!disabled"
     )
@@ -59,7 +59,7 @@
 <script lang="ts">
 
 import {Temporal} from 'temporal-spec'
-import {Computed, Prop, VST, Watch} from '../../../core'
+import {Prop, VST, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import FPLocales from 'flatpickr/dist/l10n'
 import flatpickr from 'flatpickr'

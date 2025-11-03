@@ -8,7 +8,9 @@
         div
       div(class="mb10px text-lightblue-400") With auto locales format
 
-      ElementDocBlock
+      ElementDocBlock(
+
+      )
         //template(#$title-default) sadsdf
         template(#default)
           .row(class="gap-7")
@@ -47,8 +49,27 @@
                 inputValue="2012-12-12 00:01:22"
               )
         //template(#$title-props) 123123
-        //template(#props)
-        //  div Хуёпс
+        template(#props)
+          CodeHighlight(
+            class="h100px mb20px"
+            code=`/**
+  * Глобальное название поля. Используется для ссылок на поля дат (этого же компонента), в которых указываются
+  * минимальные/максимальные даты для текущего поля даты.
+  * Внимание! Для сложных форм используйте префиксы.
+  */
+  @Prop(String) readonly fieldName: string = ''`
+          ).
+          div firstDayOfWeek: 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7
+          div disabledDays: number | string | Date[]
+          div disableWeekends: boolean
+          div disableDaysOfWeek
+          div disabled
+          div ISO861UTCMode
+          div dayPreRender
+          div max
+          div min
+          div maxField
+          div minField
 </template>
 
 
@@ -56,7 +77,7 @@
 import {VST, Prop, BaseComponent} from '../../../core'
 import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
 import IDateField from './IDateField'
-import ElementDocBlock from '../../Documentation/ElementDocBlock.vue'
+import ElementDocBlock, {IElementDocBlockData} from '../../Documentation/ElementDocBlock.vue'
 
 /**
  * DateKit
@@ -69,13 +90,26 @@ import ElementDocBlock from '../../Documentation/ElementDocBlock.vue'
   }
   components = {GuidesMenu, ElementDocBlock}
 
+  // TODO подумать над автоматической hot генерацией json данных по классу
+  dateData: IElementDocBlockData = {
+    props: {
+
+    },
+    events: {
+
+    },
+    methods: {
+
+    },
+  }
+
   mounted() {
     // setTimeout(() => {
     //   console.log('upd', this.$refs.rus.DT?.add({hours: 5})?.toLocaleString())
     // }, 5000)
   }
 
-  l(...args) {
+  l(...args: any[]) {
     console.log('dk', ...args)
   }
 

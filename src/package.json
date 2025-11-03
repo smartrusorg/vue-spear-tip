@@ -1,6 +1,6 @@
 {
   "name": "vue-spear-tip-dev",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "type": "module",
   "main": "./index.ts"
 }
