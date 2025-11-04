@@ -27,15 +27,7 @@
         disabled,
       }`
     )
-      div(class="flex! items-center justify-center")
-        div(
-          @click="!disabled ? (isChecked = !isChecked) : null"
-          class="cursor-pointer fs-1rem mx15px my2px hover:underline"
-          :class=`{
-            'fw-bold underline': isChecked,
-          }`
-        )
-          slot
+      span(class="")
         input(type="checkbox" :id="'checkbox-'+randomId" v-model="isChecked" :disabled="disabled")
         label(:for="'checkbox-'+randomId" class="check h30px!")
           svg(
@@ -49,6 +41,14 @@
               `
             )
             polyline(points="1 9 7 14 15 4")
+      span(
+        @click="!disabled ? (isChecked = !isChecked) : null"
+        class="cursor-pointer fs-1rem mx15px my2px whitespace-nowrap"
+        :class=`{
+          'fw-bold underline underline-black': isChecked,
+        }`
+      )
+        slot
     component(is="style" v-if="type == 'toggler'").
       .toggler-{{ randomId }} .tgl-flip + .tgl-btn {
         perspective: {{ isChecked ? togglerWidthActive : togglerWidth }} !important;
@@ -145,13 +145,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 <style lang="sass">
 .container-switch
-  @apply min-w64px h100% p-0 m-0 text-center z-10! d-inline-block! user-select-none
+  @apply min-w64px h100% p-0 m-0 text-center z-10! flex! user-select-none
   @apply min-h44px w-fit-content!
 .switch
-  @apply pos-absolute t-50% l-50% z-10! rounded-15px
-  transform: translate(-50%, -50%)
-  grid-template-columns: repeat(2, min-content)
-  justify-self: center
+  @apply z-10! rounded-15px relative!
   input
     @apply d-none
 
@@ -292,7 +289,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
 .typical-checkbox
-  @apply mb12px mt15px d-inline-block min-h30px!
+  @apply mb12px mt15px flex px10px min-h44px!
   input[type="checkbox"]
     display: none
     visibility: hidden
@@ -346,9 +343,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     .check:hover svg
       stroke: #4285f4
   input[type="checkbox"] + label
-    @apply px4px py2px
+    @apply pl4px pt3px
   input[type="checkbox"]:checked + label
-    @apply border-solid border-2px border-#4285f4 rounded-3px
+    @apply border-solid border-2px border-#4285f4 rounded-3px px4px! py2px!
   input[type="checkbox"]:checked + .check svg
     stroke: #4285f4
   input[type="checkbox"]:checked + .check svg path
