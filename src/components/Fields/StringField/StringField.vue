@@ -136,7 +136,9 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid"
   }
 
   beforeMountParent() {
-    this.value = this.modelValue || this.inputValue || ''
+    let value = (this.modelValue || this.inputValue || '')
+    if (typeof value != 'string') value = ''
+    this.value = value
     if (this.isDateTime) {
       const parts = (new Intl.DateTimeFormat((
           this.dtPresetLocale || this.VST.$r.locale
@@ -275,7 +277,7 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid"
     this.$emit('focus')
   }
   private _onBlur() {
-    this.nextTick(() => this.$emit('blur', this.$refs.selectInput.$el.value))
+    this.nextTick(() => this.$emit('blur', this.$refs.selectInput?.$el?.value))
   }
   private _onInput(event: any, reset: boolean = false) {
     const val = event?.target?.value?.trim?.() || event

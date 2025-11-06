@@ -5,7 +5,20 @@
     div(class="w[calc(100%-260px)]")
       h1 TextField
       div
-        TextField
+        TextField(
+          inputValue=`Hey, try ***to*** select *some* text <b>here</b>.
+  There will <https://smartrus.org> a menu for selecting some inline styles.
+  Remember: you have full control about content and styling of this menu.
+
+  Roadmap:
+  - v-model
+  - Ссылка, с возможностью редактирования
+  - Ссылка на изображение, возможно дать вставлять base64, но автоматически конвертируемый и сжатый в webp
+  - Нормальный скрол (вписывающийся, возможно через родительский элемент)
+  - Кнопка clear
+  - Отображение количества символов
+          `
+        )
 </template>
 
 

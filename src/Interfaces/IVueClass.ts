@@ -6,7 +6,7 @@ import {VueClass} from '../core'
  * @interface IVueClass
  * @typedef {Function} mounted Mount
  */
-export default interface IVueClass {
+export interface IVueClass {
   readonly mixins: Array<any>
   readonly components: {[key:string|symbol|number]:any}
   readonly componentsParent: {[key:string|symbol|number]:any}

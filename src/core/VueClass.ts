@@ -1,5 +1,5 @@
 import { VNode } from "@vue/runtime-core"
-import IVueClass from '../Interfaces/IVueClass'
+import {IVueClass} from '../Interfaces/IVueClass'
 
 export default abstract class VueClass implements IVueClass {
   public readonly mixins: Array<any> = []

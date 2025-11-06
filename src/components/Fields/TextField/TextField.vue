@@ -133,7 +133,9 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { Link } from '@tiptap/extension-link'
 import { NoSymbolIcon } from "@heroicons/vue/20/solid"
 
+
 @VST export default class TextField extends FieldComponent {
+  @Prop(String) readonly outputFormat: 'markdown'|'html' = 'markdown'
   @Prop(String) readonly defaultButtonsTheme: string = 'pink'
   @Prop(String) readonly activeButtonsTheme: string = 'purple'
   @Prop(String) readonly placeholder: string = ''
@@ -156,6 +158,7 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid"
   }
 
   mounted() {
+    this.value = (this.modelValue || this.inputValue || '')
     this.editor = new Editor({
       extensions: [
         StarterKit,
@@ -174,25 +177,52 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid"
         Placeholder.configure({
           placeholder: this.placeholder ? this.placeholder : 'Введите текст',
         }),
-        // Link.configure({
-        //   openOnClick: false, // Отключаем стандартный переход по клику
-        //   autolink: true,
-        //   defaultProtocol: 'https',
-        // }),
+        Link.configure({
+          openOnClick: false,
+          autolink: true,
+          defaultProtocol: 'https',
+        }),
+        Markdown.configure({
+          html: true,
+          breaks: true,
+          linkify: true,
+          transformPastedText: true,
+          transformCopiedText: this.outputFormat === 'markdown',
+          // Включаем трансформацию при копировании в Markdown
+          // transformCopiedText: (text) => {
+          //   console.log('text', text)
+          //   // Используем геттер Markdown для буфера обмена
+          //   return this.outputFormat === 'markdown' ? this.editor?.storage.markdown.getMarkdown() : text;
+          // },
+        }),
       ],
       // contentType: 'html',
       // content: ,
+      content: this.value
     })
-    this.editor.commands.setContent(
-        this.value = `
-        Hey, try ***to*** select *some* text <b>here</b>. There will https://smartrus.org a menu for selecting some inline styles. Remember: you have full control about content and styling of this menu.
-          <li>Select any item to display a global menu</li>
-          <li>Item 1</li>
-          <li>Item 2</li>
-          <li>Item 3</li>
-          <li>Item 4</li>
-      `
-    )
+
+    // if (this.outputFormat === 'html') {
+      // Если ожидаем HTML, вставляем его как HTML
+      // this.editor.commands.setContent(this.value, {
+      //   parseOptions: { contentType: 'text/markdown' }
+      // })
+    // }
+    // else {
+    //   // Если ожидаем Markdown, вставляем его как Markdown
+    //   this.editor.commands.setContent(this.value, {
+    //     parseOptions: { contentType: 'text/markdown' }
+    //   })
+    // }
+  }
+
+  getValue(): string {
+    // if (!this.editor) return this.internalContent
+
+    if (this.outputFormat === 'markdown') {
+      return this.editor.storage.markdown.getMarkdown()
+    } else {
+      return this.editor.getHTML()
+    }
   }
 
   addLink() {

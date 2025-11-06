@@ -115,4 +115,7 @@ export default [
   {
     name: '<b style="color: #ccc;">Modals (Soon)</b>',
   },
+  {
+    name: '<b style="color: #ccc;">AutoDocs by Class (Soon)</b>',
+  },
 ]

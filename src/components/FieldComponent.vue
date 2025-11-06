@@ -7,8 +7,8 @@ import IFieldComponent from '../Interfaces/IFieldComponent'
  */
 export default abstract class FieldComponent extends BaseComponent implements IFieldComponent {
   /** Входящее значение */
-  @Prop(String, Number, Array, Object, Boolean) readonly inputValue: any = null
-  @Prop(String, Number, Array, Object, Boolean) readonly modelValue: any = null
+  @Prop(String, Number, Array, Object, Boolean, null) readonly inputValue: any = null
+  @Prop(String, Number, Array, Object, Boolean, null) readonly modelValue: any = null
   /** Значение по умолчанию */
   @Prop(String, Number, Array, Object, Boolean) readonly default?: any = null
   @Prop(Boolean) readonly disabled?: boolean = false

@@ -148,7 +148,7 @@ globalThis.$VST.safeStringify = (message: any) => {
   }
 }
 
-
+export * from '../Interfaces/IVueClass'
 export * from './VueClassComponent'
 export * from './VueClass'
 export * from './Props'
@@ -157,7 +157,7 @@ export * from './Computed'
 import BaseComponent from '../components/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
 const VST = VueClassComponent
-export {BaseComponent, VST, VSTType}
+export {BaseComponent, VST, VSTType, IVueClass}
 
 window.addEventListener('resize', (event: Event) => $VST.$emit('$VST.viewPortResize'))
 
