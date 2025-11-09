@@ -157,7 +157,7 @@ export * from './Computed'
 import BaseComponent from '../components/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
 const VST = VueClassComponent
-export {BaseComponent, VST, VSTType, IVueClass}
+export {BaseComponent, VST, VSTType}
 
 window.addEventListener('resize', (event: Event) => $VST.$emit('$VST.viewPortResize'))
 

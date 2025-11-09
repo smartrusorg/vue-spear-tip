@@ -1,4 +1,4 @@
-import IVueClass from './IVueClass'
+import {IVueClass} from './IVueClass'
 import IGlobalVST from './IGlobalVST'
 
 export default interface IBaseVueComponent extends IVueClass {
