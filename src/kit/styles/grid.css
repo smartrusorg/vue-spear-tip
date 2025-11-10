@@ -22,6 +22,8 @@
 .row .col-10,
 .row .col-11,
 .row .col-12 {
+    flex: auto !important;
+    max-width: 100% !important;
     position: relative;
     grid-column: span 1;
     align-self: stretch;

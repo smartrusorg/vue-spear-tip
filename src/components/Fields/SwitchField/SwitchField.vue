@@ -3,6 +3,9 @@
     :title="disabled ? disabledTitle : title"
     :data-theme="disabled ? disabledTitleTheme : titleTheme"
     data-offset="[-15, 15]"
+    :class=`{
+      'min-w64px': type != 'checkbox',
+    }`
   )
     | &nbsp;
     .switch(:class="disabled ? 'disabled' : ''" v-if="type == 'switcher'")
@@ -34,7 +37,7 @@
           class="check pb3px! w20px! p0!"
           :class=`{
             'bg-white': isChecked,
-            'ml5px! mt3px!': !isChecked,
+            'mt3px!': !isChecked,
           }`
         )
           svg(
@@ -52,6 +55,7 @@
             )
             polyline(points="1 9 7 14 15 4")
       span(
+        v-if="$slots.default"
         @click="!disabled ? (isChecked = !isChecked) : null"
         class="cursor-pointer fs-1rem mx15px my2px whitespace-nowrap"
         :class=`{
@@ -163,8 +167,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 <style lang="sass">
 .container-switch
-  @apply min-w64px h100% p-0 m-0 text-center z-10! flex! user-select-none
-  @apply min-h44px w-fit-content!
+  @apply h100% p-0 m-0 text-center z-10! flex! user-select-none
+  @apply min-h44px
 .switch
   @apply z-10! rounded-15px relative!
   input
@@ -307,7 +311,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
 .typical-checkbox
-  @apply flex px10px min-h44px! items-center
+  @apply flex px10px min-h44px! items-center mx-auto
   label.check
     @apply rounded-3px flex! items-center justify-center
     display: inline-block
