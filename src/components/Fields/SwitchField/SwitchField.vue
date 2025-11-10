@@ -29,10 +29,20 @@
     )
       span(class="")
         input(type="checkbox" :id="'checkbox-'+randomId" v-model="isChecked" :disabled="disabled")
-        label(:for="'checkbox-'+randomId" class="check h30px!")
+        label(
+          :for="'checkbox-'+randomId"
+          class="check pb3px! w20px! p0!"
+          :class=`{
+            'bg-white': isChecked,
+            'ml5px! mt3px!': !isChecked,
+          }`
+        )
           svg(
-            width="18px" height="18px" viewBox="0 0 18 18"
-            :class=`{'svg-unchecked mt3px': !isChecked}`
+            width="20px" height="20px" viewBox="0 0 18 18"
+            class="w20px"
+            :class=`{
+              'svg-unchecked bg-white': !isChecked,
+            }`
           )
             path(
               :d=`
@@ -63,6 +73,14 @@
     component(is="style" v-if="type == 'toggler' && disabled").
       .toggler-{{ randomId }} {
         opacity: 0.5 !important;
+      }
+    component(is="style" v-if="type == 'checkbox'").
+      #checkbox-{{ randomId }} {
+        display: none;
+        visibility: hidden;
+      }
+      #checkbox-{{ randomId }} + label {
+        box-sizing: content-box !important;
       }
     component(is="style").
       [for="switch-{{ randomId }}"]::before {
@@ -289,41 +307,34 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
 .typical-checkbox
-  @apply mb12px mt15px flex px10px min-h44px!
-  input[type="checkbox"]
-    display: none
-    visibility: hidden
-  label
-    @apply rounded-7px w20px h20px! flex! items-center justify-center
+  @apply flex px10px min-h44px! items-center
+  label.check
+    @apply rounded-3px flex! items-center justify-center
     display: inline-block
-  .check
     cursor: pointer
     position: relative
     margin: auto
-    width: 18px
-    height: 18px
     -webkit-tap-highlight-color: transparent
     transform: translate3d(0, 0, 0)
   .check:before
-    @apply bg-lime-100
     content: ""
     position: absolute
     top: -15px
     left: -15px
-    width: 55px
-    height: 55px
+    width: 50px
+    height: 50px
     border-radius: 50%
     opacity: 0
     transition: opacity 0.2s ease
   .check svg
-    @apply bg-white rounded-2px
+    @apply rounded-2px
     position: relative
     z-index: 1
     fill: none
     stroke-linecap: round
     stroke-linejoin: round
     stroke: #bababb
-    stroke-width: 1.7
+    stroke-width: 1.5
     transform: translate3d(0, 0, 0) scale(1.3)
     transition: all 0.2s ease
 
@@ -342,8 +353,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       opacity: 1
     .check:hover svg
       stroke: #4285f4
-  input[type="checkbox"] + label
-    @apply pl4px pt3px
   input[type="checkbox"]:checked + label
     @apply border-solid border-2px border-#4285f4 rounded-3px px4px! py2px!
   input[type="checkbox"]:checked + .check svg
