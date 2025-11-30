@@ -1,4 +1,4 @@
-import IFieldComponent from '../../../Interfaces/IFieldComponent'
+import {IFieldComponent} from '../../../Interfaces/IFieldComponent'
 import {Temporal} from 'temporal-spec'
 
 /** Date field interface */

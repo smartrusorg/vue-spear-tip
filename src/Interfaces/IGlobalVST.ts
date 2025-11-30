@@ -1,6 +1,6 @@
 import {Temporal} from 'temporal-polyfill'
 
-export default interface IGlobalVST {
+export interface IGlobalVST {
   $r: IGlobalReactiveElements
   $on(event: string, callback: (message: any) => any): void
   $off(event: string, callback: (message: any) => any): void

@@ -1,5 +1,7 @@
-import { VNode } from "@vue/runtime-core"
+import { VNode, SetupContext } from "@vue/runtime-core"
 import {IVueClass} from '../Interfaces/IVueClass'
+import {IFieldComponent} from '../Interfaces/IFieldComponent'
+import {LooseRequired} from '@vue/shared'
 
 export default abstract class VueClass implements IVueClass {
   public readonly mixins: Array<any> = []
@@ -24,7 +26,9 @@ export default abstract class VueClass implements IVueClass {
   declare readonly $parent: VueClass|null
   declare readonly $props: Object
   declare readonly $refs: {
-    [key:string]: HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IVueClass
+    [key:string]:
+      HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IFieldComponent|IFieldComponent[]|
+      IVueClass|VueClass|typeof VueClass
   }
   readonly $root: {
     // [key:string]:any
@@ -57,6 +61,13 @@ export default abstract class VueClass implements IVueClass {
     }
   } = {} as any
 
+  setup(
+    props?: LooseRequired<Readonly<{}> & Readonly<
+      {[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}
+    >,
+    context?: SetupContext,
+    self?: IVueClass
+  ) {}
   beforeCreate() {}
   created() {}
   beforeMount() {}
@@ -65,7 +76,14 @@ export default abstract class VueClass implements IVueClass {
   updated() {}
   beforeUnmount() {}
   unmounted() {}
-
+  
+  setupParent(
+    props?: LooseRequired<Readonly<{}> & Readonly<
+      {[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}
+    >,
+    context?: SetupContext,
+    self?: IVueClass
+  ) {}
   beforeCreateParent() {}
   createdParent() {}
   beforeMountParent() {}

@@ -10,9 +10,9 @@
     | &nbsp;
     .switch(:class="disabled ? 'disabled' : ''" v-if="type == 'switcher'")
       .switch_box
-        div(@click="!disabled ? (isChecked = !isChecked) : null" class="cursor-pointer fs-1rem mb2px")
+        div(@click="!disabled ? (value = !value) : null" class="cursor-pointer fs-1rem mb2px")
           slot
-        input(:id="'switch-'+randomId" type="checkbox" v-model="isChecked" :disabled="disabled")
+        input(:id="'switch-'+randomId" type="checkbox" v-model="value" :disabled="disabled")
         label(:for="'switch-'+randomId" :class=`{
           disabled,
         }`)
@@ -22,7 +22,7 @@
       ['toggler-'+randomId]: true,
     }`
     )
-      input(class="tgl tgl-flip" :id="'toggler-'+randomId" type="checkbox" v-model="isChecked" :disabled="disabled")
+      input(class="tgl tgl-flip" :id="'toggler-'+randomId" type="checkbox" v-model="value" :disabled="disabled")
       label(class="tgl-btn" :data-tg-off="titleTogglerN" :data-tg-on="titleTogglerY" :for="'toggler-'+randomId")
     .typical-checkbox(
       v-else-if="type == 'checkbox'"
@@ -31,20 +31,20 @@
       }`
     )
       span(class="")
-        input(type="checkbox" :id="'checkbox-'+randomId" v-model="isChecked" :disabled="disabled")
+        input(type="checkbox" :id="'checkbox-'+randomId" v-model="value" :disabled="disabled")
         label(
           :for="'checkbox-'+randomId"
           class="check pb3px! w20px! p0!"
           :class=`{
-            'bg-white': isChecked,
-            'mt3px!': !isChecked,
+            'bg-white': value,
+            'mt3px!': !value,
           }`
         )
           svg(
             width="20px" height="20px" viewBox="0 0 18 18"
             class="w20px"
             :class=`{
-              'svg-unchecked bg-white': !isChecked,
+              'svg-unchecked bg-white': !value,
             }`
           )
             path(
@@ -56,17 +56,17 @@
             polyline(points="1 9 7 14 15 4")
       span(
         v-if="$slots.default"
-        @click="!disabled ? (isChecked = !isChecked) : null"
+        @click="!disabled ? (value = !value) : null"
         class="cursor-pointer fs-1rem mx15px my2px whitespace-nowrap"
         :class=`{
-          'fw-bold underline underline-black': isChecked,
+          'fw-bold underline underline-black': value,
         }`
       )
         slot
     component(is="style" v-if="type == 'toggler'").
       .toggler-{{ randomId }} .tgl-flip + .tgl-btn {
-        perspective: {{ isChecked ? togglerWidthActive : togglerWidth }} !important;
-        width: {{ isChecked ? togglerWidthActive : togglerWidth }} !important;
+        perspective: {{ value ? togglerWidthActive : togglerWidth }} !important;
+        width: {{ value ? togglerWidthActive : togglerWidth }} !important;
       }
       .toggler-{{ randomId }} .tgl-flip + .tgl-btn:before {
         background: {{ togglerRevertColors ? bgTogglerY : bgTogglerN }}
@@ -139,24 +139,20 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   @Prop(String) readonly type: 'switcher'|'toggler'|'checkbox' = 'switcher'
   @Prop(Boolean, null) readonly modelValue: boolean = false
   value: boolean = false
+
   beforeMount() {
-    this.isChecked = this.modelValue || this.inputValue || this.value
+    this.value = this.modelValue || this.inputValue
     this.randomId = $VST.generateRandomKey(32)
   }
   emits = ['update:modelValue', 'change']
 
-  @Watch('isChecked', true, true) private _onCheckChange() {
-    this.$emit('update:modelValue', this.isChecked)
-    this.$emit('change', this.isChecked)
+  onValueChange() {
+    this.$emit('update:modelValue', this.value)
+    this.$emit('change', this.value)
   }
 
-  isChecked: boolean = false
-  isDisabled: boolean = false
   randomId: string = ''
 
-  setValue(val: boolean) {
-    this.isChecked = val
-  }
 
   @Watch('modelValue', true) _modelValueChanged(value: any) {
     this.setValue(value)

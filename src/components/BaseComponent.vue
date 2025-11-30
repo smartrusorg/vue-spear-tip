@@ -1,8 +1,8 @@
 <script lang="ts">
-import {ref} from 'vue'
+import {reactive} from 'vue'
 import IBaseVueComponent from '../Interfaces/IBaseVueComponent'
-import {VSTType, VueClass} from '../core'
-import IGlobalVST from '../Interfaces/IGlobalVST'
+import {VueClass} from '../core'
+import {IGlobalVST} from '../Interfaces/IGlobalVST'
 
 /** Base component */
 export default abstract class BaseComponent extends VueClass implements IBaseVueComponent {
@@ -13,9 +13,8 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
   constructor() {
     super()
-    const { _dynamic, ...vst } = $VST
-    this.VST = vst
-    this.VST.$r = ref({
+    this.VST = globalThis.$VST
+    this.VST.$r = reactive({
       locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
       isMobile: false,
       isTablet: false,
@@ -51,7 +50,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
 
 const _VST_BaseComponentEventHelper: {
   [k:string]: any
-  VST: VSTType
+  VST: IGlobalVST
   onViewPortResize(): void
 } = {
   onWindowResizeCallback(event?: Event) {
@@ -80,6 +79,6 @@ const _VST_BaseComponentEventHelper: {
     }
     this.onViewPortResize()
   },
-  VST: {} as VSTType,
+  VST: {} as IGlobalVST,
 } as any
 </script>

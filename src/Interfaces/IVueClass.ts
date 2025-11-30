@@ -1,5 +1,7 @@
-import {VNode} from '@vue/runtime-core'
+import {LooseRequired} from '@vue/shared'
+import {SetupContext, VNode} from '@vue/runtime-core'
 import {VueClass} from '../core'
+import {IFieldComponent} from './IFieldComponent'
 
 /**
  * Наследуемый интерфейс компонента vue
@@ -18,7 +20,7 @@ export interface IVueClass {
   readonly provideParent: {[key:string]:(...args: any) => any}
   
   /**
-   * Название компонента. Определяется автоматически по названию класса если наследовать от View.
+   * Название компонента. Определяется автоматически по названию класса если наследовать от IVueClass.
    */
   readonly name: string
   
@@ -118,6 +120,7 @@ export interface IVueClass {
   readonly $refs: {
     [key:string]:HTMLElement|HTMLInputElement|undefined|
     HTMLElement[]|HTMLInputElement[]|IVueClass|typeof VueClass|VueClass
+    |IFieldComponent[]|IFieldComponent
   }
   
   /**
@@ -187,6 +190,11 @@ export interface IVueClass {
   
   
   // Хуки жизненного цикла
+  setup(
+    props?: LooseRequired<Readonly<{}> & Readonly<{[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}>,
+    context?: SetupContext,
+    self?: IVueClass
+  ): {[k:string]:any}|void
   beforeCreate(): void
   created(): void
   beforeMount(): void
@@ -197,6 +205,11 @@ export interface IVueClass {
   unmounted(): void
   
   // Родительские хуки
+  setupParent(
+    props?: LooseRequired<Readonly<{}> & Readonly<{[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}>,
+    context?: SetupContext,
+    self?: IVueClass
+  ): {[k:string]:any}|void
   beforeCreateParent(): void
   createdParent(): void
   beforeMountParent(): void

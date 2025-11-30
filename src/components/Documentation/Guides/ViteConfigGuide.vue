@@ -5,6 +5,7 @@
     div(class="w[calc(100%-260px)]")
       h1 Vite Config Guide
       div soon
+      //- Добавить какой-нибудь параметр full в vite компонент, который бы, например, даже vue подключал
 </template>
 
 

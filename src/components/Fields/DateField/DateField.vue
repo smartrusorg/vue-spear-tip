@@ -1,6 +1,6 @@
 <template lang="pug">
   .vst-date-field(
-    class="d-inline-block my1px w100% flex items-center flex-col relative"
+    class="d-inline-block my1px w100% flex items-center relative"
     :class=`{
       // 'vst-select-multi': mode == 'multi' || mode == 'tags',
     }`
@@ -8,47 +8,62 @@
     //@click="!$root.APP.hasTouchpad ? addDate() : null"
     //@touchstart="$root.APP.hasTouchpad ? addDate() : null"
     div(
-      tabindex="-1"
+      class=`flex items-center min-w240px h100% bg-white rounded-3xl justify-center text-#c1c7cf w100%`
       v-if="!value"
-      @focusin="!disabled ? addDate() : null"
-      @click="!disabled ? addDate() : null"
-      class=`flex items-center min-w240px bg-white rounded-3xl justify-center text-#c1c7cf
-          border-solid border-1px w100%
-          mx-auto min-h46px!`
-      :class=`{
-        'hover:border-stone hover:text-stone border-#c1c7cf' : !disabled,
-        'border-#D0CCC9FF cursor-no-drop' : disabled,
-      }`
-    ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
+    )
+      div(
+        class=`h[calc(100%-2px)]! text-stone border-y-solid border-l-solid rounded-l-3xl
+          cursor-pointer px15px border-1px! flex items-center border-#D0CCC9FF`
+      )
+        .vst-date-field-calendar-icon(
+          class="w22px h22px text-stone hover:scale-130 h100% mx2px"
+        )
+          CalendarDaysIcon(
+            @click="value ? _inputFocus() : addDate()"
+        )
+      div(
+        tabindex="-1"
+        @focusin="!disabled ? addDate() : null"
+        @click="!disabled ? addDate() : null"
+        class=`flex items-center min-w240px bg-white rounded-r-3xl justify-center text-#c1c7cf
+            border-solid border-solid border-1px w100% z2
+            mx-auto min-h42px! cursor-text`
+        :class=`{
+          'hover:border-stone hover:text-stone border-#c1c7cf' : !disabled,
+          'border-#D0CCC9FF cursor-no-drop' : disabled,
+        }`
+      ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
+    // @blur="v => _onBlur(v)"
     VSTStringField(
       v-if="value"
       :maskPreset
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
       class=`z2`
       @focus="_inputFocus()"
-      @blur="v => _onBlur(v)"
       @change="(v, reset) => _changeInput(v, reset)"
       @dateMaskChange="_dateMaskChange"
       :force12hours
       :dtPresetLocale="locale"
       :disabled
-      fontSize="1rem"
-      @keypress.enter="_inputEnter($refs.VSTStringField.value)"
+      :fontSize="'1rem'"
+      @keypress.enter="_inputEnter($refs.VSTStringField?.getValue?.())"
+      @reset="_onReset"
       ref="VSTStringField"
     )
+      template(#start v-if="!disabled")
+        .vst-date-field-calendar-icon(
+          class="w22px h22px text-stone cursor-pointer hover:scale-130 w100% mx5px"
+          v-if="!disabled"
+        )
+          CalendarDaysIcon(
+            @click="value ? _inputFocus() : addDate()"
+          )
     div(class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value" )
       input(
         ref="picker"
         type="text"
         readonly
         @mousedown.prevent
-      )
-    .vst-date-field-calendar-icon(
-      class="w22px h22px text-stone absolute t-13px l-12px z4 cursor-pointer hover:scale-130"
-      v-if="!disabled"
-    )
-      CalendarDaysIcon(
-        @click="value ? _inputFocus() : addDate()"
       )
     component(is="style" v-if="!showCalendar") .flatpickr-calendar {display: none !important}
     component(is="style") .flatpickr-calendar {box-shadow: 0px 2px 13px var(--un-shadow-color, rgb(193 193 193)) !important}
@@ -64,7 +79,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import FPLocales from 'flatpickr/dist/l10n'
 import flatpickr from 'flatpickr'
 import 'flatpickr/dist/flatpickr.min.css' // @ts-ignore
-import { FlatpickrFn } from 'flatpickr/dist/types/instance' // @ts-ignore
 import { Instance } from 'flatpickr/dist/types/instance'
 import 'flatpickr/dist/plugins/confirmDate/confirmDate.css'
 import confirmDatePlugin from 'flatpickr/dist/plugins/confirmDate/confirmDate.js'
@@ -82,7 +96,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   emits = ['change']
   declare $refs: {
     picker: HTMLElement
-    VSTStringField: any
+    VSTStringField?: any
   }
   @Prop(String, Object) readonly placeholder: string|{[k:string]:string} = {
     en: 'Select date',
@@ -180,6 +194,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       $VST.$off('$VST.components.fields.date.'+btoa(this.maxField), this._onMaxDateFieldChange)
     if (this.minField)
       $VST.$off('$VST.components.fields.date.'+btoa(this.minField), this._onMinDateFieldChange)
+    clearInterval(this._pickerInterval)
   }
 
   private _onMaxDateFieldChange(stamp: number) {
@@ -256,7 +271,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     let change // @ts-ignore
     const locale = (localeShort ? FPLocales?.[localeShort] : FPLocales?.default) || FPLocales?.default || {} // @ts-ignore
     if (this.firstDayOfWeek != 'auto') locale.firstDayOfWeek = (parseInt(this.firstDayOfWeek) || 1)-1 // @ts-ignore
-    this.fp = (flatpickr as FlatpickrFn)(this.$refs.picker as HTMLElement, {
+    this.fp = (flatpickr as any)(this.$refs.picker as HTMLElement, {
       enableTime: this.withTime,
       time_24hr: !pmHours,
       enableSeconds: this.withSeconds,
@@ -332,12 +347,19 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     })
 
 
-    setTimeout(() => {
-      if (this.value) {
-        this._setInputMaskValueByDTStamp(this.value)
+    this._pickerInterval = setInterval(() => {
+      if (this.$refs.VSTStringField?.$el) {
+        this.nextTick(() => {
+          if (this.value) {
+            this._setInputMaskValueByDTStamp(this.value)
+          }
+          clearInterval(this._pickerInterval)
+        })
       }
-    }, 150)
+    }, 25)
   }
+
+  _pickerInterval: number = 0
 
   private _inputFocus() {
     if (this.fp && !this.fp.isOpen) {
@@ -345,38 +367,42 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }
   }
 
-  private _onBlur(val: string) {
-    const isFromCalClick = !!this.fp?.isOpen
-    setTimeout(() => {
-      this.nextTick(() => {
-        if (!this.$refs.VSTStringField?.value && val?.includes('_')) {
-          this._changeInput('')
-        }
-        else if (val?.length && !val.includes('_') && (!this.withTime || !isFromCalClick)) {
-          const mask = this.$refs.VSTStringField.mask
-          const month = this.$refs.VSTStringField.getFromMask(mask, val, 'MM').toString().padStart(2, '0')
-          const year = this.$refs.VSTStringField.getFromMask(mask, val, 'YYYY').toString().padStart(4, '0')
-          const day = this.$refs.VSTStringField.getFromMask(mask, val, 'DD').toString().padStart(2, '0')
-          let hour = this.$refs.VSTStringField.getFromMask(mask, val, 'hh').toString().padStart(2, '0')
-          const minute = this.$refs.VSTStringField.getFromMask(mask, val, 'mm').toString().padStart(2, '0')
-          const seconds = this.$refs.VSTStringField.getFromMask(mask, val, 'ss').toString().padStart(2, '0')
-          let strDt = `${year}-${month}-${day}`
-          if (this.withTime) {
-            strDt += ` ${hour}:${minute}:${this.withSeconds ? seconds : '00'}`
-          }
-          if (!isFromCalClick) {
-            this.DT = $VST.DT(strDt.split('.')[0])
-            this._setInputMaskValueByDTStamp(this.DT.epochMilliseconds)
-          }
-        }
-        this.nextTick(() => {
-          if (this.fp && this.fp.isOpen && (!this.withTime || !isFromCalClick)) {
-            this.fp.close()
-          }
-        })
-      })
-    }, 150)
-  }
+  // private _onBlur(val: string) {
+  //   const isFromCalClick = !!this.fp?.isOpen
+  //   setTimeout(() => {
+  //     this.nextTick(() => {
+  //       if (!this.$refs.VSTStringField?.value && val?.includes('_')) {
+  //         this._changeInput('')
+  //       }
+  //       else if (
+  //         val?.length && !val.includes('_')
+  //         && (!this.withTime || !isFromCalClick)
+  //         && this.$refs.VSTStringField?.$el
+  //       ) {
+  //         const mask = this.$refs.VSTStringField.mask
+  //         const month = this.$refs.VSTStringField.getFromMask(mask, val, 'MM').toString().padStart(2, '0')
+  //         const year = this.$refs.VSTStringField.getFromMask(mask, val, 'YYYY').toString().padStart(4, '0')
+  //         const day = this.$refs.VSTStringField.getFromMask(mask, val, 'DD').toString().padStart(2, '0')
+  //         let hour = this.$refs.VSTStringField.getFromMask(mask, val, 'hh').toString().padStart(2, '0')
+  //         const minute = this.$refs.VSTStringField.getFromMask(mask, val, 'mm').toString().padStart(2, '0')
+  //         const seconds = this.$refs.VSTStringField.getFromMask(mask, val, 'ss').toString().padStart(2, '0')
+  //         let strDt = `${year}-${month}-${day}`
+  //         if (this.withTime) {
+  //           strDt += ` ${hour}:${minute}:${this.withSeconds ? seconds : '00'}`
+  //         }
+  //         if (!isFromCalClick) {
+  //           this.DT = $VST.DT(strDt.split('.')[0])
+  //           this._setInputMaskValueByDTStamp(this.DT.epochMilliseconds)
+  //         }
+  //       }
+  //       this.nextTick(() => {
+  //         if (this.fp && this.fp.isOpen && (!this.withTime || !isFromCalClick)) {
+  //           this.fp.close()
+  //         }
+  //       })
+  //     })
+  //   }, 150)
+  // }
 
   private _changeInput(val: string, reset: boolean = false) {
     if (!val?.toString?.()?.trim?.()) {
@@ -396,7 +422,14 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       this.fp.close()
     }
     this.$refs?.VSTStringField?.blur?.()
-    this._onBlur(val)
+    // this._onBlur(val)
+  }
+
+  _onReset() {
+    if (this.withTime) {
+      this.value = ''
+      this.fp?.open?.()
+    }
   }
 
   /**
@@ -525,9 +558,9 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       @apply border-#d6ff63! border-width-1px! shadow-none! outline-solid-stone outline-2px
 
   input
-    @apply px-5px rounded border bg-white cursor-pointer rounded-3xl! min-w240px 1rem! h28px! py0
+    @apply px-5px border bg-white cursor-pointer min-w240px 1rem! h28px! py0
     @apply user-select-none w[calc(100%-12px)]
-    @apply border-1px border-#c1c7cf border-solid text-center
+    @apply border-y-1px border-y-#c1c7cf border-t-solid text-center
     @apply disabled:(bg-gray-100 cursor-not-allowed)
     &:focus
       @apply border-#d6ff63! border-width-1px shadow-none! outline-solid-stone outline-2px

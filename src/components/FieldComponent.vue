@@ -1,6 +1,6 @@
 <script lang="ts">
 import {BaseComponent, Prop, Watch} from '../core'
-import IFieldComponent from '../Interfaces/IFieldComponent'
+import {IFieldComponent} from '../Interfaces/IFieldComponent'
 
 /**
  * Базовый компонент поля.

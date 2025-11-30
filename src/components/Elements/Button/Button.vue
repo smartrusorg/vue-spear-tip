@@ -1,11 +1,16 @@
 <template lang="pug">
-  span(
+  div(
     :title="disabled ? disabledTitle : ''"
     :data-theme="dataThemeInner"
     :data-offset="dataOffset"
     :data-placement="dataPlacement"
-    class="d-inline-block relative min-h40px whitespace-nowrap"
+    class="d-inline-block relative whitespace-nowrap"
     v-if="showButton"
+    :class=`{
+      'h24px': size == 'sm',
+      'h34px': size == 'md',
+      'min-h40px': size == 'lg',
+    }`
   )
     //- @mousedown="e => ((isButtonActive = true) && mousedown(e))"
     button(
@@ -28,15 +33,18 @@
       :class=`{
         shine,
         [randomClass + (isOnHover ? ' hover' : '')]: true,
+        'py10px px8px': size == 'sm',
+        'py10px px13px': size == 'md',
+        'py10px px18px': size == 'lg',
         // mobile: viewPortType == 'mobile',
         // tablet: viewPortType == 'tablet',
       }`
       :style=`{...{
-      fontSize,
-      fontFamily,
-      borderRadius,
-      width,
-    }, ...style}`
+        fontSize: size == 'sm' ? '0.75rem' : fontSize,
+        fontFamily,
+        borderRadius,
+        width,
+      }, ...style}`
       ref="button"
     )
       div(
@@ -125,7 +133,6 @@ button
   display: inline-block
   border: 1px solid #fff
   transition: all 0.04s ease-in-out
-  padding: 10px 18px
   //&.hover
   //  opacity: 0.9
   .left-icon

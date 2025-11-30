@@ -1,7 +1,7 @@
 import {VueClass, Prop, Watch} from '../../../core'
 import BaseComponent from '../../BaseComponent.vue'
 
-export default class ButtonInherited extends BaseComponent {
+export default abstract class ButtonInherited extends BaseComponent {
   emits = [
     'click',
     'touchstart',
@@ -33,6 +33,7 @@ export default class ButtonInherited extends BaseComponent {
   @Prop(String, null) readonly boxShadowColor: string | null = null
   
   @Prop(String) readonly fontSize: string | null = '1rem'
+  @Prop(String) readonly size: string | null = 'lg'
   @Prop(String) readonly fontFamily: string | null = null
   
   // @Prop(String) readonly bgHover: string = '#333'

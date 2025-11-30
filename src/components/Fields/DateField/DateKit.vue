@@ -22,8 +22,10 @@
             .col-12
               b.text-center Default date field auto language, locale, format detect
               DateField(
-                inputValue="2012-12-12 00:01:22"
+                v-model="testVal"
+                :ISO861UTCMode="true"
               )
+              //div {{ testVal }}
             .col-6
               b.text-center European 24 hours format (Russia)
               DateField(
@@ -47,6 +49,14 @@
                 :disabled="true"
                 :withTime="true"
                 inputValue="2012-12-12 00:01:22"
+              )
+            .col-6
+              span.text-center
+                b InputMask StringField
+                span  to check compatibility
+              StringField(
+                mask="+7 (999) 999-99-99"
+                :alwaysCopyIcon="true"
               )
         //template(#$title-props) 123123
         template(#props)
@@ -89,6 +99,8 @@ import ElementDocBlock, {IElementDocBlockData} from '../../Documentation/Element
     rus: IDateField
   }
   components = {GuidesMenu, ElementDocBlock}
+
+  testVal: string = '2012-12-12 00:01:22'
 
   // TODO подумать над автоматической hot генерацией json данных по классу
   dateData: IElementDocBlockData = {
