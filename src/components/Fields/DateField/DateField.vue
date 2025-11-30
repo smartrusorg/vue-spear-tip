@@ -8,26 +8,27 @@
     //@click="!$root.APP.hasTouchpad ? addDate() : null"
     //@touchstart="$root.APP.hasTouchpad ? addDate() : null"
     div(
-      class=`flex items-center min-w240px h100% bg-white rounded-3xl justify-center text-#c1c7cf w100%`
+      class=`flex items-center min-w240px h100% bg-white rounded-3xl justify-center text-stone w100%`
       v-if="!value"
     )
       div(
-        class=`h[calc(100%-2px)]! text-stone border-y-solid border-l-solid rounded-l-3xl
-          cursor-pointer px15px border-1px! flex items-center border-#D0CCC9FF`
+        class=`h[calc(100%-2px)]! h44px! text-stone border-y-solid border-l-solid rounded-l-3xl
+          cursor-pointer px10px border-1px! flex items-center border-#D0CCC9FF`
       )
-        .vst-date-field-calendar-icon(
-          class="w22px h22px text-stone hover:scale-130 h100% mx2px"
-        )
-          CalendarDaysIcon(
-            @click="value ? _inputFocus() : addDate()"
-        )
+        div
+          .vst-date-field-calendar-icon(
+            class="w24px h24px text-stone hover:scale-130 mx2px"
+          )
+            CalendarDaysIcon(
+              @click="value ? _inputFocus() : addDate()"
+            )
       div(
         tabindex="-1"
         @focusin="!disabled ? addDate() : null"
         @click="!disabled ? addDate() : null"
         class=`flex items-center min-w240px bg-white rounded-r-3xl justify-center text-#c1c7cf
             border-solid border-solid border-1px w100% z2
-            mx-auto min-h42px! cursor-text`
+            mx-auto min-h44px! cursor-text my1px`
         :class=`{
           'hover:border-stone hover:text-stone border-#c1c7cf' : !disabled,
           'border-#D0CCC9FF cursor-no-drop' : disabled,
@@ -52,7 +53,7 @@
     )
       template(#start v-if="!disabled")
         .vst-date-field-calendar-icon(
-          class="w22px h22px text-stone cursor-pointer hover:scale-130 w100% mx5px"
+          class="w24px h24px text-stone cursor-pointer hover:scale-130 w100% mx5px"
           v-if="!disabled"
         )
           CalendarDaysIcon(

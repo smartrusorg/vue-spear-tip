@@ -5,10 +5,10 @@
       ['sf'+_randKey]: true,
     }`
   )
-    div(class="flex h100% w100% relative")
+    div(class="flex h100% h45px w100% relative")
       div(
         v-if="startText || startIcon || $slots.start"
-        class="rounded-l-3xl h43px flex items-center pl9px pr5px border-color-#c1c7cf border-solid border-width-[1px_0_1px_1px]!"
+        class="rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid border-width-[1px_0_1px_1px]!"
         :style=`{
           background: startBg,
           color: startColor,
