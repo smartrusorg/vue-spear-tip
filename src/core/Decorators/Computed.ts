@@ -7,14 +7,14 @@ let VstPrepareClassInstance: {[k:string]: any} = {}
  */
 export const Computed = function(propertyName: string): any {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    if (typeof target?.constructor?.name != 'string') return
     let VST = target.constructor?.___VST ?? {}
     if (!VST.computed) VST.computed = {}
     if(!VstPrepareClassInstance[target.constructor.name]) {
       VstPrepareClassInstance[target.constructor.name] = new target.constructor
-      VstPrepareClassInstance[target.constructor.name].name = 'test'
       VstPrepareClassInstance[target.constructor.name].name =
-        VstPrepareClassInstance[target.constructor.name]?.constructor?.name?.toString()
-        ?? VstPrepareClassInstance[target.constructor.name]['name']
+        VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
+        ?? VstPrepareClassInstance?.[target.constructor.name]?.['name']
         ??  ''
     }
     if(!target?.constructor?.prototype?.__vue_computed__) {

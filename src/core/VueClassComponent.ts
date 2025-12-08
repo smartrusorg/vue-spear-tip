@@ -191,7 +191,8 @@ function createComponent<T extends { new(...args: any[]): {} }>(
         vueClassInstance['$options'] = this.$options // @ts-ignore
         vueClassInstance['$parent'] = this.$parent // @ts-ignore
         vueClassInstance['$root'] = this.$root // @ts-ignore
-        vueClassInstance['$slots'] = this.$slots
+        vueClassInstance['$slots'] = this.$slots // @ts-ignore
+        // vueClassInstance['modelValue'] = this.modelValue
         
         // @ts-expect-error
         vueClassInstance['instance'] = vueClassInstance // @ts-ignore

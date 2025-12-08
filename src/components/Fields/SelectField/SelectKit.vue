@@ -4,7 +4,8 @@
       GuidesMenu
     div(class="w[calc(100%-260px)]")
       h1 SelectKit
-      div SelectKit
+      div
+
 </template>
 
 

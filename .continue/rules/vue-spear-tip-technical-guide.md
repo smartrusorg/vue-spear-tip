@@ -51,19 +51,11 @@ globalThis.$VST = {
   $emit(event: string, message?: any),
   
   // Utilities
-  DT,                            // Date utilities
+  DT, // Date utilities
   copyToClipboard(text: string),
   generateSecurePassword(len?: number),
   generateRandomKey(len?: number),
   safeStringify(obj: any),
-  
-  // Internal metadata storage
-  _dynamic: {
-    _vueClassInstances: {[className: string]: any},
-    _vueClassProps: {[className: string]: any},
-    _vueClassWatchers: {[className: string]: any},
-    _vueComputed: {[className: string]: any}
-  }
 }
 ```
 

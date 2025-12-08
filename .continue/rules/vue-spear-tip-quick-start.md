@@ -38,7 +38,7 @@ alwaysApply: true
 
 ### 2. Template & Style Rules
 - Use **Pug** templates: `template(lang="pug")`
-- Use **Sass/SCSS** styles: `<style lang="scss" scoped>`
+- Use **Sass/SCSS** styles: `<style lang="sass" scoped>`
 - Component names in kebab-case in templates
 - Events use kebab-case: `@click-tap` not `@clickTap`
 

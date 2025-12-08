@@ -1,3 +1,5 @@
+import VueClass from '../VueClass'
+
 let VstPrepareClassInstance: {[k:string]: any} = {}
 
 /**
@@ -9,13 +11,14 @@ let VstPrepareClassInstance: {[k:string]: any} = {}
  */
 export const Watch = function(propertyName: string, deep: boolean = false, immediate: boolean = false): any {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    if (typeof target?.constructor?.name != 'string') return
     let VST = target.constructor?.___VST ?? {}
     if (!VST.watch) VST.watch = {}
     if (!VstPrepareClassInstance[target.constructor.name]) {
       VstPrepareClassInstance[target.constructor.name] = new target.constructor
       VstPrepareClassInstance[target.constructor.name].name =
-        VstPrepareClassInstance[target.constructor.name]?.constructor?.name?.toString()
-        ?? VstPrepareClassInstance[target.constructor.name]['name']
+        VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
+        ?? VstPrepareClassInstance?.[target.constructor?.name]?.['name']
         ??  ''
     }
     if(!target?.constructor?.prototype?.__vue_watch__) {

@@ -1,5 +1,5 @@
 <template v-once lang="pug">
-  div(
+  .vst-select-field(
     class="d-inline-block mx2px my1px w100%"
     :class=`{
       'vst-select-multi': mode == 'multi' || mode == 'tags',
@@ -108,16 +108,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                   = typeof e.detail?.value == 'string' && (
                   e.detail?.value?.trim?.()?.startsWith('{') || e.detail?.value?.trim?.()?.startsWith('[')
               )
-                  ? JSON.parse(e.detail?.value)?.[0]?.key
-                  : (
-                      e.detail?.value?.[0]?.key
-                      || e.detail?.value?.key
-                  )
+                ? JSON.parse(e.detail?.value)?.[0]?.key
+                : (e.detail?.value?.[0]?.key || e.detail?.value?.key)
               this.nextTick(() => {
                 const value = (JSON.parse(JSON.stringify((this.itemsInner.find(
                         v => (v?.key) === modelValue)?.value ?? null
                 ))))
-                if (value) {
+                if (value || value === 0) {
                   this.tagify.addTags(this.reactiveValue = value)
                   this.$emit('update:modelValue',  this.value = modelValue)
                 }
@@ -269,79 +266,88 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 </script>
 
 <style lang="sass">
-.tagify
-  outline: 2px solid transparent !important
-  @apply min-h44px! flex! items-center justify-center rounded-3xl
-  --tags-border-color: #c1c7cf !important
-  --tag-hide-transition: .1ms !important
-  transition: 100ms !important
-  overflow: hidden
-  background: #fff
-  margin: 0 !important
-  border-color: #c1c7cf !important
-  padding: 0 0 0 10px !important
+.vst-select-field
+  &.vst-select-multi
+    .tagify__tag-text
+      @apply max-w-max-content;
 
-.tagify__input
-  @apply min-w80px! fs-0.9rem duration-0!
-  transition: 100ms !important
-  padding: .3em .5em !important
-  //font-size: 13px
+  .tagify
+    outline: 2px solid transparent !important
+    @apply min-h44px! flex! items-center justify-center rounded-3xl
+    --tags-border-color: #c1c7cf !important
+    --tag-hide-transition: .1ms !important
+    transition: 100ms !important
+    overflow: hidden
+    background: #fff
+    margin: 0 !important
+    border-color: #c1c7cf !important
+    padding: 0 0 0 10px !important
 
-.tagify--empty.tagify--select
-  @apply text-stone
-  padding: 2px 0 0 15px !important
-.tagify__dropdown
-  @apply mt4px! border-0!
-  &.tagify__dropdown__openInModal
-    @apply z-999999!
-
-  &.tagify__dropdown__openInOI
-    @apply z-999999!
-.tagify__dropdown__wrapper
-  @apply rounded-lg!
-  border-color: transparent !important
-  box-shadow: none
-  border-width: 0 1px 1px
-  background: #fff repeating-linear-gradient(45deg, transparent, transparent 10px, #fafffd 10px, #fafffd 20px) !important
-
-.tagify__dropdown__item
-  @apply px12px! py8px! my2px fs-1rem
-  border: 1px solid rgba(152, 177, 169, 0.37)
-
-.tagify__dropdown__item--active
-  background: #fffecd !important
-  color: #000 !important
-  border-color: #f6f2a7
-
-  *
-    color: #fff !important
-
-.tagify__dropdown__item--selected
-  background: #ffe37a
-  color: #1e1e1e
-  font-weight: bolder
-  padding-top: 7px !important
-
-  &:before
-    content: ""
-
-.tagify__tag
-  @apply fs-1rem!
-
-.tagify--focus
-  @apply outline-stone-400! outline-1px! border-color-#c1c7cf border-solid border-1px!
-
-:not(.vst-select-multi)
-  .tagify--focus.tagify--noTags
-    @apply pt2px! min-h40px!
-  .tagify--select:not(.tagify--empty)
-    @apply min-h40px! mt5px
-
-.vst-select-multi
-  .tagify__tag
-    @apply mt6px!
+  .tagify__input
+    @apply min-w80px! fs-1rem duration-0!
+    transition: 100ms !important
+    padding: .3em .5em !important
+    //font-size: 13px
 
   .tagify--empty
-    //@apply min-w120px!
-    padding: 5px 0 0 15px !important
+    .tagify__input:before
+      @apply color-#c1c7cf!
+
+  .tagify--empty.tagify--select
+    @apply text-stone
+    padding: 2px 0 0 15px !important
+  .tagify__dropdown
+    @apply mt4px! border-0!
+    &.tagify__dropdown__openInModal
+      @apply z-999999!
+
+    &.tagify__dropdown__openInOI
+      @apply z-999999!
+  .tagify__dropdown__wrapper
+    @apply rounded-lg!
+    border-color: transparent !important
+    box-shadow: none
+    border-width: 0 1px 1px
+    background: #fff repeating-linear-gradient(45deg, transparent, transparent 10px, #fafffd 10px, #fafffd 20px) !important
+
+  .tagify__dropdown__item
+    @apply px12px! py8px! my2px fs-1rem
+    border: 1px solid rgba(152, 177, 169, 0.37)
+
+  .tagify__dropdown__item--active
+    background: #fffecd !important
+    color: #000 !important
+    border-color: #f6f2a7
+
+    *
+      color: #fff !important
+
+  .tagify__dropdown__item--selected
+    background: #ffe37a
+    color: #1e1e1e
+    font-weight: bolder
+    padding-top: 7px !important
+
+    &:before
+      content: ""
+
+  .tagify__tag
+    @apply fs-1rem!
+
+  .tagify--focus
+    @apply outline-stone-400! outline-2px outline-color-#c1c7cf! border-color-#c1c7cf border-solid border-1px!
+
+  :not(.vst-select-multi)
+    .tagify--focus.tagify--noTags
+      @apply pt2px! min-h40px!
+    .tagify--select:not(.tagify--empty)
+      @apply min-h40px! mt5px
+
+  .vst-select-multi
+    .tagify__tag
+      @apply mt6px!
+
+    .tagify--empty
+      //@apply min-w120px!
+      padding: 5px 0 0 15px !important
 </style>

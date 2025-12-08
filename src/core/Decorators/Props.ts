@@ -1,3 +1,5 @@
+import VueClass from '../VueClass'
+
 type VuePropsTypes = typeof String | typeof Number | typeof Array | typeof Boolean | typeof Object |
   typeof Date | typeof Function | typeof Symbol | null // @ts-ignore
 
@@ -31,18 +33,16 @@ let VstPrepareClassInstance: {[k:string]: any} = {}
  * @param types
  * @constructor
  */
-export const Prop = (
-  propDataOrType: VuePropsTypes | VuePropObj,
-  ...types: (VuePropsTypes)[]
-): any => {
+export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]): any => {
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    if (typeof target?.constructor?.name != 'string') return
     let VST = target.constructor?.___VST ?? {}
     if (!VST.props) VST.props = {}
     if(!VstPrepareClassInstance[target.constructor.name]) {
       VstPrepareClassInstance[target.constructor.name] = new target.constructor
       VstPrepareClassInstance[target.constructor.name].name =
-        VstPrepareClassInstance[target.constructor.name]?.constructor?.name?.toString()
-        ?? VstPrepareClassInstance[target.constructor.name]['name']
+        VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
+        ?? VstPrepareClassInstance?.[target.constructor.name]?.['name']
         ??  ''
     }
     

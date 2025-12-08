@@ -23,6 +23,9 @@ export default abstract class FieldComponent extends BaseComponent implements IF
   constructor() {
     super()
   }
+  createdParent() {
+    this.value = this.modelValue || this.inputValue || null
+  }
   mountedParent() {
 
   }

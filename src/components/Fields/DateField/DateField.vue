@@ -208,7 +208,6 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   /** Библиотека по работе  */
   private fp: Instance|null = null
 
-
   addDate() {
     const zonedDate = $VST.DT()
     const isNewVal: boolean = !!this.value
@@ -299,7 +298,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
           this._setInputMaskValueByDTStamp(time)
         }
       },
-      onDayCreate: (dateObj, dateStr, fp, dayElem) => {
+      onDayCreate: (dateObj: any, dateStr: any, fp: any, dayElem: any) => {
         let dt: Temporal.ZonedDateTime|null = null
         if (dateObj?.[0]) {
           try {
