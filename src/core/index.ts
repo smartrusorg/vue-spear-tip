@@ -1,6 +1,7 @@
 // import {IGlobalVST} from '../Interfaces/IGlobalVST'
 // declare global {var $VST: IGlobalVST}
 
+import IBaseVueComponent from '../Interfaces/IBaseVueComponent'
 import VSTLib from './VST.lib'
 globalThis.$VST = {...VSTLib}
 

@@ -82,9 +82,9 @@ export default abstract class ButtonInherited extends BaseComponent {
     // this.showButton = true
     this.randomClass = 'button-c' + Math.random().toString().split('.')[1]
     this.updateTheme()
-    if (this.$refs?.button){
+    if (this.$refs?.button instanceof HTMLElement) {
       const componentHammer = new this.VST.Hammer(this.$refs.button)
-      componentHammer.on('tap', e => this.clickTap(e))
+      componentHammer.on('tap', e => this.clickTap(e.srcEvent))
       this.hookWhenComponentDestroy(() => componentHammer.destroy())
     }
   }

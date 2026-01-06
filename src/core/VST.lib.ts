@@ -7,6 +7,7 @@ let VSTLib: IGlobalVST = {} as IGlobalVST
 // Работа с датами
 // -----------------------
 import DT from './Helpers/DT'
+
 VSTLib.DT = DT
 
 
@@ -14,6 +15,7 @@ VSTLib.DT = DT
 // Встроенный менеджер событий
 // -----------------------
 import eventManager from './Helpers/EventManager'
+
 VSTLib.$on = (event: string, callback: (message: any) => any) => {
   eventManager.addEventListener(event, callback)
 }
@@ -58,7 +60,8 @@ VSTLib.copyToClipboard = (text: string): void => {
     }
     if (success) {
       // console.log('Текст скопирован в буфер обмена')
-    } else {
+    }
+    else {
       console.error('Не удалось скопировать текст')
     }
   }
@@ -124,7 +127,7 @@ VSTLib.safeStringify = (obj: any, space: string | number = 2, maxDepth: number =
       return {
         name: value.name,
         message: value.message,
-        stack: value.stack
+        stack: value.stack,
       }
     }
     seen.add(value)
@@ -154,6 +157,7 @@ VSTLib.safeStringify = (obj: any, space: string | number = 2, maxDepth: number =
 // Информация об устройстве
 // -----------------------
 import DeviceInfo from './Helpers/DeviceInfo'
+
 VSTLib.device = () => new DeviceInfo
 
 
@@ -176,55 +180,55 @@ VSTLib['__REGISTERED_HOTKEYS'] = {}
 window.addEventListener('keydown', (e: KeyboardEvent) => {
   let keyName: string = ''
   let isCtrlOrCmdPressed: boolean = (e.key == 'Meta' && /Mac OS/.test(navigator.userAgent)) || e.ctrlKey
-  if(e.code == 'Minus') {
+  if (e.code == 'Minus') {
     keyName = '-'
   }
-  else if(e.code == 'Equal') {
+  else if (e.code == 'Equal') {
     keyName = '='
   }
-  else if(e.code == 'Enter') {
+  else if (e.code == 'Enter') {
     keyName = 'enter'
   }
-  else if(e.code == 'Escape' || e.key == 'Escape') {
+  else if (e.code == 'Escape' || e.key == 'Escape') {
     keyName = 'escape'
   }
-  else if(e.code == 'BracketLeft') {
+  else if (e.code == 'BracketLeft') {
     keyName = '['
   }
-  else if(e.code == 'BracketRight') {
+  else if (e.code == 'BracketRight') {
     keyName = ']'
   }
-  else if(e.code == 'Semicolon') {
+  else if (e.code == 'Semicolon') {
     keyName = ';'
   }
-  else if(e.code == 'Quote') {
-    keyName = "'"
+  else if (e.code == 'Quote') {
+    keyName = '\''
   }
-  else if(e.code == 'Backslash') {
+  else if (e.code == 'Backslash') {
     keyName = '\\'
   }
-  else if(e.code == 'Comma') {
+  else if (e.code == 'Comma') {
     keyName = ','
   }
-  else if(e.code == 'Period') {
+  else if (e.code == 'Period') {
     keyName = '.'
   }
-  else if(e.code == 'Slash') {
+  else if (e.code == 'Slash') {
     keyName = '/'
   }
-  else if(e.code == 'Backquote') {
+  else if (e.code == 'Backquote') {
     keyName = '`'
   }
-  else if(e.code == 'Unidentified' || e.code == 'f1') {
+  else if (e.code == 'Unidentified' || e.code == 'f1') {
     keyName = 'f1'
   }
-  else if(['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12'].includes(e.code?.toLowerCase())) {
+  else if (['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12'].includes(e.code?.toLowerCase())) {
     keyName = e.code?.toLowerCase()
   }
   else {
     keyName = e.code?.toString().toLowerCase()
-    if(typeof keyName == 'string') {
-      if(keyName.startsWith('digit')) {
+    if (typeof keyName == 'string') {
+      if (keyName.startsWith('digit')) {
         keyName = keyName.slice(5)
       }
       else {
@@ -235,9 +239,9 @@ window.addEventListener('keydown', (e: KeyboardEvent) => {
       keyName = ''
     }
   }
-  if(keyName) {
+  if (keyName) {
     const key = `${keyName}_${isCtrlOrCmdPressed ? 1 : 0}_${e.altKey ? 1 : 0}_${e.shiftKey ? 1 : 0}`
-    if(VSTLib.__REGISTERED_HOTKEYS[key]) {
+    if (VSTLib.__REGISTERED_HOTKEYS[key]) {
       e.preventDefault()
       VSTLib.__REGISTERED_HOTKEYS[key].callback(e)
     }
