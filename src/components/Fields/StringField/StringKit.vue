@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="mx-auto max-w1024px w100% min-h100% flex")
+    //div(class="mt150px") {{ VST.$reactive }}
     div(class="flex px20px py15px w220px min-h100%!")
       GuidesMenu
     div(class="w[calc(100%-260px)]")
@@ -76,6 +77,14 @@
             endColor="#fff"
             placeholder="Some field"
           )
+        .col-12
+          StringField(
+            v-model="fValueNum3"
+            endText="Text end"
+            endBg="#b41e1e"
+            endColor="#fff"
+            placeholder="Some field"
+          )
 </template>
 
 
@@ -94,6 +103,7 @@ import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
   fValueNum: number = 0
   fValueNum1: number = 0
   fValueNum2: string = ''
+  fValueNum3: number = 99991
 }
 </script>
 

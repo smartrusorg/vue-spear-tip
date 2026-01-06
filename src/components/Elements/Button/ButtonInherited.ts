@@ -1,4 +1,4 @@
-import {VueClass, Prop, Watch} from '../../../core'
+import {Prop, Watch} from '../../../core'
 import BaseComponent from '../../BaseComponent.vue'
 
 export default abstract class ButtonInherited extends BaseComponent {
@@ -78,30 +78,14 @@ export default abstract class ButtonInherited extends BaseComponent {
   currentBoxShadowColor: string | null = null
   currentColorActive: string | null = null
   innerTitle: string | null = null
-  hasTouchpad: boolean = false // TODO добавить проверку и Hammer
   mountedParent() {
     // this.showButton = true
-    this.randomClass = 'button-c'+Math.random().toString().split('.')[1]
+    this.randomClass = 'button-c' + Math.random().toString().split('.')[1]
     this.updateTheme()
-    if (this.$refs?.button){ // @ts-ignore
-      // const hammer = new window['Hammer'](this.$refs?.button)
-      // hammer.off('tap')
-      // hammer.on('tap', (e: any) => {
-      //   if (this.hasTouchpad) {
-      //     this.$emit('clickTap', e, this)
-      //     if (
-      //       (this.link && (this.link?.startsWith('http') || this.link?.startsWith('//')))
-      //       || (
-      //         this.link && this.linkRevert && !this.linkRevert?.startsWith('http') && !this.linkRevert?.startsWith('//')
-      //       )
-      //     ) {
-      //       this.$refs.link?.click()
-      //     }
-      //     else if (this.link || this.linkRevert) {
-      //       Engine.openPage(this.link || this.linkRevert!)
-      //     }
-      //   }
-      // })
+    if (this.$refs?.button){
+      const componentHammer = new this.VST.Hammer(this.$refs.button)
+      componentHammer.on('tap', () => this.clickTap())
+      this.hookWhenComponentDestroy(() => componentHammer.destroy())
     }
   }
   
@@ -139,7 +123,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#31735b'
       this.currentColorActive = '#fff'
       this.currentColorHover = '#fff'
-    } else if (this.theme == 'danger'){
+    }
+    else if (this.theme == 'danger'){
       this.currentBg = '#FF3B30'
       this.currentColor = '#fff'
       this.currentBorderColor = '#FF3B30'
@@ -148,7 +133,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#ff8179'
       this.currentColorActive = '#fff'
       this.currentColorHover = '#fff'
-    } else if (this.theme == 'pink'){
+    }
+    else if (this.theme == 'pink'){
       this.currentBg = '#ff6161'
       this.currentColor = '#fff'
       this.currentBorderColor = '#ff4741c9'
@@ -157,7 +143,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#ff6a60'
       this.currentColorActive = '#fff'
       this.currentColorHover = '#fff'
-    } else if (this.theme == 'warning'){
+    }
+    else if (this.theme == 'warning'){
       this.currentBg = '#FF9500'
       this.currentColor = '#fff'
       this.currentBorderColor = '#FF9500'
@@ -166,7 +153,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#ffbe64'
       this.currentColorActive = '#fdff98'
       this.currentColorHover = '#fff8e8'
-    } else if (this.theme == 'info'){
+    }
+    else if (this.theme == 'info'){
       this.currentBg = '#78d9ff'
       this.currentColor = '#203464'
       this.currentColorHover = '#34aff1'
@@ -176,7 +164,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#78d9ff'
       this.currentColorActive = '#fff'
       this.currentColorHover = '#304460'
-    } else if (this.theme == 'yellow'){
+    }
+    else if (this.theme == 'yellow'){
       this.currentBg = '#ffd900'
       this.currentColor = '#444'
       this.currentBorderColor = '#ffd900'
@@ -184,7 +173,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBorderColorActive = '#f3c922'
       this.currentBoxShadowColor = '#cac838'
       this.currentColorActive = '#fff'
-    } else if (this.theme == 'white'){
+    }
+    else if (this.theme == 'white'){
       this.currentBg = '#ffffff'
       this.currentColor = '#444'
       this.currentColorHover = '#164205'
@@ -193,7 +183,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBorderColorActive = '##cacaca'
       this.currentBoxShadowColor = '#b3b3ab'
       this.currentColorActive = '#164205'
-    } else if (this.theme == 'purple'){
+    }
+    else if (this.theme == 'purple'){
       this.currentBg = '#942cdd'
       this.currentColor = '#fff'
       this.currentColorHover = '#e7c0ff'
@@ -202,7 +193,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBorderColorActive = '#b755ff'
       this.currentBoxShadowColor = '#7f18c5'
       this.currentColorActive = '#ffffff'
-    } else if (this.theme == 'indigo'){
+    }
+    else if (this.theme == 'indigo'){
       this.currentBg = '#5b2cdd'
       this.currentColor = '#fff'
       this.currentColorHover = '#e7c0ff'
@@ -211,7 +203,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBorderColorActive = '#6f55ff'
       this.currentBoxShadowColor = '#5a18c5'
       this.currentColorActive = '#ffffff'
-    } else if (this.theme == 'black'){
+    }
+    else if (this.theme == 'black'){
       this.currentBg = '#32383e'
       this.currentColor = '#fff'
       this.currentColorHover = '#ebf8b3'
@@ -220,7 +213,8 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBorderColorActive = '#3b4249'
       this.currentBoxShadowColor = '#32383e'
       this.currentColorActive = '#ffffff'
-    } else if (this.theme == 'grey'){
+    }
+    else if (this.theme == 'grey'){
       this.currentBg = '#5f6163'
       this.currentColor = '#fff'
       this.currentColorHover = '#cec6c4'
@@ -247,31 +241,10 @@ export default abstract class ButtonInherited extends BaseComponent {
     )
   }
   
-  click(e: Event) {
-    if (!this.disabled){
-      this.$emit('click', e, this)
-      if (!this.hasTouchpad){
-        this.$emit('clickTouch', e, this)
-        this.$emit('clickOrTouchstart', e, this)
-        this.$emit('clickTap', e, this)
-        if (
-          (this.link && (this.link?.startsWith('http') || this.link?.startsWith('//')))
-          || (
-            this.link && this.linkRevert && !this.linkRevert?.startsWith('http') && !this.linkRevert?.startsWith('//')
-          )
-        ){
-          this.$refs.link?.click()
-        } else if (this.link || this.linkRevert){ // @ts-ignore
-          window.pjax(this.link || this.linkRevert!)
-        }
-      }
-    }
-  }
-  
   touchstart(e: Event) {
     if (!this.disabled){
       this.$emit('touchstart', e, this)
-      if (this.hasTouchpad){
+      if (this.VST.$reactive.hasTouchpad){
         this.$emit('clickTouch', e, this)
         this.$emit('clickOrTouchstart', e, this)
       }
@@ -281,7 +254,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   touchend(e: Event) {
     if (!this.disabled){
       this.$emit('touchend', e, this)
-      if (!this.hasTouchpad){
+      if (!this.VST.$reactive.hasTouchpad){
         this.$emit('clickOrTouchend', e, this)
       }
     }
@@ -317,6 +290,29 @@ export default abstract class ButtonInherited extends BaseComponent {
   focus() {
     this.$refs?.button?.focus()
   }
+  
+  clickTap() {
+    if (!this.disabled) {
+      this.$emit('click', this.$refs.button, this)
+      this.$emit('clickTap', this.$refs.button, this)
+      if (!this.VST.$reactive.hasTouchpad){
+        this.$emit('clickTouch', this.$refs.button, this)
+        this.$emit('clickOrTouchstart', this.$refs.button, this)
+        if (
+          (this.link && (this.link?.startsWith('http') || this.link?.startsWith('//')))
+          || (
+            this.link && this.linkRevert && !this.linkRevert?.startsWith('http') && !this.linkRevert?.startsWith('//')
+          )
+        ){
+          this.$refs.link?.click()
+        }
+        else if (this.link || this.linkRevert){ // @ts-ignore
+          window.pjax(this.link || this.linkRevert!)
+        }
+      }
+    }
+  }
+  onComponentClickOrTap() {}
   
   @Watch('theme') private _onThemeChanged() {
     this.updateTheme()

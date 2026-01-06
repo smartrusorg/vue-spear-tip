@@ -5,7 +5,7 @@
       'vst-select-multi': mode == 'multi' || mode == 'tags',
     }`
   )
-    input(ref="selectInput" :id="'vst-select-'+VST.generateRandomKey()" :value="reactiveValue" :autofocus)
+    input(ref="selectInput" :id="_randKey" :value="reactiveValue" :autofocus)
 </template>
 
 
@@ -44,6 +44,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   reactiveValue: any = null
   randomClass: string = ''
   itemsInner: any[] = []
+  _randKey: string = ''
+  createdParent() {
+    this._randKey = 'vst-select-'+this.VST.generateRandomKey()
+  }
+
   beforeMountParent() {
     this.randomClass = 'vst-select-'+Math.random().toString().split('.')[1]
     this.itemsInner = this.items ?? []
@@ -97,7 +102,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       // delimiters: null,
       placeholder: typeof this.placeholder == 'string'
           ? this.placeholder
-          : (this.placeholder as any)?.[this.VST.$r.locale]
+          : (this.placeholder as any)?.[this.VST.$reactive.locale]
             || (this.placeholder as any)?.en || 'Выберите значение',
       callbacks: {
         change: (e: any) => {
@@ -171,6 +176,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
               }
             }, 4)
           }
+
+          this.nextTick(() => () => (
+              this.$el?.querySelector(`#${this._randKey}`) as HTMLInputElement
+          )?.focus(), 5)
         }
       },
       templates: {
@@ -266,6 +275,41 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 </script>
 
 <style lang="sass">
+.tagify__dropdown
+  @apply mt4px! border-0!
+  &.tagify__dropdown__openInModal
+    @apply z-999999!
+
+  &.tagify__dropdown__openInOI
+    @apply z-999999!
+
+.tagify__dropdown__wrapper
+  @apply rounded-lg!
+  border-color: transparent !important
+  box-shadow: none
+  border-width: 0 1px 1px
+  background: #fff repeating-linear-gradient(45deg, transparent, transparent 10px, #fafffd 10px, #fafffd 20px) !important
+
+.tagify__dropdown__item
+  @apply px12px! py8px! my2px fs-1rem
+  border: 1px solid rgba(152, 177, 169, 0.37)
+
+.tagify__dropdown__item--active
+  background: #fffecd !important
+  color: #000 !important
+  border-color: #f6f2a7
+
+  *
+    color: #fff !important
+
+.tagify__dropdown__item--selected
+  background: #ffe37a
+  color: #1e1e1e
+  font-weight: bolder
+  padding-top: 7px !important
+
+  &:before
+    content: ""
 .vst-select-field
   &.vst-select-multi
     .tagify__tag-text
@@ -296,40 +340,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   .tagify--empty.tagify--select
     @apply text-stone
     padding: 2px 0 0 15px !important
-  .tagify__dropdown
-    @apply mt4px! border-0!
-    &.tagify__dropdown__openInModal
-      @apply z-999999!
-
-    &.tagify__dropdown__openInOI
-      @apply z-999999!
-  .tagify__dropdown__wrapper
-    @apply rounded-lg!
-    border-color: transparent !important
-    box-shadow: none
-    border-width: 0 1px 1px
-    background: #fff repeating-linear-gradient(45deg, transparent, transparent 10px, #fafffd 10px, #fafffd 20px) !important
-
-  .tagify__dropdown__item
-    @apply px12px! py8px! my2px fs-1rem
-    border: 1px solid rgba(152, 177, 169, 0.37)
-
-  .tagify__dropdown__item--active
-    background: #fffecd !important
-    color: #000 !important
-    border-color: #f6f2a7
-
-    *
-      color: #fff !important
-
-  .tagify__dropdown__item--selected
-    background: #ffe37a
-    color: #1e1e1e
-    font-weight: bolder
-    padding-top: 7px !important
-
-    &:before
-      content: ""
 
   .tagify__tag
     @apply fs-1rem!

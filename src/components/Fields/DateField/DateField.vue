@@ -246,7 +246,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   private _preventMaskDateChange = false
   private _initPicker() {
-    const localeName = ((this.force12hours ? 'en-US'  : this.locale) || this.VST.$r.locale)
+    const localeName = ((this.force12hours ? 'en-US'  : this.locale) || this.VST.$reactive.locale)
     const localeShort = localeName?.split?.('-')?.[0]
     if (!this.$refs.picker || !localeShort) return
     this.localeInner = localeShort

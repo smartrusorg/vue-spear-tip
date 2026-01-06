@@ -149,6 +149,99 @@ VSTLib.safeStringify = (obj: any, space: string | number = 2, maxDepth: number =
   }
 }
 
-window.addEventListener('resize', (event: Event) => $VST.$emit('$VST.viewPortResize'))
+
+// -----------------------
+// Информация об устройстве
+// -----------------------
+import DeviceInfo from './Helpers/DeviceInfo'
+VSTLib.device = () => new DeviceInfo
+
+
+// -----------------------
+// Hammer.js
+// -----------------------
+import Hammer from './Helpers/Hammer' // @ts-ignore
+VSTLib['Hammer'] = Hammer
+
+
+// -----------------------
+// Глобальная, единоразовая подписка на изменения размера окна, для рекативных вычислений внутри базового
+// -----------------------
+window.addEventListener('resize', (event: Event) => $VST.$emit('$VST.viewPortResize')) // @ts-ignore
+
+// -----------------------
+// Регистрация горячих клавиш в компонентах
+// -----------------------
+VSTLib['__REGISTERED_HOTKEYS'] = {}
+window.addEventListener('keydown', (e: KeyboardEvent) => {
+  let keyName: string = ''
+  let isCtrlOrCmdPressed: boolean = (e.key == 'Meta' && /Mac OS/.test(navigator.userAgent)) || e.ctrlKey
+  if(e.code == 'Minus') {
+    keyName = '-'
+  }
+  else if(e.code == 'Equal') {
+    keyName = '='
+  }
+  else if(e.code == 'Enter') {
+    keyName = 'enter'
+  }
+  else if(e.code == 'Escape' || e.key == 'Escape') {
+    keyName = 'escape'
+  }
+  else if(e.code == 'BracketLeft') {
+    keyName = '['
+  }
+  else if(e.code == 'BracketRight') {
+    keyName = ']'
+  }
+  else if(e.code == 'Semicolon') {
+    keyName = ';'
+  }
+  else if(e.code == 'Quote') {
+    keyName = "'"
+  }
+  else if(e.code == 'Backslash') {
+    keyName = '\\'
+  }
+  else if(e.code == 'Comma') {
+    keyName = ','
+  }
+  else if(e.code == 'Period') {
+    keyName = '.'
+  }
+  else if(e.code == 'Slash') {
+    keyName = '/'
+  }
+  else if(e.code == 'Backquote') {
+    keyName = '`'
+  }
+  else if(e.code == 'Unidentified' || e.code == 'f1') {
+    keyName = 'f1'
+  }
+  else if(['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12'].includes(e.code?.toLowerCase())) {
+    keyName = e.code?.toLowerCase()
+  }
+  else {
+    keyName = e.code?.toString().toLowerCase()
+    if(typeof keyName == 'string') {
+      if(keyName.startsWith('digit')) {
+        keyName = keyName.slice(5)
+      }
+      else {
+        keyName = keyName.slice(3)
+      }
+    }
+    else {
+      keyName = ''
+    }
+  }
+  if(keyName) {
+    const key = `${keyName}_${isCtrlOrCmdPressed ? 1 : 0}_${e.altKey ? 1 : 0}_${e.shiftKey ? 1 : 0}`
+    if(VSTLib.__REGISTERED_HOTKEYS[key]) {
+      e.preventDefault()
+      VSTLib.__REGISTERED_HOTKEYS[key].callback(e)
+    }
+  }
+})
 
 export default VSTLib

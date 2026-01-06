@@ -20,7 +20,6 @@
       :data-placement="dataPlacement"
       @mouseover="isOnHover = true"
       @mouseout="isOnHover = false"
-      @click="click"
       @touchstart="touchstart"
       @touchend="touchend"
       @mouseup="mouseup"

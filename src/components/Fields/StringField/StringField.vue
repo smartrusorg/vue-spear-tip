@@ -249,7 +249,7 @@ import IMask from 'imask'
     if (!this.is12hours && this.isDateTime) {
       try {
         const options = new Intl.DateTimeFormat(
-            (this.dtPresetLocale || this.VST.$r.locale), { hour: 'numeric' })
+            (this.dtPresetLocale || this.VST.$reactive.locale), { hour: 'numeric' })
             .resolvedOptions()
         this.is12hours = options.hourCycle === 'h11' || options.hourCycle === 'h12'
       } catch (e) {
@@ -263,12 +263,12 @@ import IMask from 'imask'
 
   beforeMountParent() {
     let value = (this.modelValue || this.inputValue || '')
-    if (typeof value != 'string') value = ''
+    if (!['string', 'number'].includes(typeof value)) value = ''
     this._preResetValue = ''
     this.value = value
     if (this.isDateTime) {
       const parts = (new Intl.DateTimeFormat((
-          this.dtPresetLocale || this.VST.$r.locale
+          this.dtPresetLocale || this.VST.$reactive.locale
       ), {
         year: 'numeric',
         month: '2-digit',
@@ -538,11 +538,11 @@ import IMask from 'imask'
     // if (this.withTime) {
     //   this.$refs?.VSTStringField?.blur?.()
     // }
-    if (this.maskPreset == 'date') {
-      this.$refs.selectInput?.focus?.()
+    if (!this.isDateTime) {
+      this.$refs?.selectInput?.blur?.()
     }
-    else if (this.isDateTime) {
-      this.$refs.selectInput?.blur?.()
+    else {
+      this.nextTick(() => this.$refs?.selectInput?.focus?.())
     }
   }
   private _onInput(event: any, reset: boolean = false) {
