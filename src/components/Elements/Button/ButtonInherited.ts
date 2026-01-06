@@ -84,7 +84,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     this.updateTheme()
     if (this.$refs?.button){
       const componentHammer = new this.VST.Hammer(this.$refs.button)
-      componentHammer.on('tap', () => this.clickTap())
+      componentHammer.on('tap', e => this.clickTap(e))
       this.hookWhenComponentDestroy(() => componentHammer.destroy())
     }
   }
@@ -287,29 +287,18 @@ export default abstract class ButtonInherited extends BaseComponent {
     }
   }
   
+  click(e: Event) {
+    this.clickTap(e)
+  }
+  
   focus() {
     this.$refs?.button?.focus()
   }
   
-  clickTap() {
+  clickTap(e: Event) {
     if (!this.disabled) {
-      this.$emit('click', this.$refs.button, this)
-      this.$emit('clickTap', this.$refs.button, this)
-      if (!this.VST.$reactive.hasTouchpad){
-        this.$emit('clickTouch', this.$refs.button, this)
-        this.$emit('clickOrTouchstart', this.$refs.button, this)
-        if (
-          (this.link && (this.link?.startsWith('http') || this.link?.startsWith('//')))
-          || (
-            this.link && this.linkRevert && !this.linkRevert?.startsWith('http') && !this.linkRevert?.startsWith('//')
-          )
-        ){
-          this.$refs.link?.click()
-        }
-        else if (this.link || this.linkRevert){ // @ts-ignore
-          window.pjax(this.link || this.linkRevert!)
-        }
-      }
+      this.$emit('click', e, this)
+      this.$emit('clickTap', e, this)
     }
   }
   onComponentClickOrTap() {}

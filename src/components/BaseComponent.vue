@@ -91,7 +91,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
 
   mountedParent() {
-    if (this.$el instanceof Element) {
+    if (this.$el instanceof HTMLElement) {
       const componentHammer = new this.VST.Hammer(this.$el)
       componentHammer.on('tap', () => this.onComponentClickOrTap())
       this.hookWhenComponentDestroy(() => componentHammer.destroy())
