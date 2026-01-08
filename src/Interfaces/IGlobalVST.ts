@@ -85,6 +85,8 @@ interface IGlobalReactiveElements {
   readonly locale: string
   /** Отображается ли компонент в мобильной версии экрана */
   readonly isMobile: boolean
+  /** Находится ли мобильная версия в горизонтальном положении (телефон повёрнут) */
+  readonly isMobileHorizontal: boolean
   /** Отображается ли компонент в планшетной версии экрана */
   readonly isTablet: boolean
   /** Отображается ли компонент в версии экрана для ноутбука */

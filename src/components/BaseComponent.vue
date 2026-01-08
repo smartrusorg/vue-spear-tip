@@ -32,6 +32,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.VST.$reactive = reactive({
         locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
         isMobile: computed(() => windowWidth.value < 768 || (windowHeight.value < 768 && windowWidth.value < 1000)),
+        isMobileHorizontal: computed(() => windowHeight.value < 768 && windowWidth.value < 1000),
         isTablet: computed(() => windowWidth.value < 1280 && windowWidth.value >= 768),
         isNotebook: computed(() => windowWidth.value <= 1366 && windowWidth.value >= 1280),
         isDesktop: computed(() => windowWidth.value > 1366),
