@@ -20,6 +20,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       const windowHeight = ref(window.innerHeight)
       const isAndroid = this.VST.device().osName()?.toLowerCase().includes('android')
       const isApple = this.VST.device().deviceVendor() == 'Apple'
+      const hasTouchpad = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0
       const isIphone =
       this.VST.device().osName()?.toLowerCase().includes('ios')
         || this.VST.device().deviceModel()?.toLowerCase().includes('iphone')
@@ -30,18 +31,25 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
 
       this.VST.$reactive = reactive({
         locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
-        isMobile: computed(() => windowWidth.value < 768),
+        isMobile: computed(() => windowWidth.value < 768 || (windowHeight.value < 768 && windowWidth.value < 1000)),
         isTablet: computed(() => windowWidth.value < 1280 && windowWidth.value >= 768),
         isNotebook: computed(() => windowWidth.value <= 1366 && windowWidth.value >= 1280),
         isDesktop: computed(() => windowWidth.value > 1366),
-        viewPortType: computed(() => (windowWidth.value < 768) ? 'mobile' : (
-          (windowWidth.value < 1280)
-            ? 'tablet'
-            : (
-              (windowWidth.value < 1366)
-                ? 'notebook'
-                : 'desktop'
-            )),
+        viewPortType: computed(() => (
+          windowWidth.value < 768 || (
+            // Мобильник в повёрнутом состоянии в большинстве случаев
+            windowHeight.value < 768 && windowWidth.value < 1000
+          ))
+            ? 'mobile'
+            : hasTouchpad() && windowWidth.value < 1440 // Планшет в режиме desktop
+              ? 'tablet'
+              : ((windowWidth.value < 1280)
+                ? 'tablet'
+                : (
+                  (windowWidth.value < 1366)
+                    ? 'notebook'
+                    : 'desktop'
+                )),
         ),
         get isIphone() {
           return isIphone
@@ -53,7 +61,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
           return isAndroid
         },
         get hasTouchpad() {
-          return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0
+          return hasTouchpad()
         },
         viewPortWidth: computed(() => windowWidth.value),
         viewPortHeight: computed(() => windowHeight.value),

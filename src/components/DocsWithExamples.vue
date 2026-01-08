@@ -5,7 +5,6 @@
     link(href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet")
     header(class="bg-[#fcffdfff] w100% fixed t-0 z3003")
       .row(class="container mx-auto px-4 py-3 flex items-center justify-between w100%")
-        .col-2
         .col-5(class="flex items-center space-x-10")
           .row
             .col-6(class="text-xl flex flex-col items-center font-700 tracking-tight")

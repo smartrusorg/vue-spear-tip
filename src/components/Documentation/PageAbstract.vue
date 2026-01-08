@@ -1,15 +1,12 @@
-
-
 <script lang="ts">
-import {VST, Prop, VueClass} from '../../core'
-import 'uno.css'
+import {VST, Prop, VueClass, BaseComponent} from '../../core'
 
 /**
  * Example
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-export default abstract class PageAbstract extends VueClass {
+export default abstract class PageAbstract extends BaseComponent {
   @Prop(String) readonly text: string = ''
   mountedParent() {
     $VST.$on('RouterPageMount', this.routedPageMount)
