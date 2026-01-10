@@ -19,33 +19,33 @@ export default abstract class ButtonInherited extends BaseComponent {
   @Prop(String) readonly icon: string = ''
   @Prop(String) readonly iconRight: string = ''
   @Prop(String) readonly badge: string = ''
-  @Prop(String) readonly badgeBg: string | null = null
-  @Prop(String) readonly badgeColor: string | null = null
+  @Prop(String) readonly badgeBg: string|null = null
+  @Prop(String) readonly badgeColor: string|null = null
   @Prop(Object) readonly style: Partial<CSSStyleDeclaration> = {}
   
-  @Prop(String, null) readonly bg: string | null = null
-  @Prop(String, null) readonly color: string | null = null
-  @Prop(String, null) readonly borderColor: string | null = null
-  @Prop(String, null) readonly bgActive: string | null = null
-  @Prop(String, null) readonly colorActive: string | null = null
-  @Prop(String, null) readonly colorHover: string | null = null
-  @Prop(String, null) readonly borderColorActive: string | null = null
-  @Prop(String, null) readonly boxShadowColor: string | null = null
+  @Prop(String, null) readonly bg: string|null = null
+  @Prop(String, null) readonly color: string|null = null
+  @Prop(String, null) readonly borderColor: string|null = null
+  @Prop(String, null) readonly bgActive: string|null = null
+  @Prop(String, null) readonly colorActive: string|null = null
+  @Prop(String, null) readonly colorHover: string|null = null
+  @Prop(String, null) readonly borderColorActive: string|null = null
+  @Prop(String, null) readonly boxShadowColor: string|null = null
   
-  @Prop(String) readonly fontSize: string | null = '1rem'
-  @Prop(String) readonly size: string | null = 'lg'
-  @Prop(String) readonly fontFamily: string | null = null
+  @Prop(String) readonly fontSize: string|null = '1rem'
+  @Prop(String) readonly size: string|null = 'lg'
+  @Prop(String) readonly fontFamily: string|null = null
   
   // @Prop(String) readonly bgHover: string = '#333'
   
-  @Prop(String) readonly bgGradientTop: string | null = null // '#d2d2d2'
-  @Prop(String) readonly bgGradientBottom: string | null = null // '#ccc'
+  @Prop(String) readonly bgGradientTop: string|null = null // '#d2d2d2'
+  @Prop(String) readonly bgGradientBottom: string|null = null // '#ccc'
   @Prop(Boolean) readonly disabled: boolean = false
   @Prop(Boolean) readonly shine: boolean = false
   @Prop(String) readonly type: string = 'button'
   
-  @Prop(String) readonly title: string | null = null
-  @Prop(String) readonly disabledTitle: string | null = null
+  @Prop(String) readonly title: string|null = null
+  @Prop(String) readonly disabledTitle: string|null = null
   @Prop(String) readonly dataTheme: string = 'black'
   @Prop(String) readonly dataDisabledTheme: string = 'gray'
   @Prop(String) readonly dataPlacement: string = 'top'
@@ -53,13 +53,13 @@ export default abstract class ButtonInherited extends BaseComponent {
   @Prop(String) readonly width: string = 'calc(100% - 8px)'
   @Prop(String) readonly borderRadius: string = '3px'
   /** Открыть ссылку при нажатии, если начинается с http или https будет открыто в новом окне */
-  @Prop(String) readonly link: string | null = null
+  @Prop(String) readonly link: string|null = null
   /** Для открытия локальных ссылок в новом окне и внешних в текущем, будет проигнорирован при указанном link */
-  @Prop(String) readonly linkRevert: string | null = null
+  @Prop(String) readonly linkRevert: string|null = null
   
   @Prop(String, null) readonly theme:
-    'success' | 'default' | 'primary' | 'warning' | 'danger' | 'info' | 'pink' | 'purple' | 'indigo' | 'grey' | 'white' |
-    'yellow' | 'black' | null = 'default'
+    'success'|'default'|'primary'|'warning'|'danger'|'info'|'pink'|'purple'|'indigo'|'grey'|'white' |
+    'yellow'|'black'|null = 'default'
   
   backgroundCss: string = ''
   boxShadowCss: string = ''
@@ -69,24 +69,23 @@ export default abstract class ButtonInherited extends BaseComponent {
   dataThemeInner: string = ''
   showButton: boolean = true
   
-  currentBg: string | null = null
-  currentColor: string | null = null
-  currentColorHover: string | null = null
-  currentBorderColor: string | null = null
-  currentBgActive: string | null = null
-  currentBorderColorActive: string | null = null
-  currentBoxShadowColor: string | null = null
-  currentColorActive: string | null = null
-  innerTitle: string | null = null
+  currentBg: string|null = null
+  currentColor: string|null = null
+  currentColorHover: string|null = null
+  currentBorderColor: string|null = null
+  currentBgActive: string|null = null
+  currentBorderColorActive: string|null = null
+  currentBoxShadowColor: string|null = null
+  currentColorActive: string|null = null
+  innerTitle: string|null = null
   mountedParent() {
-    // this.showButton = true
     this.randomClass = 'button-c' + Math.random().toString().split('.')[1]
     this.updateTheme()
-    if (this.$refs?.button instanceof HTMLElement) {
-      const componentHammer = new this.VST.Hammer(this.$refs.button)
-      componentHammer.on('tap', e => this.clickTap(e.srcEvent))
-      this.hookWhenComponentDestroy(() => componentHammer.destroy())
-    }
+    this.registerReactiveEvent(
+      'tap',
+      `.${this.randomClass}-click-tap`,
+      e =>this.clickTap(e.srcEvent)
+    )
   }
   
   declare $refs: {
@@ -101,8 +100,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     const bgActive: string = '#ccc'
     const borderColorActive: string = '#b6b6b6'
     const currentBoxShadowColor: string = '#5b5a5a'
-    const colorActive: string | null = null
-    this.currentBgActive
+    const colorActive: string|null = null
     this.currentBorderColor = this.currentColor = this.currentBg = this.currentColorActive = null
     if (this.theme == 'primary'){
       this.currentBg = '#005bbf'
@@ -271,9 +269,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   mousedown(e: Event) {
     if (!this.disabled){
       this.$emit('mousedown', e, this)
-      // if (this.hasTouchpad) {
       this.$emit('mousedownOrTouchstart', e, this)
-      // }
     }
   }
   

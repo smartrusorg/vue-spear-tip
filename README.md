@@ -10,16 +10,13 @@ And UI KIT on them.
 Built documentation with examples: [vue-spear-tip.smartrus.org](https://vue-spear-tip.smartrus.org "Open demo with docs")
 
 #### Install
-```
-npm install vue-spear-tip
-```
-or with Yarn
-```
-yarn add vue-spear-tip
-```
-or with Bun.JS
+With [Bun.JS](https://bun.sh)
 ```
 bun add vue-spear-tip
+```
+or with npm
+```
+npm install vue-spear-tip
 ```
 
 [//]: # (Use with vite + html/pug + typescript classes + sass/scss)

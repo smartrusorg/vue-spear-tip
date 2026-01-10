@@ -1,6 +1,7 @@
 // biome-ignore assist/source/organizeImports: <Нужно для глобального экспорта>
 import type {IVueClass} from './IVueClass'
 import type {IGlobalVST} from './IGlobalVST'
+import {HammerEvents, HammerInput} from './IHammer'
 
 export default interface IBaseVueComponent extends IVueClass {
   readonly VST: IGlobalVST
@@ -15,8 +16,8 @@ export default interface IBaseVueComponent extends IVueClass {
   
   
   /**
-   * Хук-синтаксический сахар, для группировки отписок пред размонированием компонента.
-   * @param end Метод, который будет выполнен, перед размонтрованием.
+   * Хук-синтаксический сахар, для группировки отписок пред размонтированием компонента.
+   * @param end Метод, который будет выполнен, перед размонтированием.
    */
   hookWhenComponentDestroy(end: () => any): void
   
@@ -44,4 +45,16 @@ export default interface IBaseVueComponent extends IVueClass {
    alt: boolean,
    shift: boolean,
   ): void
+  
+  /**
+   * Регистрация пользовательских реактивных событий с автоматическим отключением при размонтировании
+   * @param event Название события
+   * @param componentSelector Селектор элемента, который будет захвачен при ренеринге/ререндеринге
+   * @param callback
+   */
+  registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: () => any): void
 }
+
+type BaseComponentEvents = HammerEvents
+interface BaseComponentEventInput extends HammerInput {}
+export {BaseComponentEvents, BaseComponentEventInput}

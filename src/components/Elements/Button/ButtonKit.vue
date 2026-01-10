@@ -114,6 +114,8 @@ import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
  */
 @VST export default class ButtonKit extends BaseComponent {
   components = {GuidesMenu}
+  mounted() {
+  }
 }
 </script>
 

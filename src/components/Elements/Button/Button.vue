@@ -12,7 +12,6 @@
       'min-h40px': size == 'lg',
     }`
   )
-    //- @mousedown="e => ((isButtonActive = true) && mousedown(e))"
     button(
       :title="!disabled ? innerTitle : ''"
       :data-theme="dataThemeInner"
@@ -31,6 +30,7 @@
       :type="type"
       :class=`{
         shine,
+        [randomClass + '-click-tap']: true,
         [randomClass + (isOnHover ? ' hover' : '')]: true,
         'py10px px8px': size == 'sm',
         'py10px px13px': size == 'md',
