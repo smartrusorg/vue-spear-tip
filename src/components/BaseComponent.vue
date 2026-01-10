@@ -120,7 +120,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
     }
     for (const h of this.__VSTBaseComponent.hammer) {
       h.instance?.destroy?.()
-      const el = this.$el.querySelector(h.selector)
+      const el = this.$el?.querySelector(h.selector)
       if (el instanceof HTMLElement || el instanceof SVGElement) {
         h.instance = new this.VST.Hammer(el) as any
         h.instance!.on(h.event, h.callback as any)
@@ -137,7 +137,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
-    const el = this.$el.querySelector(componentSelector)
+    const el = this.$el?.querySelector(componentSelector)
     let hammer
     if (el instanceof HTMLElement || el instanceof SVGElement) {
       hammer = new this.VST.Hammer(el) as any
