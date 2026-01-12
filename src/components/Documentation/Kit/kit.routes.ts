@@ -8,6 +8,7 @@ import StringKitField from './Fields/StringKitField.vue'
 import TabsKit from '../../Elements/Tabs/TabsKit.vue'
 import TextKitField from './Fields/TextKitField.vue'
 import SwitchKitField from './Fields/SwitchKitField.vue'
+import ScrollbarKit from '../../Elements/Scrollbar/ScrollbarKit.vue'
 
 export default [
   {
@@ -43,15 +44,20 @@ export default [
     component: TabsKit
   },
   {
-    path: '/elements/qr',
-    name: 'QR Code',
-    component: QRCodeKitElement
+    path: '/elements/scrollbar',
+    name: 'Scrollbar',
+    component: ScrollbarKit
   },
-  {
-    path: '/elements/barcode',
-    name: 'Barcode',
-    component: BarcodeKitElement
-  },
+  // {
+  //   path: '/elements/qr',
+  //   name: 'QR Code',
+  //   component: QRCodeKitElement
+  // },
+  // {
+  //   path: '/elements/barcode',
+  //   name: 'Barcode',
+  //   component: BarcodeKitElement
+  // },
   // {
   //   path: '/grid',
   //   name: 'Tabs',

@@ -44,7 +44,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.VST.$reactive = reactive({
         locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
         isMobile: computed(() => windowWidth.value < 768 || (windowHeight.value < 768 && windowWidth.value < 1000)),
-        isMobileHorizontal: computed(() => windowHeight.value < 768 && windowWidth.value < 1000),
+        isMobileHorizontal: computed(() => windowHeight.value < windowWidth.value && windowHeight.value < 768 && windowWidth.value < 1000),
         isTablet: computed(() => windowWidth.value < 1280 && windowWidth.value >= 768),
         isNotebook: computed(() => windowWidth.value <= 1366 && windowWidth.value >= 1280),
         isDesktop: computed(() => windowWidth.value > 1366),
@@ -89,6 +89,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       hammer: [],
       endCallbacks: [],
       keyBindingsCallbacks: {},
+      clickTapComponentCallback: () => this.onComponentClickOrTap(),
     }
   }
 
@@ -107,16 +108,17 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   mountedParent() {
     if (this.$el instanceof HTMLElement) {
       this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
-      this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.onComponentClickOrTap())
+      this.__VSTBaseComponent.clickTapHammer.on('tap', this.__VSTBaseComponent.clickTapComponentCallback)
     }
     this.updatedParent()
   }
 
   updatedParent() {
     if (this.__VSTBaseComponent.clickTapHammer) {
+      this.__VSTBaseComponent.clickTapHammer.off('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
       this.__VSTBaseComponent.clickTapHammer.destroy()
       this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
-      this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.onComponentClickOrTap())
+      this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
     }
     for (const h of this.__VSTBaseComponent.hammer) {
       h.instance?.destroy?.()
@@ -134,6 +136,10 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       delete $VST.__REGISTERED_HOTKEYS[hk]
     }
     this.__VSTBaseComponent.clickTapHammer?.destroy?.()
+    for (const h of this.__VSTBaseComponent.hammer) {
+      h.instance!.off(h.event, h.callback as any)
+      h.instance?.destroy?.()
+    }
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
@@ -188,6 +194,7 @@ interface IVSTBaseBaseComponent {
   }[]
   clickTapHammer?: IHammerManager
   endCallbacks: (() => any)[]
+  clickTapComponentCallback: (() => any)
   keyBindingsCallbacks: {[key:string]:{
     callback: (e: Event) => any
     ctrlOrCommand: boolean

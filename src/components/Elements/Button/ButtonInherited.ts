@@ -84,7 +84,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     this.registerReactiveEvent(
       'tap',
       `.${this.randomClass}-click-tap`,
-      e =>this.clickTap(e.srcEvent)
+      e => this.clickTap(e.srcEvent)
     )
   }
   
