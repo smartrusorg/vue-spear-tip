@@ -28,7 +28,7 @@ export default abstract class VueClass implements IVueClass {
   declare readonly $refs: {
     [key:string]:
       HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IFieldComponent|IFieldComponent[]|
-      IVueClass|VueClass|typeof VueClass
+      IVueClass|VueClass|typeof VueClass|IVueClass[]|typeof VueClass[]|VueClass[]
   }
   readonly $root: {
     // [key:string]:any

@@ -120,7 +120,7 @@ export interface IVueClass {
   readonly $refs: {
     [key:string]:HTMLElement|HTMLInputElement|undefined|
     HTMLElement[]|HTMLInputElement[]|IVueClass|typeof VueClass|VueClass
-    |IFieldComponent[]|IFieldComponent
+    |IFieldComponent[]|IFieldComponent|IVueClass[]|typeof VueClass[]|VueClass[]
   }
   
   /**
