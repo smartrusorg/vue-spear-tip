@@ -137,7 +137,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
     }
     this.__VSTBaseComponent.clickTapHammer?.destroy?.()
     for (const h of this.__VSTBaseComponent.hammer) {
-      h.instance!.off(h.event, h.callback as any)
+      h.instance?.off?.(h.event, h.callback as any)
       h.instance?.destroy?.()
     }
   }
