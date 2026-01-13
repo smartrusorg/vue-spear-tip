@@ -120,6 +120,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
       this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
     }
+    console.log(this.__VSTBaseComponent.hammer)
     for (const h of this.__VSTBaseComponent.hammer) {
       h.instance?.destroy?.()
       const el = this.$el?.querySelector?.(h.selector)
@@ -143,17 +144,19 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
-    const el = this.$el?.querySelector?.(componentSelector)
-    let hammer
-    if (el instanceof HTMLElement || el instanceof SVGElement) {
-      hammer = new this.VST.Hammer(el) as any
-      hammer.on(event, callback)
-    }
-    this.__VSTBaseComponent.hammer.push({
-      event,
-      callback,
-      instance: hammer,
-      selector: componentSelector,
+    this.nextTick(() => {
+      const el = this.$el?.querySelector?.(componentSelector)
+      let hammer
+      if (el instanceof HTMLElement || el instanceof SVGElement) {
+        hammer = new this.VST.Hammer(el) as any
+        hammer.on(event, callback)
+      }
+      this.__VSTBaseComponent.hammer.push({
+        event,
+        callback,
+        instance: hammer,
+        selector: componentSelector,
+      })
     })
   }
 

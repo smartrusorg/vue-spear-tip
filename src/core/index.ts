@@ -1,7 +1,6 @@
 // import {IGlobalVST} from '../Interfaces/IGlobalVST'
 // declare global {var $VST: IGlobalVST}
 
-import IBaseVueComponent from '../Interfaces/IBaseVueComponent'
 import VSTLib from './VST.lib'
 globalThis.$VST = {...VSTLib}
 
@@ -18,4 +17,5 @@ export * from './Decorators/Computed'
 import BaseComponent from '../components/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
 const VST = VueClassComponent
+
 export {BaseComponent, VST,/* IGlobalVST*/}
