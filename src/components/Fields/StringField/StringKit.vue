@@ -85,6 +85,18 @@
             endColor="#fff"
             placeholder="Some field"
           )
+        .col-6
+          StringField(
+            endText="Text end"
+            endBg="#b41e1e"
+            endColor="#fff"
+            placeholder="Some field"
+            size="md"
+          )
+        .col-6
+          Button(
+            size="md"
+          ) Middle size
 </template>
 
 

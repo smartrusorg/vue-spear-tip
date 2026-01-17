@@ -127,7 +127,7 @@ import ElementDocBlock, {IElementDocBlockData} from '../../Documentation/Element
 
   preRenderRus(el: HTMLElement, dt: Temporal.ZonedDateTime, currentNextOrPrev: boolean|null) {
     const now = $VST.DT()
-    if (dt.startOfDay().epochMilliseconds == $VST.DT(`${now.year}-${now.month}-01`).epochMilliseconds) {
+    if (dt.startOfDay().epochMilliseconds == $VST.DT(`${now.year}-${now.month?.toString().padStart(2, '0')}-01`).epochMilliseconds) {
       el.style.background = currentNextOrPrev ? '#ff9393' : '#f75c5c'
       el.style.borderRadius = '4px'
       el.style.color = currentNextOrPrev ? '#000' : 'white'

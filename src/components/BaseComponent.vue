@@ -94,6 +94,14 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   private readonly __VSTBaseComponent: IVSTBaseBaseComponent = {} as IVSTBaseBaseComponent
 
 
+  beforeCreateParent() { // @ts-ignore need always update
+    this['__VSTBaseComponent'] = {
+      hammer: [],
+      endCallbacks: [],
+      keyBindingsCallbacks: {},
+      clickTapComponentCallback: () => this.onComponentClickOrTap(),
+    }
+  }
   createdParent() { // @ts-ignore need always update
     this['__VSTBaseComponent'] = {
       hammer: [],
@@ -120,7 +128,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
       this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
     }
-    for (const h of this.__VSTBaseComponent.hammer) {
+    for (const h of this.__VSTBaseComponent?.hammer ?? []) {
       h.instance?.destroy?.()
       const el = this.$el?.querySelector?.(h.selector)
       if (el instanceof HTMLElement || el instanceof SVGElement) {
@@ -136,7 +144,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       delete $VST.__REGISTERED_HOTKEYS[hk]
     }
     this.__VSTBaseComponent.clickTapHammer?.destroy?.()
-    for (const h of this.__VSTBaseComponent.hammer) {
+    for (const h of this.__VSTBaseComponent?.hammer ?? []) {
       h.instance?.off?.(h.event, h.callback as any)
       h.instance?.destroy?.()
     }

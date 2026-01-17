@@ -5,7 +5,14 @@
       ['sf'+_randKey]: true,
     }`
   )
-    div(class="flex h100% h45px w100% relative")
+    div(
+      class="flex h100% w100% relative"
+      :class=`{
+        'h45px' : size == 'lg',
+        'h24px': size == 'sm',
+        'h35px': size == 'md',
+      }`
+    )
       div(
         v-if="startText || startIcon || $slots.start"
         class="rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid border-width-[1px_0_1px_1px]!"
@@ -20,7 +27,14 @@
           span(v-html="startText")
         div(class="flex items-center" v-if="$slots.start")
           slot(name="start")
-      div(class="flex h100% w100% relative")
+      div(
+        class="flex h100% w100% relative"
+        :class=`{
+          ' ' : size == 'lg',
+          '': size == 'sm',
+          '  ': size == 'md',
+        }`
+      )
         div(class="relative h100% w100%")
           //- type="number"
           //:type="asNumber ? 'number' : 'text'"
@@ -38,6 +52,10 @@
               // fixme костыль при вставленном блоке даты, переделать когда будет какая-то общая концепция по размерам блоков
               'pr65px!': isDateTime && (startText || startIcon || $slots.start),
               // 'rounded-l-none!' : !startText && !startIcon && !$slots.start,
+
+              'min-h45px fs-1rem' : size == 'lg',
+              'h24px': size == 'sm',
+              'h35px fs-0.9rem pt5px': size == 'md',
             }`
             :disabled
             :placeholder
@@ -128,8 +146,10 @@
           class="w25px h25px text-stone absolute r-12px z4 cursor-pointer hover:scale-130"
           v-if="!disabled && (value || _preResetValue) && !(asNumber && value == '0')"
           :class=`{
-             't-15px': maskPreset == 'datetime' || maskPreset == 'datetimeSec',
-             't-9px': maskPreset != 'datetime' && maskPreset != 'datetimeSec',
+             't-15px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'lg',
+             't-9px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'lg',
+             't-10px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'md',
+             't-6px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'md',
           }`
         )
           svg(
@@ -180,16 +200,6 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid" // @ts-ignore
 import InputMask from "./inputmask.es6"
 import IMask from 'imask'
 
-// InputMask.extendDefinitions({
-//   'y': {  //masksymbol
-//     "validator": function (chrs, buffer, pos, strict, opts) {
-//       console.log(chrs, pos, strict, opts)
-//       //do some logic and return true, false, or { "pos": new position, "c": character to place }
-//       return {pos, c: chrs}
-//     }
-//   }
-// })
-
 /**
  * Компонент для ввода строкового текста или значения!
  * @author CHORNY
@@ -237,7 +247,7 @@ import IMask from 'imask'
   maskBlocks = {}
   utc: string = 'UTC'
 
-  @Prop(String) readonly placeholder: string = 'Введите текст'
+  @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
 
   is12hours: boolean = false
   private _randKey: string = ''
@@ -815,7 +825,7 @@ import IMask from 'imask'
 
 <style scoped lang="sass">
 input
-  @apply w100%! border-0 border-color-#c1c7cf border-solid border-y-1px! min-h45px fs-1rem
+  @apply w100%! border-0 border-color-#c1c7cf border-solid border-y-1px!
   @apply outline-stone-400 outline-1px focus:bg-white bg-white
   &[disabled]
     @apply bg-stone-200 text-stone-500!
