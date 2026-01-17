@@ -6,6 +6,8 @@ globalThis.$VST = {...VSTLib}
 
 // Только так получается совмещать разработку с практикой
 export * from '../Interfaces/IVueClass'
+export * from '../Interfaces/IBaseVueComponent'
+
 export * from '../Interfaces/IFieldComponent'
 
 export * from './VueClassComponent'

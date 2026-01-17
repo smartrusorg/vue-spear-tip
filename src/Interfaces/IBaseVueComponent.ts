@@ -3,7 +3,7 @@ import type {IVueClass} from './IVueClass'
 import type {IGlobalVST} from './IGlobalVST'
 import {HammerEvents, HammerInput} from './IHammer'
 
-export default interface IBaseVueComponent extends IVueClass {
+export interface IBaseVueComponent extends IVueClass {
   readonly VST: IGlobalVST
   readonly $root: {
     [key:string]:any
@@ -58,3 +58,5 @@ export default interface IBaseVueComponent extends IVueClass {
 type BaseComponentEvents = HammerEvents
 interface BaseComponentEventInput extends HammerInput {}
 export {BaseComponentEvents, BaseComponentEventInput}
+
+export default IBaseVueComponent

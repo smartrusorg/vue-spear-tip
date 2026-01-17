@@ -1,6 +1,6 @@
 <script lang="ts">
 import {reactive, computed, ref} from 'vue'
-import IBaseVueComponent, {BaseComponentEventInput, BaseComponentEvents} from '../Interfaces/IBaseVueComponent'
+import {IBaseVueComponent, BaseComponentEventInput, BaseComponentEvents} from '../Interfaces/IBaseVueComponent'
 import {VueClass} from '../core'
 import {IGlobalVST} from '../Interfaces/IGlobalVST'
 import {IHammerManager} from '../Interfaces/IHammer'
@@ -85,12 +85,6 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
         windowHeight.value = window.innerHeight
       })
     }
-    this.__VSTBaseComponent = {
-      hammer: [],
-      endCallbacks: [],
-      keyBindingsCallbacks: {},
-      clickTapComponentCallback: () => this.onComponentClickOrTap(),
-    }
   }
 
   /**
@@ -100,7 +94,13 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   private readonly __VSTBaseComponent: IVSTBaseBaseComponent = {} as IVSTBaseBaseComponent
 
 
-  createdParent() {
+  createdParent() { // @ts-ignore need always update
+    this['__VSTBaseComponent'] = {
+      hammer: [],
+      endCallbacks: [],
+      keyBindingsCallbacks: {},
+      clickTapComponentCallback: () => this.onComponentClickOrTap(),
+    }
     this.VST.$on('$VST.viewPortResize', this.onViewPortResize)
     this.hookWhenComponentDestroy(() => this.VST.$off('$VST.viewPortResize', this.onViewPortResize))
   }
@@ -120,7 +120,6 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
       this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
     }
-    console.log(this.__VSTBaseComponent.hammer)
     for (const h of this.__VSTBaseComponent.hammer) {
       h.instance?.destroy?.()
       const el = this.$el?.querySelector?.(h.selector)
