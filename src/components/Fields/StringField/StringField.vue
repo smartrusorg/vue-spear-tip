@@ -238,7 +238,9 @@ import IMask from 'imask'
    */
   @Prop(Boolean) readonly wheelNumber: boolean = true
 
-  emitsParent = ['input', 'change', 'focus','blur','update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset']
+  emitsParent = [
+    'input', 'change', 'focus', 'blur', 'update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset',
+  ]
   componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
   declare $refs: {
     selectInput: HTMLInputElement & {maskRef: any}

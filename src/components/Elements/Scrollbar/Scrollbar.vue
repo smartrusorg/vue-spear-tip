@@ -4,6 +4,7 @@
     :class=`{
       [randomClass]: true
     }`
+    class="user-select-auto!"
   )
     slot
     component(is="style").
