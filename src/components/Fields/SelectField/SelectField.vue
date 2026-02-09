@@ -5,7 +5,7 @@
       'vst-select-multi': mode == 'multi' || mode == 'tags',
     }`
   )
-    input(ref="selectInput" :id="_randKey" :value="reactiveValue" :autofocus)
+    input(ref="selectInput" :id="_randKey" :value="reactiveValue" :disabled :autofocus)
 </template>
 
 
@@ -270,6 +270,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   @Watch('modelValue', true) _modelValueWatch(modelValue: any) {
     if (this._isIgnoreSetTags) return this._isIgnoreSetTags = false
     this.nextTick(() => this.setTags())
+  }
+  @Watch('disabled', false, true) _disabledWatch(disabled: boolean) {
+    this.tagify?.setDisabled?.(disabled)
   }
 }
 </script>
