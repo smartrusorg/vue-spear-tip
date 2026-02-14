@@ -66,6 +66,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   mountedParent() {
     let settings: Tagify.TagifySettings = {
       mode: this.mode == 'select' ? 'select' : undefined,
+      addTagOnBlur: false,
+      onChangeAfterBlur: false,
       whitelist: this.itemsInner
       //     [
       //   {
@@ -103,7 +105,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         enabled: 0,
         maxItems: 2000,
       },
-      onChangeAfterBlur: false,
       // delimiters: null,
       placeholder: typeof this.placeholder == 'string'
           ? this.placeholder
@@ -243,6 +244,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.tagify.loading(this.loading)
     this.tagify.on('input', (e:any) => {
       this.$emit('input', e?.detail?.value ?? '')
+    })
+    this.tagify.on('blur', (e:any) => { // Оставляем загрузку, если включена
+      this.nextTick(() => this.tagify?.loading?.(this.loading))
     })
     this.setTags()
   }
