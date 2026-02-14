@@ -10,7 +10,6 @@
         b Single select
         SelectField(
           placeholder="Select one value"
-          v-model="selectOnce"
           :items="selectOnceItems"
         )
         div(
@@ -56,6 +55,14 @@
           div(class="mt5px bg-amber-50 p10px")
             b :items =&nbsp;
             span {{ selectTagsItems }}
+      .col-4(class="px30px")
+        b Tags select with presets
+        SelectField(
+          :loading="true"
+          mode="tags"
+          placeholder="Select tags values with preset"
+          :items="selectTagsItems"
+        )
 
 </template>
 

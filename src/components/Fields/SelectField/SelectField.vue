@@ -6,11 +6,15 @@
     }`
   )
     input(ref="selectInput" :id="_randKey" :value="reactiveValue" :disabled :autofocus)
+
+    //svg(
+    //  data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+    //)
+    //  path(stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636")
 </template>
 
 
 <script lang="ts">
-import './tagify.css'
 import Tagify from '@yaireo/tagify' // @ts-ignore
 import TagifyEsm from './tagify.esm.js'
 
@@ -27,11 +31,12 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
  */
 @VST export default class SelectField extends FieldComponent {
   emits = [
-    'click',
+    'input',
   ]
   declare $refs: {
     selectInput: HTMLInputElement
   }
+  @Prop(Boolean) readonly loading: boolean = false
   @Prop(Boolean) readonly autofocus: boolean = false
   @Prop(String) readonly inputValidatePattern: string|null = null
   @Prop(String) readonly mode: 'select' | 'multi' | 'tags' = 'select'
@@ -184,6 +189,19 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       },
       templates: {
         // todo доработать вставку html замену шаблона элементов, идеально если через слоты можно было бы шаблон указать
+        // tag(tagData, tagify){
+        //   return `<tag title="${(tagData.title || tagData.value)}"
+        //             contenteditable='false'
+        //             spellcheck='false'
+        //             tabIndex="${this.settings.a11y.focusableTags ? 0 : -1}"
+        //             class="${this.settings.classNames.tag} ${tagData.class ? tagData.class : ""}"
+        //             ${this.getAttributes(tagData)}>
+        //     <x title='' class="${this.settings.classNames.tagX}" role='button' aria-label='remove tag'></x>
+        //     <div>
+        //         <span class="${this.settings.classNames.tagText}">${tagData[this.settings.tagTextProp] || tagData.value}</span>
+        //     </div>
+        //   </tag>`
+        // }
         //   tag: (t, i) => {
         //     let value: any  = t.value?.value ?? t.value;
         //     if (this.mode == 'select' && (value = i?.DOM?.originalInput?.getAttribute?.('value')?.trim?.())?.length) {
@@ -221,6 +239,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       }
     }
     this.tagify = new TagifyEsm(this.$refs.selectInput, settings)
+    this.tagify.setDisabled(this.disabled)
+    this.tagify.loading(this.loading)
+    this.tagify.on('input', (e:any) => {
+      this.$emit('input', e?.detail?.value ?? '')
+    })
     this.setTags()
   }
 
@@ -265,19 +288,23 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('value', true) _valueWatch(value: any) {
     if (this._isFirstValueSet) return this._isFirstValueSet = false
-    this.$emit('update:modelValue', value)
+    this.$emit('update:modelValue', value?.value ?? null)
   }
   @Watch('modelValue', true) _modelValueWatch(modelValue: any) {
     if (this._isIgnoreSetTags) return this._isIgnoreSetTags = false
     this.nextTick(() => this.setTags())
   }
-  @Watch('disabled', false, true) _disabledWatch(disabled: boolean) {
+  @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
+  }
+  @Watch('loading', true, true) _loadingWatch(disabled: boolean) {
+    this.tagify?.loading?.(disabled)
   }
 }
 </script>
 
 <style lang="sass">
+@import './tagify.css'
 .tagify__dropdown
   @apply mt4px! border-0!
   &.tagify__dropdown__openInModal
@@ -304,6 +331,27 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
   *
     color: #fff !important
+
+.tagify__tag__removeBtn
+  @apply h25px! w25px text-stone!
+  //content: url("ban.svg") !important
+  mask-image: url("ban.svg")
+  -webkit-mask-size: contain
+  mask-size: contain
+  mask-repeat: no-repeat
+
+  /* Цвет иконки */
+  @apply bg-stone
+  &:hover
+    @apply scale-130
+    transition: box-shadow .03s !important
+
+.tagify__tag__removeBtn:after
+  transition: .03s, color 0s !important
+  content: "" !important
+
+.tagify--loading .tagify__input:empty::after
+  @apply top-30%
 
 .tagify__dropdown__item--selected
   background: #ffe37a
