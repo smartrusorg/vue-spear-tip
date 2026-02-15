@@ -130,6 +130,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           }
         },
         remove: (e: any) => {
+          if (this.disabled) return
           if (this.mode == 'select' && !(e.detail?.tagify?.value ?? []).length && this.value !== null) {
             this.tagify.removeAllTags()
             this.reactiveValue = null
@@ -276,7 +277,18 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.nextTick(() => this.setTags())
   }
   @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
-    // this.tagify?.setDisabled?.(disabled)
+    this.tagify?.setDisabled?.(disabled)
+    if (disabled && !this.value && (this.modelValue || this.inputValue)) {
+      if ((this.value = this.modelValue || this.inputValue)) {
+        this.nextTick(() =>
+          this.tagify?.addTags(
+            this.mode == 'select'
+              ? this.itemsInner?.find?.(v => v.key == this.value)?.value ?? ''
+              : this.itemsInner?.filter?.(v => this.value?.includes(v.key))
+          )
+        )
+      }
+    }
   }
 
   @Watch('loading') _loadingWatch(inLoading: boolean) {

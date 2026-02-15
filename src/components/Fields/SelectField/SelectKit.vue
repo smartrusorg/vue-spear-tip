@@ -6,64 +6,72 @@
       h1 SelectKit
       div
         .row(class="p5px w100%")
-      .col-4(class="px30px")
-        b Single select
-        SelectField(
-          v-model="selectOnce"
-          placeholder="Select one value"
-          :items="selectOnceItems"
-        )
-        div(
-          class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
-        )
-          div
-            b v-model =&nbsp;
-            span {{ selectOnce }}
-          div(class="mt5px bg-amber-50 p10px")
-            b :items =&nbsp;
-            span {{ selectOnceItems }}
-      .col-4(class="px30px")
-        b Multi select
-        SelectField(
-          mode="multi"
-          placeholder="Select multi value"
-          v-model="selectMulti"
-          :items="selectMultiItems"
-        )
-        div(
-          class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
-        )
-          div
-            b v-model =&nbsp;
-            span {{ selectMulti }}
-          div(class="mt5px bg-amber-50 p10px")
-            b :items =&nbsp;
-            span {{ selectMultiItems }}
-      .col-4(class="px30px")
-        b Tags select with presets
-        SelectField(
-          mode="tags"
-          placeholder="Select tags values with preset"
-          v-model="selectTags"
-          :items="selectTagsItems"
-        )
-        div(
-          class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
-        )
-          div
-            b v-model =&nbsp;
-            span {{ selectTags }}
-          div(class="mt5px bg-amber-50 p10px")
-            b :items =&nbsp;
-            span {{ selectTagsItems }}
-      .col-4(class="px30px")
-        b With loading
-        SelectField(
-          :loading="true"
-          mode="tags"
-          placeholder="Select tags values with preset"
-          :items="selectTagsItems"
-        )
+          .col-12(class="px30px")
+            b Single select
+            SelectField(
+              v-model="selectOnce"
+              placeholder="Select one value"
+              :items="selectOnceItems"
+            )
+            div(
+              class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
+            )
+              div
+                b v-model =&nbsp;
+                span {{ selectOnce }}
+              div(class="mt5px bg-amber-50 p10px")
+                b :items =&nbsp;
+                span {{ selectOnceItems }}
+          .col-12(class="px30px")
+            b Multi select
+            SelectField(
+              mode="multi"
+              placeholder="Select multi value"
+              v-model="selectMulti"
+              :items="selectMultiItems"
+            )
+            div(
+              class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
+            )
+              div
+                b v-model =&nbsp;
+                span {{ selectMulti }}
+              div(class="mt5px bg-amber-50 p10px")
+                b :items =&nbsp;
+                span {{ selectMultiItems }}
+          .col-12(class="px30px")
+            b Tags select with presets
+            SelectField(
+              mode="tags"
+              placeholder="Select tags values with preset"
+              v-model="selectTags"
+              :items="selectTagsItems"
+            )
+            div(
+              class="mx-20px bg-amber-100 my8px px15px py7px rounded-lg"
+            )
+              div
+                b v-model =&nbsp;
+                span {{ selectTags }}
+              div(class="mt5px bg-amber-50 p10px")
+                b :items =&nbsp;
+                span {{ selectTagsItems }}
+          .col-6(class="px30px")
+            b Disabled
+            SelectField(
+              :disabled="loadingWithDisabled"
+              mode="tags"
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
+          .col-6(class="px30px")
+            b With loading
+            SelectField(
+              :loading="true"
+              mode="tags"
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
 
 </template>
 
@@ -86,10 +94,12 @@ import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
   selectMultiItems: any[] = []
   selectTags: {value:string, key?:string|number}[]|null = [{key:4, value: 'Fourth'}]
   selectTagsItems: {value:string, key?:string|number}[]|null = []
+  loadingWithDisabled: boolean = false
   beforeMount() {
     this.selectOnceItems = [{key:1, value: 'Test'}, {key:2, value: 'Second value'}, ]
     this.selectMultiItems = [{key:1, value: 'Test'}, {key:2, value: 'Second value'}, {key:3, value: 'Third'}]
     this.selectTagsItems = [{key:1, value: 'Test'}, {key:2, value: 'Second value'}, {key:4, value: 'Fourth'}]
+    setInterval(() => this.loadingWithDisabled = !this.loadingWithDisabled, 2000)
     setTimeout(() => this.selectOnce = 3, 2000)
     setTimeout(() => this.selectMulti = [1,3], 1000)
     setTimeout(() => this.selectOnceItems.push({ "key": 3, "value": "S3" }), 1000)
