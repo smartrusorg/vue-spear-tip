@@ -5,7 +5,7 @@
       'vst-select-multi': mode == 'multi' || mode == 'tags',
     }`
   )
-    input(ref="selectInput" :id="_randKey" :value="reactiveValue" :disabled :autofocus)
+    input(ref="selectInput" :id="_randKey" :value="reactiveValue" :autofocus)
 
     //svg(
     //  data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
@@ -57,7 +57,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
   beforeMountParent() {
     this.randomClass = 'vst-select-'+Math.random().toString().split('.')[1]
-    this.itemsInner = this.items ?? []
+    this.itemsInner = Array.isArray(this.items) ? this.items : []
     this._isFirstValueSet = false
     this._isIgnoreSetTags = false
   }
@@ -96,12 +96,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                 ? JSON.parse(e.detail?.value)?.[0]?.key
                 : (e.detail?.value?.[0]?.key || e.detail?.value?.key)
               this.nextTick(() => {
-                const value = (JSON.parse(JSON.stringify((this.itemsInner.find(
-                        v => (v?.key) === modelValue)?.value ?? null
+                const item = (JSON.parse(JSON.stringify((this.itemsInner.find(
+                  v => (v?.key) === modelValue) ?? null
                 ))))
-                console.log(value)
-                if (value || value === 0) {
-                  this.tagify.addTags(this.reactiveValue = value)
+                if (item?.key || item?.key === 0) {
+                  this.tagify.addTags(this.reactiveValue = item?.value)
                   this.$emit('change', this.value = modelValue ?? null)
                 }
               })
@@ -220,7 +219,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.$emit('input', this.currentSearchValue = e?.detail?.value ?? '')
     })
     this.tagify.on('blur', (e:any) => { // Оставляем загрузку, если включена
-      this.nextTick(() => this.tagify?.loading?.(this.loading))
+      this.nextTick(() => {
+        this.tagify?.loading?.(this.loading)
+        this.tagify?.setDisabled?.(this.disabled)
+      })
     })
     this.setTags()
   }
@@ -274,7 +276,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.nextTick(() => this.setTags())
   }
   @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
-    this.tagify?.setDisabled?.(disabled)
+    // this.tagify?.setDisabled?.(disabled)
   }
 
   @Watch('loading') _loadingWatch(inLoading: boolean) {
