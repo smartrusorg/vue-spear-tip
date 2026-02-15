@@ -32,6 +32,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 @VST export default class SelectField extends FieldComponent {
   emits = [
     'input',
+    'change',
   ]
   declare $refs: {
     selectInput: HTMLInputElement
@@ -68,34 +69,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       mode: this.mode == 'select' ? 'select' : undefined,
       addTagOnBlur: false,
       onChangeAfterBlur: false,
-      whitelist: this.itemsInner
-      //     [
-      //   {
-      //     key: 2,
-      //     value: '<b>Test</b>'
-      //   },
-      //   {
-      //     key: 3,
-      //     value: '3'
-      //   },
-      //   {
-      //     key: 4,
-      //     value: '<b>Test4</b>'
-      //   },
-      //   {
-      //     key: 55,
-      //     value: '<b>Test5</b>'
-      //   },
-      //   {
-      //     key: 21,
-      //     value: '<b>Test11</b>'
-      //   },
-      //   {
-      //     key: 233,
-      //     value: '<b>Test33</b>'
-      //   },
-      // ]
-      ,
+      whitelist: this.itemsInner,
       dropdown: {
         // maxTags: 5,
         // fetchSuggestions: this.mode != 'select',
@@ -125,11 +99,12 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                 const value = (JSON.parse(JSON.stringify((this.itemsInner.find(
                         v => (v?.key) === modelValue)?.value ?? null
                 ))))
+                console.log(value)
                 if (value || value === 0) {
                   this.tagify.addTags(this.reactiveValue = value)
-                  this.$emit('update:modelValue',  this.value = modelValue)
+                  this.$emit('change', this.value = modelValue ?? null)
                 }
-              }, 4)
+              })
             }
             else if (this.mode == 'multi') {
               this.tagify.removeAllTags()
@@ -137,9 +112,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
               modelValue = Array.isArray(modelValue) ? modelValue.map(v => v.key) : [modelValue]
               this.tagify.addTags(JSON.parse(e.detail?.value))
               this.nextTick(() => {
-                this.$emit('update:modelValue',  this.value = modelValue)
+                this.$emit('change',  this.value = modelValue)
                 this.reactiveValue = e.detail?.value
-              }, 4)
+              })
             }
             else if (this.mode == 'tags'){
               this.tagify.removeAllTags()
@@ -148,11 +123,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
               this.nextTick(() => {
                 this.reactiveValue = e.detail?.value
                 this.nextTick(() => {
-                  this._isFirstValueSet = true
                   this._isIgnoreSetTags = true
-                  this.$emit('update:modelValue',  this.value = modelValue)
+                  this.$emit('change',  this.value = modelValue ?? null)
                 })
-              }, 4)
+              })
             }
           }
         },
@@ -160,13 +134,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           if (this.mode == 'select' && !(e.detail?.tagify?.value ?? []).length && this.value !== null) {
             this.tagify.removeAllTags()
             this.reactiveValue = null
-            this.$emit('update:modelValue',  this.value = null)
+            this.$emit('change',  this.value = null)
           }
           else if (this.mode == 'tags') {
             const reactiveValue = JSON.parse(this.reactiveValue)?.filter((v: any) => v.key != e.detail?.data?.key)
             if (!reactiveValue?.length && this.reactiveValue != '[]') {
               this.tagify.removeAllTags()
-              this.$emit('update:modelValue',  this.value = [])
+              this.$emit('change', this.value = [])
               this.reactiveValue = '[]'
             }
           }
@@ -178,7 +152,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
               if (!reactiveValue?.length && this.reactiveValue != '[]') {
                 this.reactiveValue = '[]'
                 this.tagify.removeAllTags()
-                this.$emit('update:modelValue',  this.value = [])
+                this.$emit('change', this.value = [])
               }
             }, 4)
           }
@@ -243,13 +217,14 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.tagify.setDisabled(this.disabled)
     this.tagify.loading(this.loading)
     this.tagify.on('input', (e:any) => {
-      this.$emit('input', e?.detail?.value ?? '')
+      this.$emit('input', this.currentSearchValue = e?.detail?.value ?? '')
     })
     this.tagify.on('blur', (e:any) => { // Оставляем загрузку, если включена
       this.nextTick(() => this.tagify?.loading?.(this.loading))
     })
     this.setTags()
   }
+  currentSearchValue: string = ''
 
   setTags() {
     this.tagify?.removeAllTags?.()
@@ -292,7 +267,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('value', true) _valueWatch(value: any) {
     if (this._isFirstValueSet) return this._isFirstValueSet = false
-    this.$emit('update:modelValue', value?.value ?? null)
+    this.$emit('update:modelValue', value)
   }
   @Watch('modelValue', true) _modelValueWatch(modelValue: any) {
     if (this._isIgnoreSetTags) return this._isIgnoreSetTags = false
@@ -301,8 +276,12 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
   }
-  @Watch('loading', true, true) _loadingWatch(disabled: boolean) {
-    this.tagify?.loading?.(disabled)
+
+  @Watch('loading') _loadingWatch(inLoading: boolean) {
+    this.tagify?.loading?.(inLoading)
+    if (!inLoading && this.items?.length) {
+      this.nextTick(() => this.tagify?.dropdown.show(this.currentSearchValue))
+    }
   }
 }
 </script>

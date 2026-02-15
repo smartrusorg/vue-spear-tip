@@ -9,6 +9,7 @@
       .col-4(class="px30px")
         b Single select
         SelectField(
+          v-model="selectOnce"
           placeholder="Select one value"
           :items="selectOnceItems"
         )
@@ -56,7 +57,7 @@
             b :items =&nbsp;
             span {{ selectTagsItems }}
       .col-4(class="px30px")
-        b Tags select with presets
+        b With loading
         SelectField(
           :loading="true"
           mode="tags"
