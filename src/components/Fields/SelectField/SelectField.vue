@@ -1,4 +1,4 @@
-<template v-once lang="pug">
+<template lang="pug">
   .vst-select-field(
     class="d-inline-block mx2px my1px w100%"
     :class=`{
@@ -52,6 +52,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   itemsInner: any[] = []
   _randKey: string = ''
   createdParent() {
+    this.value = this.inputValue || this.modelValue || null
     this._randKey = 'vst-select-'+this.VST.generateRandomKey()
   }
 
@@ -213,7 +214,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         }
       }
     }
-    this.tagify = new TagifyEsm(this.$refs.selectInput, settings)
+    this.tagify = new TagifyEsm(this.$el.querySelector(`#${this._randKey}`), settings)
     this.tagify.setDisabled(this.disabled)
     this.tagify.loading(this.loading)
     this.tagify.on('input', (e:any) => {
@@ -232,31 +233,30 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   setTags() {
     this.tagify?.removeAllTags?.()
     if (this.mode == 'select'){
-      const value = (this.itemsInner.find(v => (v?.key || v?.value) === (this.modelValue || this.inputValue))?.value ?? null)
-      if (value) {
+      this.value = (this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null)
+      if (this.value) {
         this.nextTick(() => {
-          this._isFirstValueSet = true
-          this.tagify?.addTags(this.value = value ?? '')
+          this.tagify?.addTags(this.value ?? '')
         }, 2)
       }
     }
     else if (this.mode == 'multi'){
-      const val = this.modelValue || this.inputValue
+      const val = this.inputValue || this.modelValue
       if (Array.isArray(val)) {
         this._isFirstValueSet = true
         this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
         this.nextTick(() => {
-          this.tagify?.addTags(this.value ?? '')
+          this.tagify?.addTags(this.reactiveValue = this.value ?? '')
         }, 2)
       }
     }
     else if (this.mode == 'tags'){
-      const val = this.modelValue || this.inputValue
+      const val =  this.inputValue || this.modelValue
       if (Array.isArray(val)) {
         this._isFirstValueSet = true
         this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value)))
         this.nextTick(() => {
-          this.tagify?.addTags(this.value ?? '')
+          this.tagify?.addTags(this.reactiveValue = this.value ?? '')
         }, 2)
       }
     }
@@ -278,8 +278,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
-    if (disabled && !this.value && (this.modelValue || this.inputValue)) {
-      if ((this.value = this.modelValue || this.inputValue)) {
+    if (!this.value && (this.inputValue || this.modelValue)) {
+      if ((this.value = this.inputValue || this.modelValue)) {
         this.nextTick(() =>
           this.tagify?.addTags(
             this.mode == 'select'
