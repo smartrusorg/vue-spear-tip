@@ -233,8 +233,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   setTags() {
     this.tagify?.removeAllTags?.()
     if (this.mode == 'select'){
-      this.value = (this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null)
-      if (this.value) {
+      const value = (this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null)
+      if (value) {
+        this.value = value
         this.nextTick(() => {
           this.tagify?.addTags(this.value ?? '')
         }, 2)
@@ -278,7 +279,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('disabled', true, true) _disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
-    if (!this.value && (this.inputValue || this.modelValue)) {
+    if (disabled && !this.value && (this.inputValue || this.modelValue)) {
       if ((this.value = this.inputValue || this.modelValue)) {
         this.nextTick(() =>
           this.tagify?.addTags(
