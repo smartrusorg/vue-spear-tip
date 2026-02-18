@@ -247,7 +247,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         this._isFirstValueSet = true
         this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
         this.nextTick(() => {
-          this.tagify?.addTags(this.reactiveValue = this.value ?? '')
+          this.tagify?.addTags(this.value ?? '')
         }, 2)
       }
     }
@@ -257,7 +257,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         this._isFirstValueSet = true
         this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value)))
         this.nextTick(() => {
-          this.tagify?.addTags(this.reactiveValue = this.value ?? '')
+          this.tagify?.addTags(this.value ?? '')
         }, 2)
       }
     }
