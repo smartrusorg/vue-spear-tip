@@ -1,7 +1,7 @@
-import { VNode, SetupContext } from "@vue/runtime-core"
+import { VNode, SetupContext, TriggerOpTypes, TrackOpTypes, ReactiveEffect } from '@vue/runtime-core'
 import {IVueClass} from '../Interfaces/IVueClass'
 import {IFieldComponent} from '../Interfaces/IFieldComponent'
-import {LooseRequired} from '@vue/shared'
+import IBaseVueComponent from '../Interfaces/IBaseVueComponent'
 
 export default abstract class VueClass implements IVueClass {
   public readonly mixins: Array<any> = []
@@ -23,13 +23,13 @@ export default abstract class VueClass implements IVueClass {
     __scopeId: string
     __file: string
   }
-  declare readonly $parent: VueClass|null
+  declare readonly $parent?: any
   declare readonly $props: Object
-  declare readonly $refs: {
-    [key:string]:
-      HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IFieldComponent|IFieldComponent[]|
-      IVueClass|VueClass|typeof VueClass|IVueClass[]|typeof VueClass[]|VueClass[]
-  }
+  declare readonly $refs: {[key:string]:any}
+  //   [key:string]:
+  //     HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IFieldComponent|IFieldComponent[]|
+  //     IVueClass|VueClass|typeof VueClass|IVueClass[]|(typeof VueClass)[]|VueClass[]|IBaseVueComponent|IBaseVueComponent[]
+  // }
   readonly $root: {
     // [key:string]:any
     readonly APP?: any
@@ -62,9 +62,7 @@ export default abstract class VueClass implements IVueClass {
   } = {} as any
 
   setup(
-    props?: LooseRequired<Readonly<{}> & Readonly<
-      {[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}
-    >,
+    props?: {[key:string]: any},
     context?: SetupContext,
     self?: IVueClass
   ) {}
@@ -78,9 +76,7 @@ export default abstract class VueClass implements IVueClass {
   unmounted() {}
   
   setupParent(
-    props?: LooseRequired<Readonly<{}> & Readonly<
-      {[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}
-    >,
+    props?: {[key:string]: any},
     context?: SetupContext,
     self?: IVueClass
   ) {}
@@ -92,7 +88,55 @@ export default abstract class VueClass implements IVueClass {
   updatedParent() {}
   beforeUnmountParent() {}
   unmountedParent() {}
-
+  
+  onErrorCaptured<T = this>(callback: (error: {
+    err: unknown,
+    instance: T | null,
+    info: string
+  }) => boolean | void): void {}
+  
+  
+  onErrorCapturedParent<T = this>(callback: (error: {
+    err: unknown,
+    instance: T | null,
+    info: string
+  }) => boolean | void): void {}
+  
+  onRenderTracked(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    key: any
+  }): void {}
+  
+  onRenderTrackedParent(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    key: any
+  }): void {}
+  
+  onRenderTriggered(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    key: any
+    newValue?: any
+    oldValue?: any
+    oldTarget?: Map<any, any> | Set<any>
+  }): void {}
+  
+  onRenderTriggeredParent(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    key: any
+    newValue?: any
+    oldValue?: any
+    oldTarget?: Map<any, any> | Set<any>
+  }): void {}
+  
+  
   nextTick(callback: () => void, steps: number = 1) {}
-  hasExternalHandlerEvent(name: string): boolean {return false}
 }
+

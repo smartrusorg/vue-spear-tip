@@ -1,6 +1,4 @@
-import VueClass from '../VueClass'
-
-let VstPrepareClassInstance: {[k:string]: any} = {}
+import {getMeta} from '../registry'
 
 /**
  * Трансформация метода в vue watch функцию
@@ -9,35 +7,12 @@ let VstPrepareClassInstance: {[k:string]: any} = {}
  * @param {boolean} immediate Выполнить ли метод сразу, не учитывая есть ли изменения
  * @constructor
  */
+
 export const Watch = function(propertyName: string, deep: boolean = false, immediate: boolean = false): any {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    if (typeof target?.constructor?.name != 'string') return
-    let VST = target.constructor?.___VST ?? {}
-    if (!VST.watch) VST.watch = {}
-    if (!VstPrepareClassInstance[target.constructor.name]) {
-      VstPrepareClassInstance[target.constructor.name] = new target.constructor
-      VstPrepareClassInstance[target.constructor.name].name =
-        VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
-        ?? VstPrepareClassInstance?.[target.constructor?.name]?.['name']
-        ??  ''
-    }
-    if(!target?.constructor?.prototype?.__vue_watch__) {
-      target.constructor.prototype.__vue_watch__ = {}
-    }
-    if(!target?.constructor?.prototype?.__vue_watch__[target.constructor.name]){
-      target.constructor.prototype.__vue_watch__[target.constructor.name] = {}
-      target.constructor.prototype.__vue_watch__[target.constructor.name][propertyName]
-        = VstPrepareClassInstance[target.constructor.name][propertyKey]
-    }
-    if(!VST.watch[target.constructor.name]) {
-      VST.watch[target.constructor.name] = {}
-    }
+  return (target: any, methodName: string) => {
+    const meta = getMeta(target.constructor);
+    if (!meta.watch) meta.watch = [];
     
-    VST.watch[target.constructor.name][propertyName] = {
-      handler: VstPrepareClassInstance[target.constructor.name][propertyKey],
-      deep: deep,
-      immediate: immediate,
-    }
-    target.constructor.___VST = VST
+    meta.watch[methodName] = {propertyName, deep, immediate}
   }
 }

@@ -1,5 +1,6 @@
 <template lang="pug">
   div(class="flex flex-col fixed")
+    div Menu
     div(
       v-for="route in routes"
       :class=`{

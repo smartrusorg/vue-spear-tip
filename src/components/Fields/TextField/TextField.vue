@@ -261,7 +261,7 @@ import { NoSymbolIcon } from "@heroicons/vue/20/solid"
   }
 
 
-  @Watch('isEditable') _isEditableWatch(value: boolean) {
+  @Watch('isEditable') isEditableWatch(value: boolean) {
     this.editor.setEditable(value)
   }
 }

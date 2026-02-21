@@ -9,18 +9,21 @@ import {IHammerManager} from '../Interfaces/IHammer'
 export default abstract class BaseComponent extends VueClass implements IBaseVueComponent {
   readonly VST: IGlobalVST
 
-  readonly Settings: {
-    directives: {
-      clickTap: boolean|string
-    }
-  } = {
-    directives: {
-      clickTap: 'onViewPortResize'
-    }
-  }
+  // readonly Settings: {
+  //   directives: {
+  //     clickTap: boolean|string
+  //   }
+  // } = {
+  //   directives: {
+  //     clickTap: 'onViewPortResize'
+  //   }
+  // }
 
   emitsParent = ['update:modelValue', 'clickTap']
   declare readonly $root: {
+    [key: string]: any
+  }
+  declare readonly $refs: {
     [key: string]: any
   }
 
@@ -91,44 +94,35 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
    * Свойство с динамическими данными, специфичными для компонента
    * @private
    */
-  private readonly __VSTBaseComponent: IVSTBaseBaseComponent = {} as IVSTBaseBaseComponent
+  private readonly VSTBaseComponent: IVSTBaseBaseComponent = {
+    hammer: [],
+    endCallbacks: [],
+    keyBindingsCallbacks: {},
+    clickTapComponentCallback: () => this.onComponentClickOrTap(),
+  } as IVSTBaseBaseComponent
 
 
-  beforeCreateParent() { // @ts-ignore need always update
-    this['__VSTBaseComponent'] = {
-      hammer: [],
-      endCallbacks: [],
-      keyBindingsCallbacks: {},
-      clickTapComponentCallback: () => this.onComponentClickOrTap(),
-    }
-  }
-  createdParent() { // @ts-ignore need always update
-    this['__VSTBaseComponent'] = {
-      hammer: [],
-      endCallbacks: [],
-      keyBindingsCallbacks: {},
-      clickTapComponentCallback: () => this.onComponentClickOrTap(),
-    }
+  createdParent() {
     this.VST.$on('$VST.viewPortResize', this.onViewPortResize)
     this.hookWhenComponentDestroy(() => this.VST.$off('$VST.viewPortResize', this.onViewPortResize))
   }
 
   mountedParent() {
     if (this.$el instanceof HTMLElement) {
-      this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
-      this.__VSTBaseComponent.clickTapHammer.on('tap', this.__VSTBaseComponent.clickTapComponentCallback)
+      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
+      this.VSTBaseComponent.clickTapHammer.on('tap', this.VSTBaseComponent.clickTapComponentCallback)
     }
     this.updatedParent()
   }
 
   updatedParent() {
-    if (this.__VSTBaseComponent.clickTapHammer) {
-      this.__VSTBaseComponent.clickTapHammer.off('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
-      this.__VSTBaseComponent.clickTapHammer.destroy()
-      this.__VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
-      this.__VSTBaseComponent.clickTapHammer.on('tap', () => this.__VSTBaseComponent.clickTapComponentCallback)
+    if (this.VSTBaseComponent.clickTapHammer) {
+      this.VSTBaseComponent.clickTapHammer.off('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
+      this.VSTBaseComponent.clickTapHammer.destroy()
+      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
+      this.VSTBaseComponent.clickTapHammer.on('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
     }
-    for (const h of this.__VSTBaseComponent?.hammer ?? []) {
+    for (const h of this.VSTBaseComponent?.hammer ?? []) {
       h.instance?.destroy?.()
       const el = this.$el?.querySelector?.(h.selector)
       if (el instanceof HTMLElement || el instanceof SVGElement) {
@@ -139,31 +133,29 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
 
   beforeUnmountParent() {
-    for (const callback of this.__VSTBaseComponent?.endCallbacks ?? []) callback()
-    for (let hk in this.__VSTBaseComponent.keyBindingsCallbacks ?? {}) {
+    for (const callback of this.VSTBaseComponent?.endCallbacks ?? []) callback()
+    for (let hk in this.VSTBaseComponent.keyBindingsCallbacks ?? {}) {
       delete $VST.__REGISTERED_HOTKEYS[hk]
     }
-    this.__VSTBaseComponent.clickTapHammer?.destroy?.()
-    for (const h of this.__VSTBaseComponent?.hammer ?? []) {
+    this.VSTBaseComponent.clickTapHammer?.destroy?.()
+    for (const h of this.VSTBaseComponent?.hammer ?? []) {
       h.instance?.off?.(h.event, h.callback as any)
       h.instance?.destroy?.()
     }
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
-    this.nextTick(() => {
-      const el = this.$el?.querySelector?.(componentSelector)
-      let hammer
-      if (el instanceof HTMLElement || el instanceof SVGElement) {
-        hammer = new this.VST.Hammer(el) as any
-        hammer.on(event, callback)
-      }
-      this.__VSTBaseComponent.hammer.push({
-        event,
-        callback,
-        instance: hammer,
-        selector: componentSelector,
-      })
+    const el = this.$el?.querySelector?.(componentSelector)
+    let hammer
+    if (el instanceof HTMLElement || el instanceof SVGElement) {
+      hammer = new this.VST.Hammer(el) as any
+      hammer.on(event, callback)
+    }
+    this.VSTBaseComponent.hammer.push({
+      event,
+      callback,
+      instance: hammer,
+      selector: componentSelector,
     })
   }
 
@@ -173,7 +165,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   onComponentClickOrTap() {}
 
   hookWhenComponentDestroy(end: () => any): void {
-    this.__VSTBaseComponent.endCallbacks.push(end)
+    this.VSTBaseComponent.endCallbacks.push(end)
   }
 
   registerHotKey(key:
@@ -186,7 +178,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
    shift: boolean,
   ): void {
     const k = `${key}_${ctrlOrCommand ? 1 : 0}_${alt ? 1 : 0}_${shift ? 1 : 0}`
-    this.__VSTBaseComponent.keyBindingsCallbacks[k] = $VST.__REGISTERED_HOTKEYS[k] = {
+    this.VSTBaseComponent.keyBindingsCallbacks[k] = $VST.__REGISTERED_HOTKEYS[k] = {
       callback,
       ctrlOrCommand,
       alt,

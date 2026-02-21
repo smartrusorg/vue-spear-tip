@@ -1,5 +1,5 @@
 import {LooseRequired} from '@vue/shared'
-import {SetupContext, VNode} from '@vue/runtime-core'
+import {SetupContext, VNode, ReactiveEffect, TriggerOpTypes, TrackOpTypes} from '@vue/runtime-core'
 import {VueClass} from '../core'
 import {IFieldComponent} from './IFieldComponent'
 
@@ -96,7 +96,7 @@ export interface IVueClass {
    *
    * [$parent](https://v3.ru.vuejs.org/ru/api/instance-properties.html#parent)
    */
-  readonly $parent: IVueClass|null
+  readonly $parent?: any
   
   /**
    * Объект, содержащий текущие входные параметры, которые получил компонент.
@@ -117,11 +117,7 @@ export interface IVueClass {
    * [Ссылки на элементы шаблона](https://v3.ru.vuejs.org/ru/guide/component-template-refs.html)
    * [Специальные атрибуты — ref](https://v3.ru.vuejs.org/ru/api/special-attributes.html#ref)
    */
-  readonly $refs: {
-    [key:string]:HTMLElement|HTMLInputElement|undefined|
-    HTMLElement[]|HTMLInputElement[]|IVueClass|typeof VueClass|VueClass
-    |IFieldComponent[]|IFieldComponent|IVueClass[]|typeof VueClass[]|VueClass[]
-  }
+  readonly $refs: {[key:string]: any}
   
   /**
    * Экземпляр корневого компонента текущего дерева компонентов.
@@ -191,7 +187,7 @@ export interface IVueClass {
   
   // Хуки жизненного цикла
   setup(
-    props?: LooseRequired<Readonly<{}> & Readonly<{[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}>,
+    props?: {[key:string]: any},
     context?: SetupContext,
     self?: IVueClass
   ): {[k:string]:any}|void
@@ -206,7 +202,7 @@ export interface IVueClass {
   
   // Родительские хуки
   setupParent(
-    props?: LooseRequired<Readonly<{}> & Readonly<{[x: `on${Capitalize<string>}`]: ((...args: any[]) => any) | undefined}> & {}>,
+    props?: {[key:string]: any},
     context?: SetupContext,
     self?: IVueClass
   ): {[k:string]:any}|void
@@ -219,18 +215,58 @@ export interface IVueClass {
   beforeUnmountParent(): void
   unmountedParent(): void
   
+  onErrorCaptured<T = this>(callback: (error: {
+    err: unknown,
+    instance: T | null,
+    info: string
+  }) => boolean | void): void
+  
+  onErrorCapturedParent<T = this>(callback: (error: {
+    err: unknown,
+    instance: T | null,
+    info: string
+  }) => boolean | void): void
+  
+  onRenderTracked(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    key: any
+  }): void
+  
+  onRenderTrackedParent(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    key: any
+  }): void
+  
+  onRenderTriggered(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    key: any
+    newValue?: any
+    oldValue?: any
+    oldTarget?: Map<any, any> | Set<any>
+  }): void
+  
+  onRenderTriggeredParent(callback: {
+    effect: ReactiveEffect
+    target: object
+    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    key: any
+    newValue?: any
+    oldValue?: any
+    oldTarget?: Map<any, any> | Set<any>
+  }): void
+  
   /**
    * Рекурсивный пропуск шагов
    * @param {Function} callback
    * @param {Number} steps Количество шагов (тиков, смен сцен), которые нужно пропустить
    */
   nextTick(callback: () => void, steps?: number): void
-  
-  /**
-   * Проверка наличия внешнего обработчика события
-   * @param name
-   */
-  hasExternalHandlerEvent(name: string): boolean
 }
 
 export interface VueWatchOptions {

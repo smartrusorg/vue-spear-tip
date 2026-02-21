@@ -64,7 +64,7 @@ import 'vue-spear-tip/grid'
 
 
 <script lang="ts">
-  import {VST, Prop, Watch, Computed, BaseComponent, Button} from 'vue-spear-tip'
+  import {VST, Prop, Watch, BaseComponent, Button} from 'vue-spear-tip'
 
   /**
    * Component example
@@ -80,11 +80,12 @@ import 'vue-spear-tip/grid'
       console.log('test')
     }
     
-    @Watch('test', false /* deep */, false /* immediate */) _testWatch(newVal: string) {
+    @Watch('test', false /* deep */, false /* immediate */) watchTest(newVal: string) {
       console.log('test variable changed', newVal)
     }
     
-    declare computed: boolean; @Watch('computed') _computedComputed(): boolean {
+    // Declare computed prop
+    get computedProp(): boolean {
       return true
     }
   }

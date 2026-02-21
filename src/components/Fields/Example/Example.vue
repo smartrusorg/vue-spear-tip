@@ -11,7 +11,7 @@
 
 <script lang="ts">
 
-import {Computed, Prop, VST, Watch} from '../../../core'
+import {Prop, VST, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 /**
@@ -42,8 +42,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
   }
   // Generate computed class prop
-  declare some: boolean; @Computed('some') _valueComputed(some: boolean): Example['some'] {
-    return some
+  get some(): string {
+    return 'some'
   }
 }
 </script>

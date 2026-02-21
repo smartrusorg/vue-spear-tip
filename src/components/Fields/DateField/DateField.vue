@@ -20,7 +20,7 @@
             class="w24px h24px text-stone hover:scale-130 mx2px"
           )
             CalendarDaysIcon(
-              @click="value ? _inputFocus() : addDate()"
+              @click="value ? inputFocus() : addDate()"
             )
       div(
         tabindex="-1"
@@ -40,15 +40,15 @@
       :maskPreset
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
       class=`z2`
-      @focus="_inputFocus()"
-      @change="(v, reset) => _changeInput(v, reset)"
-      @dateMaskChange="_dateMaskChange"
+      @focus="inputFocus()"
+      @change="(v, reset) => changeInput(v, reset)"
+      @dateMaskChange="dateMaskChange"
       :force12hours
       :dtPresetLocale="locale"
       :disabled
       :fontSize="'1rem'"
-      @keypress.enter="_inputEnter($refs.VSTStringField?.getValue?.())"
-      @reset="_onReset"
+      @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
+      @reset="onReset"
       ref="VSTStringField"
     )
       template(#start v-if="!disabled")
@@ -57,7 +57,7 @@
           v-if="!disabled"
         )
           CalendarDaysIcon(
-            @click="value ? _inputFocus() : addDate()"
+            @click="value ? inputFocus() : addDate()"
           )
     div(class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value" )
       input(
@@ -171,18 +171,18 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         this.maskPreset = 'datetimeSec'
       }
     }
-    this._initTemporalUpdateOut = true
+    this.initTemporalUpdateOut = true
     this.value = this.modelValue || this.inputValue || null
 
     if (this.maxField)
-      $VST.$on('$VST.components.fields.date.'+btoa(this.maxField), this._onMaxDateFieldChange)
+      $VST.$on('$VST.components.fields.date.'+btoa(this.maxField), this.onMaxDateFieldChange)
     if (this.minField)
-      $VST.$on('$VST.components.fields.date.'+btoa(this.minField), this._onMinDateFieldChange)
+      $VST.$on('$VST.components.fields.date.'+btoa(this.minField), this.onMinDateFieldChange)
   }
 
   mounted() {
     this.nextTick(() => {
-      this._initPicker()
+      this.initPicker()
       this.nextTick(() => {
         if (this.value) {
           this.addDate()
@@ -192,16 +192,16 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   }
   beforeUnmount() {
     if (this.maxField)
-      $VST.$off('$VST.components.fields.date.'+btoa(this.maxField), this._onMaxDateFieldChange)
+      $VST.$off('$VST.components.fields.date.'+btoa(this.maxField), this.onMaxDateFieldChange)
     if (this.minField)
-      $VST.$off('$VST.components.fields.date.'+btoa(this.minField), this._onMinDateFieldChange)
-    clearInterval(this._pickerInterval)
+      $VST.$off('$VST.components.fields.date.'+btoa(this.minField), this.onMinDateFieldChange)
+    clearInterval(this.pickerInterval)
   }
 
-  private _onMaxDateFieldChange(stamp: number) {
+  private onMaxDateFieldChange(stamp: number) {
     this.fp?.set?.('maxDate', stamp ? new Date(stamp) : null)
   }
-  private _onMinDateFieldChange(stamp: number) {
+  private onMinDateFieldChange(stamp: number) {
     this.fp?.set?.('minDate', stamp ? new Date(stamp) : null)
   }
 
@@ -216,7 +216,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     ]?.()?.toString().replace('T', ' ') : zonedDate.epochMilliseconds)
     this.showCalendar = false
     setTimeout(() => {
-      if (!this.fp) this._initPicker()
+      if (!this.fp) this.initPicker()
       this.nextTick(() => {
         this.fp?.open?.()
         this.fp?.close?.()
@@ -225,7 +225,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
           if (this.$refs?.picker) {
             setTimeout(() => {
               this.showCalendar = true
-              this.$refs.picker.setAttribute('value', this._formatDate(new Date(zonedDate.epochMilliseconds)))
+              this.$refs.picker.setAttribute('value', this.formatDate(new Date(zonedDate.epochMilliseconds)))
               this.fp?.setDate?.(new Date($VST.DT(this.value!).epochMilliseconds))
               if (!isNewVal) {
                 this.fp?.open?.()
@@ -237,15 +237,15 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }, 100)
   }
 
-  private _extractDateOnly(dateString:string): string|null {
+  private extractDateOnly(dateString:string): string|null {
     const regex = /(\d{2,4}[./_-]\d{2,4}[./_-]\d{2,4})/
     const match = dateString.match(regex)
     if (match) return match?.[0] ?? null
     return null
   }
 
-  private _preventMaskDateChange = false
-  private _initPicker() {
+  private preventMaskDateChange = false
+  private initPicker() {
     const localeName = ((this.force12hours ? 'en-US'  : this.locale) || this.VST.$reactive.locale)
     const localeShort = localeName?.split?.('-')?.[0]
     if (!this.$refs.picker || !localeShort) return
@@ -292,10 +292,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         showAlways: true,
       })] : [],
       onValueUpdate: (dates: any) => {
-        if (this._preventMaskDateChange) return this._preventMaskDateChange = false
+        if (this.preventMaskDateChange) return this.preventMaskDateChange = false
         const time = dates?.[0]?.getTime?.() ?? 0
         if (time) {
-          this._setInputMaskValueByDTStamp(time)
+          this.setInputMaskValueByDTStamp(time)
         }
       },
       onDayCreate: (dateObj: any, dateStr: any, fp: any, dayElem: any) => {
@@ -347,21 +347,21 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     })
 
 
-    this._pickerInterval = setInterval(() => {
+    this.pickerInterval = setInterval(() => {
       if (this.$refs.VSTStringField?.$el) {
         this.nextTick(() => {
           if (this.value) {
-            this._setInputMaskValueByDTStamp(this.value)
+            this.setInputMaskValueByDTStamp(this.value)
           }
-          clearInterval(this._pickerInterval)
+          clearInterval(this.pickerInterval)
         })
       }
     }, 25)
   }
 
-  _pickerInterval: number = 0
+  pickerInterval: number = 0
 
-  private _inputFocus() {
+  private inputFocus() {
     if (this.fp && !this.fp.isOpen) {
       this.fp.open()
     }
@@ -372,7 +372,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   //   setTimeout(() => {
   //     this.nextTick(() => {
   //       if (!this.$refs.VSTStringField?.value && val?.includes('_')) {
-  //         this._changeInput('')
+  //         this.changeInput('')
   //       }
   //       else if (
   //         val?.length && !val.includes('_')
@@ -404,7 +404,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   //   }, 150)
   // }
 
-  private _changeInput(val: string, reset: boolean = false) {
+  private changeInput(val: string, reset: boolean = false) {
     if (!val?.toString?.()?.trim?.()) {
       this.$emit('update:modelValue', this.value = null)
     }
@@ -417,7 +417,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       })
     }
   }
-  private _inputEnter(val: string) {
+  private inputEnter(val: string) {
     if (this.fp && this.fp.isOpen) {
       this.fp.close()
     }
@@ -425,7 +425,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     // this._onBlur(val)
   }
 
-  _onReset() {
+  onReset() {
     if (this.withTime) {
       this.value = ''
       this.fp?.open?.()
@@ -437,7 +437,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
    * @param val
    * @private
    */
-  private _dateMaskChange(val: {
+  private dateMaskChange(val: {
     month: number|string, year: number|string, day: number|string, hour: number|string,
     minute: number|string, seconds: number|string, AmPm?: string
   })
@@ -481,7 +481,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       )[0]
   }
 
-  private _formatDate(time: Date): string {
+  private formatDate(time: Date): string {
     const month = new Intl.DateTimeFormat('ru-RU', { month: 'short', day: 'numeric' }).format(
         time
     ).replace(/\d+\s?/, '')
@@ -494,7 +494,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         (this.withSeconds ? `:${date.second.toString().padStart(2, '0')}` : '')
   }
 
-  private _setInputMaskValueByDTStamp(stamp: number|string) {
+  private setInputMaskValueByDTStamp(stamp: number|string) {
     this.DT = $VST.DT(stamp)
     this.$emit(
       'update:modelValue',
@@ -513,15 +513,15 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         }
     )
     if (this.maskPreset == 'date') {
-      val = this._extractDateOnly(val) ?? ''
+      val = this.extractDateOnly(val) ?? ''
     }
     val = val.trim().replace(/\s+/g, ' ')
     this.$refs.VSTStringField?.setValue?.(val)
   }
 
-  private _initTemporalUpdateOut: boolean = false
+  private initTemporalUpdateOut: boolean = false
   onValueChange() {
-    this._initTemporalUpdateOut = true
+    this.initTemporalUpdateOut = true
     this.DT = $VST.DT(this.value || undefined)
     if (!this.value) this.fp?.clear?.()
     $VST.$emit(
@@ -530,9 +530,9 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     )
   }
 
-  @Watch('DT', true, true) _watchDT(DT: Temporal.ZonedDateTime|null) {
-    if (this._initTemporalUpdateOut) return this._initTemporalUpdateOut = false
-    this._initTemporalUpdateOut = true
+  @Watch('DT', true, true) watchDT(DT: Temporal.ZonedDateTime|null) {
+    if (this.initTemporalUpdateOut) return this.initTemporalUpdateOut = false
+    this.initTemporalUpdateOut = true
     if (DT) this.value = this.ISO861UTCMode ? DT?.[
       this.maskPreset == 'date' ? 'toPlainDate' : 'toPlainDateTime'
     ]?.()?.toString().replace('T', ' ') : DT.epochMilliseconds

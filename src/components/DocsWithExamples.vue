@@ -12,7 +12,7 @@
                 img(src="../resources/VST_LOGO.png" class="w80px")
                 div
                   span Vue Spear Tip
-                  small(class="ml8px fs-normal text-emerald-500") {{ actualVersion }}
+                  small(class="ml8px fs-normal text-emerald-500") {{ VSTVersion }}
             .col-6(
               class="flex items-end justify-center h100%"
             )
@@ -49,10 +49,10 @@ import PageAbstract from './Documentation/PageAbstract.vue'
  */
 @VST export default class DocsWithExamples extends PageAbstract {
   @Prop(String) readonly text: string = ''
-  actualVersion: string = `v${version}`
+  VSTVersion: string = `v${version}`
   menu = [
     { name: 'About', url: '/' },
-    { name: 'Guide', url: '/guide' },
+    { name: 'Guides', url: '/guide' },
     { name: 'Donate', url: '/donate' },
   ]
   routedPageMount(data?: {from: any, to: any}) {

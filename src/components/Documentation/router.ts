@@ -1,7 +1,7 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 // import Home from '../views/Home.vue'
 import About from './About.vue'
-import Guide from './Guide.vue'
+import Guide from './Guides.vue'
 import Donate from './Donate.vue'
 
 import guidesRoutes from './Guides/guides.routes'

@@ -154,7 +154,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   randomId: string = ''
 
 
-  @Watch('modelValue', true) _modelValueChanged(value: any) {
+  @Watch('modelValue', true) modelValueChanged(value: any) {
     this.setValue(value)
   }
 }

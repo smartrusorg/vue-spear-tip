@@ -70,7 +70,7 @@
                   @clickTap="test = ''"
                 ) Reset
                 div(class="mt7px")
-                  small(class="text-stone") Computed: {{ computed }}
+                  small(class="text-stone") Computed: {{ computedProp }}
         .col-8(class="relative")
           div(
             class="absolute text-stone! z3000 top--8px bg-#282c34 px5px ml2px l-0 rounded-t-lg user-select-none"
@@ -94,14 +94,14 @@
       this.test = this.text
     }
 
-    declare computed: boolean
-    @Computed('computed') _computedComputed(): boolean {
+    // Define computed property
+    get computed(): boolean {
       return !this.test ? 'TEST EMPTY'
         : (this.test == 'test' ? 'First test' : 'Second test')
     }
 
     @Watch('test', false /* deep */, false /* immediate */)
-    _testWatch(newVal: string) {
+    watchTest(newVal: string) {
       console.log('test variable changed', newVal)
     }
   }
@@ -170,7 +170,7 @@
 
     // It can also possess measurable and monitored characteristics by default.
     // declare computed: boolean @Computed('computed') _computedComputed(): boolean {return false}
-    // @Watch('test', false /* deep */, false /* immediate */) _testWatch(newVal: string) {return ''}
+    // @Watch('test', false /* deep */, false /* immediate */) testWatch(newVal: string) {return ''}
   }
               `
           )
@@ -207,7 +207,7 @@
 
 
 <script lang="ts">
-import {VST, Prop, VueClass, Computed, Watch} from '../../core'
+import {VST, Prop, VueClass, Watch} from '../../core'
 import 'uno.css'
 import GuidesMenu from './GuidesMenu.vue'
 
@@ -224,8 +224,7 @@ import GuidesMenu from './GuidesMenu.vue'
   beforeMount() {
   }
 
-  declare computed: string
-  @Computed('computed') _computedComputed(): Guides['computed'] {
+  get computedProp(): string {
     return !this.test
         ? 'TEST EMPTY'
         : (this.test == 'test' ? 'First test' : 'Second test')
@@ -233,7 +232,7 @@ import GuidesMenu from './GuidesMenu.vue'
 
 
   @Watch('test', false /* deep */, false /* immediate */)
-  _testWatch(newVal: string) {
+  testWatch(newVal: string) {
     console.log('test variable changed', newVal)
   }
 }

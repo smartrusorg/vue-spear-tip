@@ -2,7 +2,7 @@
   div(
     class="d-inline-block my2px w100% relative"
     :class=`{
-      ['sf'+_randKey]: true,
+      ['sf'+randKey]: true,
     }`
   )
     div(
@@ -40,7 +40,7 @@
           //:type="asNumber ? 'number' : 'text'"
           input(
             :value
-            :id='`vst-string-field-${_randKey}`'
+            :id='`vst-string-field-${randKey}`'
             class="w100%"
             :class=`{
               'hover:bg-white' : !disabled,
@@ -77,8 +77,8 @@
               class="absolute! z3 user-select-none top-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
               @click="keyUp"
               :class=`{
-                'r-40px!': (asNumber ? (value != '0' && value)  : value) || _preResetValue,
-                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !_preResetValue),
+                'r-40px!': (asNumber ? (value != '0' && value)  : value) || preResetValue,
+                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !preResetValue),
               }`
               :style=`{
                 pointerEvents: disabled ? 'none !important' : undefined,
@@ -95,8 +95,8 @@
               class="absolute! user-select-none bottom-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
               @click="keyDown"
               :class=`{
-                'r-40px!': (asNumber ? (value != '0' && value)  : value) || _preResetValue,
-                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !_preResetValue),
+                'r-40px!': (asNumber ? (value != '0' && value)  : value) || preResetValue,
+                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !preResetValue),
               }`
               :style=`{
                 pointerEvents: disabled ? 'none !important' : undefined,
@@ -133,8 +133,8 @@
           v-if="(disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
         )
           ClipboardDocumentListIcon(
-            @click="_copyValueToClipboard()"
-            v-if="!_isOnlyValueCopied"
+            @click="copyValueToClipboard()"
+            v-if="!isOnlyValueCopied"
           )
           CheckBadgeIcon(
             v-else
@@ -144,7 +144,7 @@
         //- Кнопка сброса и восстановления содержимого
         div(
           class="w25px h25px text-stone absolute r-12px z4 cursor-pointer hover:scale-130"
-          v-if="!disabled && (value || _preResetValue) && !(asNumber && value == '0')"
+          v-if="!disabled && (value || preResetValue) && !(asNumber && value == '0')"
           :class=`{
              't-15px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'lg',
              't-9px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'lg',
@@ -153,7 +153,7 @@
           }`
         )
           svg(
-            v-if="_preResetValue"
+            v-if="preResetValue"
             xmlns="http://www.w3.org/2000/svg"
             width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -165,7 +165,7 @@
             path(d="M5 10h11a4 4 0 1 1 0 8h-1")
           NoSymbolIcon(
             v-else
-            @click="_onReset()"
+            @click="onReset()"
           )
 
       div(
@@ -186,7 +186,7 @@
       is="style"
       v-if="(disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
     ).
-      .sf{{ _randKey }}[{{ $options.__scopeId }}] input {
+      .sf{{ randKey }}[{{ $options.__scopeId }}] input {
         padding-left: 40px !important;
       }
 </template>
@@ -252,12 +252,13 @@ import IMask from 'imask'
   @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
 
   is12hours: boolean = false
-  private _randKey: string = ''
+  private randKey: string = ''
 
   createdParent() {
-    this._inputMaskOptionsPrepare = {}
-    this._randKey = $VST.generateRandomKey() // @ts-ignore
-    StringField['__init_'+this._randKey] = this
+    super.createdParent()
+    this.inputMaskOptionsPrepare = {}
+    this.randKey = $VST.generateRandomKey() // @ts-ignore
+    StringField['__init_'+this.randKey] = this
     if (!this.is12hours && this.isDateTime) {
       try {
         const options = new Intl.DateTimeFormat(
@@ -276,7 +277,7 @@ import IMask from 'imask'
   beforeMountParent() {
     let value = (this.modelValue || this.inputValue || '')
     if (!['string', 'number'].includes(typeof value)) value = ''
-    this._preResetValue = ''
+    this.preResetValue = ''
     this.value = value
     if (this.isDateTime) {
       const parts = (new Intl.DateTimeFormat((
@@ -325,7 +326,7 @@ import IMask from 'imask'
         this.maskInner += '!'
       }
       else if (this.maskPreset === 'date') {
-        const dateMask = this._extractDateOnly(this.maskInner)
+        const dateMask = this.extractDateOnly(this.maskInner)
         if (dateMask) {
           this.maskInner = dateMask
         }
@@ -390,34 +391,34 @@ import IMask from 'imask'
   mountedParent() {
     this.nextTick(() => {
       if (this.$refs.selectInput) {
-        this.$refs.selectInput.addEventListener('focus', this._onFocus)
-        this.$refs.selectInput.addEventListener('blur', this._onBlur)
+        this.$refs.selectInput.addEventListener('focus', this.onFocus)
+        this.$refs.selectInput.addEventListener('blur', this.onBlur)
         if (this.wheelNumber && typeof this.asNumber == 'boolean' && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
           const self = this
           this.$refs.selectInput.addEventListener(
-            'wheel', this._wheelToUnmDel = (e: any) => this._onWheel.bind(this)(e, self)
+            'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
           )
         }
         if (!this.isDateTime) {
-          this.$refs.selectInput.addEventListener('input', this._onInput)
-          this.$refs.selectInput.addEventListener('keydown', this._onKeydown)
+          this.$refs.selectInput.addEventListener('input', this.onInput)
+          this.$refs.selectInput.addEventListener('keydown', this.onKeydown)
         }
       }
       this.initInputMask(this.$refs.selectInput)
     }, 5)
   }
-  _wheelToUnmDel: any
+  wheelToUnmDel: any
 
-  _inputMaskOptions: any = {}
-  _inputMaskOptionsPrepare: {[k:string]:any} = {}
-  _iMaskedInst: any = {}
+  inputMaskOptions: any = {}
+  inputMaskOptionsPrepare: {[k:string]:any} = {}
+  iMaskedInst: any = {}
   initInputMask(el: HTMLInputElement){
 
     // TODO 1 маску сделать кастомную для цифр, но только если маски нет. Если маска есть, но цифры стоят,
     //  то просто строку в цифру превращать на выходе
 
     if (this.isDateTime) {
-      this._iMaskedInst = IMask(el, {
+      this.iMaskedInst = IMask(el, {
         mask: (this.maskInner || String) as string,
         scale: (typeof this.asNumber === 'number' ? this.asNumber : 0) as number,
         autofix: true,
@@ -430,13 +431,13 @@ import IMask from 'imask'
       })
 
       // Настройка обработчиков событий
-      this._iMaskedInst.on('accept', () => {
-        this.onAccept(this._iMaskedInst.value)
+      this.iMaskedInst.on('accept', () => {
+        this.onAccept(this.iMaskedInst.value)
       })
     }
     else if (!this.mask && this.asNumber) {
       this.maskInner = ''
-      let inputMaskOptionsPrepare = {...this._inputMaskOptionsPrepare}
+      let inputMaskOptionsPrepare = {...this.inputMaskOptionsPrepare}
       // Используем альтернативные настройки для поддержки группировки и плавающей точки
       inputMaskOptionsPrepare.autoGroup = true
       inputMaskOptionsPrepare._radixDance = true
@@ -462,7 +463,7 @@ import IMask from 'imask'
       if (!this.mask) {
         inputMaskOptionsPrepare.alias = 'numeric'
       }
-      this._inputMaskOptionsPrepare = inputMaskOptionsPrepare
+      this.inputMaskOptionsPrepare = inputMaskOptionsPrepare
     }
 
 
@@ -470,26 +471,26 @@ import IMask from 'imask'
       this.maskInner = this.mask
     }
     if (this.maskInner && !this.isDateTime) {
-      new InputMask(this.maskInner, this._inputMaskOptions = JSON.parse(JSON.stringify({
-        ...this._inputMaskOptionsPrepare,
+      new InputMask(this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
+        ...this.inputMaskOptionsPrepare,
       }))).mask(el)
     }
   }
   keyUp(){ // @ts-ignore
-    this._onWheel({deltaY:-1}, this)
+    this.onWheel({deltaY:-1}, this)
   }
   keyDown(){ // @ts-ignore
-    this._onWheel({deltaY:0}, this)
+    this.onWheel({deltaY:0}, this)
   }
 
   beforeUnmountParent() {
     if (this.$refs.selectInput) {
-      this.$refs.selectInput.removeEventListener('focus', this._onFocus)
-      this.$refs.selectInput.removeEventListener('blur', this._onBlur)
-      if (this.wheelNumber) this.$refs.selectInput.removeEventListener('wheel', this._wheelToUnmDel)
+      this.$refs.selectInput.removeEventListener('focus', this.onFocus)
+      this.$refs.selectInput.removeEventListener('blur', this.onBlur)
+      if (this.wheelNumber) this.$refs.selectInput.removeEventListener('wheel', this.wheelToUnmDel)
       if (!this.isDateTime) {
-        this.$refs.selectInput.removeEventListener('input', this._onInput)
-        this.$refs.selectInput.removeEventListener('keydown', this._onKeydown)
+        this.$refs.selectInput.removeEventListener('input', this.onInput)
+        this.$refs.selectInput.removeEventListener('keydown', this.onKeydown)
       }
     }
   }
@@ -529,22 +530,22 @@ import IMask from 'imask'
   }
 
   restore() {
-    if (this._preResetValue) {
+    if (this.preResetValue) {
       this.nextTick(() => {
-        const pv = this._preResetValue
-        this._isInnerSetValue = true
-        this._onInput(pv)
-        this._preResetValue = ''
+        const pv = this.preResetValue
+        this.isInnerSetValue = true
+        this.onInput(pv)
+        this.preResetValue = ''
         this.$refs.selectInput?.focus?.()
       })
     }
   }
 
-  private _preResetValue: string = ''
-  private _onReset() {
-    this._preResetValue = this.value || this.$refs.selectInput.value
+  private preResetValue: string = ''
+  private onReset() {
+    this.preResetValue = this.value || this.$refs.selectInput.value
     this.$emit('reset')
-    this._isInnerSetValue = true
+    this.isInnerSetValue = true
     this.setValue(this.$refs.selectInput.value = this.value = '')
 
     // if (this.withTime) {
@@ -557,12 +558,12 @@ import IMask from 'imask'
       this.nextTick(() => this.$refs?.selectInput?.focus?.())
     }
   }
-  private _onInput(event: any, reset: boolean = false) {
+  private onInput(event: any, reset: boolean = false) {
     const val = event?.target?.value || event
 
     if (!['string', 'number'].includes(typeof val)) {
       if (!this.isDateTime) {
-        this._isInnerSetValue = true
+        this.isInnerSetValue = true
         this.setValue('')
         this.$emit('input', '', reset)
         this.$emit('change', '', reset)
@@ -570,7 +571,7 @@ import IMask from 'imask'
       }
       return
     }
-    else if (val) this._preResetValue = ''
+    else if (val) this.preResetValue = ''
     if (['string', 'number'].includes(typeof (val))){
 
 
@@ -582,7 +583,7 @@ import IMask from 'imask'
       // else
       let emitVal: string|number = ''
       if (this.mask || !this.asNumber && this.maskInner) {
-        this.value = emitVal = InputMask.unmask(this.maskInner, val, this._inputMaskOptions) || val
+        this.value = emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
       }
       else {
         this.value = val
@@ -628,14 +629,14 @@ import IMask from 'imask'
       this.$emit('update:modelValue', emitVal)
     }
   }
-  private _onFocus() {
+  private onFocus() {
     this.$emit('focus')
   }
-  private _onBlur() {
+  private onBlur() {
     this.nextTick(() => this.$emit('blur', this.$refs.selectInput?.value))
     // this.value = this.$refs.selectInput.value
   }
-  private _onWheel = (event: WheelEvent, field: StringField) => {
+  private onWheel = (event: WheelEvent, field: StringField) => {
     if (field.disabled || !field.asNumber) return
     event?.preventDefault?.()
     let currentValue = parseFloat(
@@ -671,21 +672,21 @@ import IMask from 'imask'
     field.$emit('input', currentValue)
     field.$emit('change' ,currentValue)
     field.$emit('update:modelValue', currentValue)
-    field._isInnerSetValue = true
+    field.isInnerSetValue = true
     field.setValue(currentValue)
-    if (currentValue && field._preResetValue) {
-      field._preResetValue = ''
+    if (currentValue && field.preResetValue) {
+      field.preResetValue = ''
     }
   }
-  private _onKeydown(event: any) {
+  private onKeydown(event: any) {
     const isCtrlOrCmd = event?.ctrlKey || event?.metaKey
     // Восстановление при нажатии ctrl + z после нажатия сброса
-    if (this._preResetValue && isCtrlOrCmd && event.key === 'z') {
+    if (this.preResetValue && isCtrlOrCmd && event.key === 'z') {
       this.restore()
     }
   }
 
-  private _extractDateOnly(dateString:string): string|null {
+  private extractDateOnly(dateString:string): string|null {
     const regex = /([\d\w]{2,4}[./_-][\d\w]{2,4}[./_-][\d\w]{2,4})/
 
     // Метод match() возвращает массив совпадений или null.
@@ -716,19 +717,19 @@ import IMask from 'imask'
     return monthNumber
   }
 
-  _isInnerSetValue: boolean = false
+  isInnerSetValue: boolean = false
   setValue(value: any) {
-    if (this.isDateTime && this._iMaskedInst) {
+    if (this.isDateTime && this.iMaskedInst) {
       this.nextTick(this.$refs.selectInput.value = this.value = value?.toString())
       return this.nextTick(() => {
-        this._iMaskedInst.unmaskedValue = value?.toString()
+        this.iMaskedInst.unmaskedValue = value?.toString()
       })
     }
 
     this.value = value
     // if (this.$refs?.selectInput) this.$refs.selectInput.value = value
-    if (this._isInnerSetValue) {
-      this._isInnerSetValue = false
+    if (this.isInnerSetValue) {
+      this.isInnerSetValue = false
       this.$emit('input', value)
       this.$emit('change', value)
       this.$emit('update:modelValue', value)
@@ -737,7 +738,7 @@ import IMask from 'imask'
 
   getValue(): any {
     if (this.isDateTime) {
-      return this._iMaskedInst?._unmaskedValue || ''
+      return this.iMaskedInst?._unmaskedValue || ''
     }
     return typeof this.asNumber == 'number'
       ? parseFloat((this.value || '0')
@@ -797,29 +798,27 @@ import IMask from 'imask'
     return true
   }
 
-  private _isOnlyValueCopied = false
-  private _copyValueToClipboard() {
+  private isOnlyValueCopied = false
+  private copyValueToClipboard() {
     if (this.value) $VST.copyToClipboard(this.getValue())
-    this._isOnlyValueCopied = true
-    setTimeout(() => this._isOnlyValueCopied = false, 500)
+    this.isOnlyValueCopied = true
+    setTimeout(() => this.isOnlyValueCopied = false, 500)
   }
 
-  declare canIncrement: boolean;
-  @Computed('canIncrement') _canIncrementComputed(): boolean {
+  get canIncrement(): boolean {
     if (!this.disabled) return false
     const value = parseFloat(this.value as string)
     return !this.max || value < this.max
   }
 
-  declare canDecrement: boolean;
-  @Computed('canDecrement') _canDecrementComputed(): boolean {
+  get canDecrement(): boolean {
     if (!this.disabled) return false
     const value = parseFloat(this.value as string)
     return !this.min || value > this.min
   }
 
   /** Является ли маска датой или датой со временем */
-  declare isDateTime: boolean; @Computed('isDateTime') _valueComputed(): boolean {
+  get isDateTime(): boolean {
     return ['date', 'datetime', 'datetimeSec'].includes(this.maskPreset ?? '')
   }
 }

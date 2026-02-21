@@ -25,49 +25,60 @@ interface VuePropObj {
   onTrigger?: (event: DebuggerEvent) => void
 }
 
-let VstPrepareClassInstance: {[k:string]: any} = {}
+import { getMeta } from '../registry'
 
-/**
- * Трансформация свойства во vue property
- * @param propDataOrType
- * @param types
- * @constructor
- */
-export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]): any => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    if (typeof target?.constructor?.name != 'string') return
-    let VST = target.constructor?.___VST ?? {}
-    if (!VST.props) VST.props = {}
-    if(!VstPrepareClassInstance[target.constructor.name]) {
-      VstPrepareClassInstance[target.constructor.name] = new target.constructor
-      VstPrepareClassInstance[target.constructor.name].name =
-        VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
-        ?? VstPrepareClassInstance?.[target.constructor.name]?.['name']
-        ??  ''
-    }
-    
-    let TypeObj: any = typeof propDataOrType == 'object' ? propDataOrType : {...{
-      type: [propDataOrType, ...types]
-    }}
-    if(VstPrepareClassInstance[target.constructor.name][propertyKey]) {
-      TypeObj.default = VstPrepareClassInstance[target.constructor.name][propertyKey]
-    }
-
-    if(!VST.props[target.constructor.name]) {
-      VST.props[target.constructor.name] = {}
-    }
-    
-    const parents = [];
-    let proto = Object.getPrototypeOf(target.constructor)
-    
-    while (proto && proto.constructor !== Object) {
-      if (proto.name) parents.push(proto.name)
-      proto = Object.getPrototypeOf(proto)
-    }
-    
-    VST.parents = parents
-    VST.props[target.constructor.name][propertyKey] = TypeObj
-    target.constructor.___VST = VST
-  }
+export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]) => (target: any, key: string) => {
+  const meta = getMeta(target.constructor)
+  meta.props[key] = typeof propDataOrType == 'object' ? propDataOrType : {...{
+    // default: meta.props?.[key]?.default,
+    type: [propDataOrType, ...types]
+  }}
 }
-// ... existing code ..."
+
+//
+// let VstPrepareClassInstance: {[k:string]: any} = {}
+//
+// /**
+//  * Трансформация свойства во vue property
+//  * @param propDataOrType
+//  * @param types
+//  * @constructor
+//  */
+// export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]): any => {
+//   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+//     if (typeof target?.constructor?.name != 'string') return
+//     let VST = target.constructor?.___VST ?? {}
+//     if (!VST.props) VST.props = {}
+//     if(!VstPrepareClassInstance[target.constructor.name]) {
+//       VstPrepareClassInstance[target.constructor.name] = new target.constructor
+//       VstPrepareClassInstance[target.constructor.name].name =
+//         VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
+//         ?? VstPrepareClassInstance?.[target.constructor.name]?.['name']
+//         ??  ''
+//     }
+//
+//     let TypeObj: any = typeof propDataOrType == 'object' ? propDataOrType : {...{
+//       type: [propDataOrType, ...types]
+//     }}
+//     if(VstPrepareClassInstance[target.constructor.name][propertyKey]) {
+//       TypeObj.default = VstPrepareClassInstance[target.constructor.name][propertyKey]
+//     }
+//
+//     if(!VST.props[target.constructor.name]) {
+//       VST.props[target.constructor.name] = {}
+//     }
+//
+//     const parents = [];
+//     let proto = Object.getPrototypeOf(target.constructor)
+//
+//     while (proto && proto.constructor !== Object) {
+//       if (proto.name) parents.push(proto.name)
+//       proto = Object.getPrototypeOf(proto)
+//     }
+//
+//     VST.parents = parents
+//     VST.props[target.constructor.name][propertyKey] = TypeObj
+//     target.constructor.___VST = VST
+//   }
+// }
+// // ... existing code ..."
