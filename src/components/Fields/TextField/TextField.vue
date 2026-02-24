@@ -2,7 +2,7 @@
   .vst-field-editor(
     class="w100% h100% overflow-hidden"
     :class=`{
-      'bg-white b-solid b-1px b-stone rounded-3xl': !disabled,
+      'bg-white b-solid b-1px b-#c1c7cf/80 rounded-3xl': !disabled,
     }`
     ref="vstFieldEditor"
     :data-simplebar-auto-hide="!disabled ? 'true' : 'false'"
@@ -219,7 +219,7 @@
       v-if="editor && showMenu && markdownEnabled"
       :editor
       :options=`{
-        placement: 'top-center',
+        placement: 'top-start',
         appendTo: 'parent',
         flip: true,
         padding: 100,
@@ -229,24 +229,28 @@
       :shouldShow="shouldBubbleMenuShow"
       @mousedown.prevent
       @touchstart.prevent
+      ref="bubbleMenu"
       :class=`{
-        'mt-4px!' : bubbleMenuPlacementY == 'bottom' && !isEditTable,
+        'mb--20px' : bubbleMenuPlacementY == 'bottom' && !isEditTable,
         'mt--4px!' : bubbleMenuPlacementY == 'top' && !isEditTable,
         'mt-8px!' : bubbleMenuPlacementY == 'bottom' && isEditTable,
         'mt--8px!' : bubbleMenuPlacementY == 'top' && isEditTable,
-        'visibility-hidden': !enabledTableRowsShowEditorButtons,
+        'op-0!': !enabledTableRowsShowEditorButtons || !bubbleMenuPlacementY,
       }`
+      class="flex ml15px!"
     )
       template(v-if="bubbleMenuPlacementY == 'top'")
         +additionalButtons
       // ОБЫЧНОЕ ТЕКСТОВОЕ МЕНЮ
       div(
-        class="bubble-menu"
+        class="bubble-menu flex"
         :class=`{
-          'flex! flex-col-reverse!': bubbleMenuPlacementY == 'top',
+          'flex-col-reverse!': bubbleMenuPlacementY == 'top',
+          'flex-col!': !isAtEmptyLine || isEditTable,
+          'flex-row!': isAtEmptyLine && !isEditTable,
         }`
       )
-        div(class="flex items-center justify-center w100%")
+        div(class="flex items-center justify-center w100%" v-if="!isAtEmptyLine || isEditTable")
           VSTButton(
             size="md"
             :theme="editor.isActive('bold') ? activeButtonsTheme : defaultButtonsTheme"
@@ -628,6 +632,7 @@ import SimpleBar from 'simplebar'
 
   declare $refs: {
     linkUrlInput: VSTButtonOrig
+    bubbleMenu: BubbleMenu
     vstFieldEditor: HTMLDivElement & {sbInstance?: typeof SimpleBar}
   }
 
@@ -677,7 +682,7 @@ import SimpleBar from 'simplebar'
           this.value = output?.toString?.() // Синхронизируем внутреннее состояние
         }
         this.nextTick(() => {
-          if (this.$refs.vstFieldEditor?.sbInstance) {
+          if (this.$refs.vstFieldEditor?.sbInstance) { // @ts-ignore
             this.$refs.vstFieldEditor.sbInstance.recalculate()
           }
         })
@@ -940,26 +945,30 @@ import SimpleBar from 'simplebar'
           this.enabledTableRowsShowEditorButtons = true
           this.nextTick(() => {
             this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-            this.nextTick(() => this.recalculateAdditionalOpenedBlocks)
+            this.nextTick(this.recalculateAdditionalOpenedBlocks)
           }, 7)
         }, 5)
       }
       this.nextTick(() => {
         this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-        this.nextTick(() => this.recalculateAdditionalOpenedBlocks)
+        this.nextTick(this.recalculateAdditionalOpenedBlocks)
       }, 3)
     })
     this.onViewPortResize()
   }
 
-  simpleBar: typeof SimpleBar|null = null
+  simpleBar: SimpleBar|null = null
   onViewPortResize() {
     // if (this.$refs.vstFieldEditor) {
     //   this.nextTick(() => {
-    //     const $el = this.$el.querySelector('.tiptap.ProseMirror')
-    //     console.log($el)
+    //     const $el = this.$el.parentElement
     //     if ($el) {
-    //       this.simpleBar = new SimpleBar($el)
+    //       // this.simpleBar = new SimpleBar($el, {
+    //       //   visible: true, forceVisible: true, direction: 'rtl'
+    //       // })
+    //       console.log($el.style)
+    //       console.log($el)
+    //       // $el.style.maxHeight = '200px'
     //     }
     //   }, 13)
     // }
@@ -1017,11 +1026,15 @@ import SimpleBar from 'simplebar'
     return this.editor?.storage.characterCount.words() || 0
   }
 
+  get isBubbleMenuShowed(): boolean {
+    return this.editor && this.showMenu && this.markdownEnabled && this.shouldBubbleMenuShow()
+  }
+
   @Watch watchShowLinkModal(showLinkModal: boolean) {
     this.bubbleMenuPlacementY = null
     this.nextTick(() => {
       this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-      this.nextTick(() => this.recalculateAdditionalOpenedBlocks)
+      this.nextTick(this.recalculateAdditionalOpenedBlocks)
     })
   }
   @Watch({immediate: true}) watchDisabled(disabled: boolean) {
@@ -1030,12 +1043,19 @@ import SimpleBar from 'simplebar'
   @Watch watchIsEditable(value: boolean) {
     this.editor?.setEditable?.(value)
   }
+  /** @see isEditTableEnabled */
   @Watch watchIsEditTableEnabled(isEditTable: boolean) {
     this.nextTick(() => {
       this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
       this.nextTick(this.recalculateAdditionalOpenedBlocks, 2)
     }, 3)
   }
+
+  @Watch watchIsBubbleMenuShowed(showed: boolean) {
+    this.nextTick(() => this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition'))
+    setTimeout(this.recalculateAdditionalOpenedBlocks, 300)
+  }
+
 
   beforeUnmount() {
     this.editor?.destroy?.()
@@ -1081,7 +1101,7 @@ import SimpleBar from 'simplebar'
   /** Пересчитать расположение дополнительных блоков к кнопкам */
   recalculateAdditionalOpenedBlocks() {
     const menuEl = document.querySelector('.bubble-menu-top')
-    if (!menuEl) return this.bubbleMenuPlacementY ='top'
+    if (!menuEl) return this.bubbleMenuPlacementY = 'top'
 
     // сравнение координат
     const menuRect = menuEl.getBoundingClientRect()
@@ -1095,7 +1115,6 @@ import SimpleBar from 'simplebar'
 
   /** Показывать ли всплывающее меню */
   shouldBubbleMenuShow() {
-    this.bubbleMenuPlacementY = null
     return !this.disabled && this.value && (
       (this.editor.isFocused && this.isAtEmptyLine) || (this.editor.isFocused && !this.editor?.state?.selection?.empty)
     )
@@ -1123,7 +1142,7 @@ import SimpleBar from 'simplebar'
       if (this.isEditTable) {
         this.nextTick(() => {
           this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-          this.nextTick(() => this.recalculateAdditionalOpenedBlocks)
+          this.nextTick(this.recalculateAdditionalOpenedBlocks)
         }, 13)
       }
       this.nextTick(() => this.showLinkModal = false)
@@ -1461,8 +1480,8 @@ import SimpleBar from 'simplebar'
   @apply flex z1000
 .vst-field-editor
   .bubble-menu-top
-    @apply flex w100% bg-stone-200/90 border-solid border-1px border-stone/50 px16px pt6px pb10px
-    @apply border-dashed mx5px z100 flex-col
+    @apply w100% bg-stone-200/90 border-solid border-1px border-stone/50 px16px pt6px pb10px
+    @apply border-dashed mx5px z1000 rounded-2xl
   p.is-editor-empty:first-child::before
     color: #c1c7cf
     content: attr(data-placeholder)

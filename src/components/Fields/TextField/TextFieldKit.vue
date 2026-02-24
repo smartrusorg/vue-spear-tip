@@ -5,9 +5,9 @@
     div(class="w[calc(100%-260px)]")
       h1 TextField
       div(
+        class="h500px"
       )
         TextField(
-          class="max-h500px"
           v-model="value"
           :limit="1000"
           :disabled

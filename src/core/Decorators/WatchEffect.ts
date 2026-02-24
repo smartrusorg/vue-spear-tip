@@ -6,8 +6,9 @@ import {getMeta} from '../registry'
  * ```js
  * @VST export default class Component extends BaseComponent {
  *  // Автоматически начинает отслеживать параметр "loading"
- *  @WatchEffect watchLoading(inLoading: boolean) {
+ *  @WatchEffect watchLoading() {
  *     // Действия при изменении this.loading
+ *     console.log(this.loading)
  *   }
  * }
  * ```
