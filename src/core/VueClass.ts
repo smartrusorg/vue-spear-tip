@@ -80,6 +80,7 @@ export default abstract class VueClass implements IVueClass {
     context?: SetupContext,
     self?: IVueClass
   ) {}
+  /** @deprecated */
   beforeCreateParent() {}
   createdParent() {}
   beforeMountParent() {}

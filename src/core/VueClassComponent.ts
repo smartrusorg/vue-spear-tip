@@ -4,7 +4,7 @@ import type {IGlobalVST} from '../Interfaces/IGlobalVST'
 import {
   defineComponent, reactive, computed, toRefs, watch, nextTick, onMounted, onUpdated, onUnmounted, onBeforeMount,
   onBeforeUpdate, onBeforeUnmount, onErrorCaptured, onRenderTracked, onRenderTriggered, onDeactivated, onActivated,
-  getCurrentInstance
+  getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect
 } from 'vue'
 import { metadataRegistry } from './registry'
 
@@ -72,8 +72,11 @@ function createComponent(constructor: any, decoratorParams: any) {
         // fixme поддержка @Computed, удалить в версии 1 оставив геттеры
         for (const [vueName, originalKey] of Object.entries(schema.computed)) {
           computedState[vueName] = computed(() => {
-            // Вызываем оригинальный метод из реактивного инстанса
-            return state[originalKey].call(state)
+            const latestMethod = constructor.prototype[originalKey]
+            if (typeof latestMethod === 'function') {
+              return latestMethod.call(state)
+            }
+            return null
           })
         }
         
@@ -82,13 +85,20 @@ function createComponent(constructor: any, decoratorParams: any) {
           const descriptor = descriptors[key]
           if (typeof descriptors[key]?.get === 'function' /*typeof descriptors[key].value === 'function' && key !== 'constructor'*/) {
             schema.computed[key] = true
-            // Оборачиваем геттер класса в Vue Computed
-            // bind(state) важен, чтобы внутри геттера this указывал на Proxy
-            computedState[key] = computed(() => descriptor.get!.call(state))
+            // computedState[key] = computed(() => descriptor.get!.call(state))
+            computedState[key] = computed(() => {
+              const latestProto = constructor.prototype
+              const latestDescriptor = Object.getOwnPropertyDescriptor(latestProto, key)
+              
+              if (latestDescriptor && latestDescriptor.get) {
+                return latestDescriptor.get.call(state)
+              }
+              return descriptors[key].get!.call(state)
+            })
           }
         }
         
-        
+        // Обработка проллушивателей
         if ((schema as WatchSchemeReal).watch) {
           for (const methodName in schema.watch) {
             watch(
@@ -104,7 +114,10 @@ function createComponent(constructor: any, decoratorParams: any) {
               }.bind(state),
               // Вызываем метод класса
               (newValue: any, oldValue: any) => {
-                state[methodName].call(state, newValue, oldValue)
+                const latestMethod = constructor.prototype[methodName]
+                if (typeof latestMethod === 'function') {
+                  latestMethod.call(state, newValue, oldValue)
+                }
               },
               {
                 immediate: schema.watch[methodName].immediate,
@@ -112,6 +125,40 @@ function createComponent(constructor: any, decoratorParams: any) {
               }
             )
           }
+        }
+        
+        if (schema.watchEffect && Array.isArray(schema.watchEffect)) {
+          schema.watchEffect.forEach((effect) => {
+            const { methodName } = effect
+            watchEffect((onCleanup) => {
+              const latestMethod = constructor.prototype[methodName]
+              if (typeof latestMethod === 'function') {
+                latestMethod.call(state, onCleanup)
+              }
+            })
+          })
+        }
+        if (schema.watchPostEffect && Array.isArray(schema.watchPostEffect)) {
+          schema.watchPostEffect.forEach((effect) => {
+            const { methodName } = effect
+            watchPostEffect((onCleanup) => {
+              const latestMethod = constructor.prototype[methodName]
+              if (typeof latestMethod === 'function') {
+                latestMethod.call(state, onCleanup)
+              }
+            })
+          })
+        }
+        if (schema.watchSyncEffect && Array.isArray(schema.watchSyncEffect)) {
+          schema.watchSyncEffect.forEach((effect) => {
+            const { methodName } = effect
+            watchSyncEffect((onCleanup) => {
+              const latestMethod = constructor.prototype[methodName]
+              if (typeof latestMethod === 'function') {
+                latestMethod.call(state, onCleanup)
+              }
+            })
+          })
         }
         
         Object.defineProperty(state, '$el', {
@@ -270,6 +317,9 @@ function createComponent(constructor: any, decoratorParams: any) {
 type WatchScheme = {
   props: Record<string, any>,
   watch: Record<string, any>,
+  watchEffect: Record<string, any>,
+  watchPostEffect: Record<string, any>,
+  watchSyncEffect: Record<string, any>,
   computed: Record<string, any>,
   emits: string[]
   emitsParent: string[]
@@ -295,6 +345,9 @@ function buildFullSchema(constructor: any) {
   const schema: WatchScheme = {
     props: {} as any,
     watch: {} as any,
+    watchEffect: [] as any,
+    watchPostEffect: [] as any,
+    watchSyncEffect: [] as any,
     computed: {} as any,
     emits: [] as string[],
     emitsParent: [] as string[],
