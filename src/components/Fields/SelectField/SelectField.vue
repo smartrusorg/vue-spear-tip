@@ -21,8 +21,6 @@ import TagifyEsm from './tagify.esm.js'
 import {Prop, VST, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
-// 3. Html выборка
-// 4. Html отображение значения
 
 /**
  * Выпадающий список на базе Tagify
@@ -54,7 +52,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   createdParent() {
     super.createdParent()
     this.value = this.inputValue || this.modelValue || null
-    console.log(this.value, this.inputValue, this.modelValue, this.$props)
     this.randKey = 'vst-select-'+this.VST.generateRandomKey()
   }
 
@@ -104,7 +101,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                 ))))
                 if (item?.key || item?.key === 0) {
                   this.tagify.addTags(this.reactiveValue = item?.value)
-                  this.$emit('change', this.value = modelValue ?? null)
+                  this.$emit(
+                    'change',
+                    this.isFirstValueSet ? (modelValue ?? null) : (this.value = modelValue ?? null)
+                  )
                 }
               })
             }
@@ -114,7 +114,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
               modelValue = Array.isArray(modelValue) ? modelValue.map(v => v.key) : [modelValue]
               this.tagify.addTags(JSON.parse(e.detail?.value))
               this.nextTick(() => {
-                this.$emit('change',  this.value = modelValue)
+                this.$emit(
+                  'change',
+                  this.isFirstValueSet ? modelValue : this.value = modelValue
+                )
                 this.reactiveValue = e.detail?.value
               })
             }
@@ -126,7 +129,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                 this.reactiveValue = e.detail?.value
                 this.nextTick(() => {
                   this.isIgnoreSetTags = true
-                  this.$emit('change',  this.value = modelValue ?? null)
+                  this.$emit(
+                    'change',
+                    this.isFirstValueSet ? (modelValue ?? null) : (this.value = modelValue ?? null)
+                  )
                 })
               })
             }
@@ -166,42 +172,138 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         }
       },
       templates: {
-        // todo доработать вставку html замену шаблона элементов, идеально если через слоты можно было бы шаблон указать
-        // tag(tagData, tagify){
-        //   return `<tag title="${(tagData.title || tagData.value)}"
-        //             contenteditable='false'
-        //             spellcheck='false'
-        //             tabIndex="${this.settings.a11y.focusableTags ? 0 : -1}"
-        //             class="${this.settings.classNames.tag} ${tagData.class ? tagData.class : ""}"
-        //             ${this.getAttributes(tagData)}>
-        //     <x title='' class="${this.settings.classNames.tagX}" role='button' aria-label='remove tag'></x>
-        //     <div>
-        //         <span class="${this.settings.classNames.tagText}">${tagData[this.settings.tagTextProp] || tagData.value}</span>
-        //     </div>
-        //   </tag>`
-        // }
-        //   tag: (t, i) => {
-        //     let value: any  = t.value?.value ?? t.value;
-        //     if (this.mode == 'select' && (value = i?.DOM?.originalInput?.getAttribute?.('value')?.trim?.())?.length) {
-        //       if (value?.startsWith('{') || value?.startsWith('[')) {
-        //         value = JSON.parse(value)
-        //         value = value?.[0]?.htmlValue || value
-        //       }
-        //     }
-        //     console.log('valu2e', value)
-        //     return `<tag title="${t.title || t.value}" contenteditable="false" tabIndex="-1" class="tagify__tag">
-        //       <x title='' class="tagify__tag__removeBtn" tabIndex="-1" role='button' aria-label='remove tag'></x>
-        //       <div><span contenteditable="${
-        //         this.mode == 'select' ? 'true' : 'false'
-        //       }" autocapitalize="false" autocorrect="off" spellcheck="false" class="tagify__tag-text">${
-        //         value
-        //     }</span></div></tag>`
-        //   },
+        // 1. Общая обертка (контейнер)
+        wrapper(inputElement, settings: {[k:string]: any}) {
+          const { classNames, mode, readonly, disabled, required } = settings
+          const modeClass = mode ? classNames[`${mode}Mode`] : ""
+          const isSelect = mode === 'select'
+
+          return `
+            <tags class="${classNames.namespace} ${modeClass} ${inputElement.className}"
+                ${readonly ? "readonly" : ""}
+                ${disabled ? "disabled" : ""}
+                ${required ? "required" : ""}
+                ${isSelect ? 'spellcheck="false"' : ""}
+                tabIndex="-1" title="">
+              ${(this.settings.templates as any)?.input?.call(this)}
+            </tags>
+          `
+        },
+
+        // @ts-ignore
+        input() { // @ts-ignore
+          const { settings } = this
+          const { classNames, a11y, mode, placeholder } = settings;
+          const isEditable = !settings.readonly && settings.userInput;
+
+          return `
+            <span ${isEditable ? "contenteditable" : ""}
+                  data-can-editable
+                  tabIndex="0"
+                  data-placeholder="${placeholder || ""}"
+                  aria-placeholder="${placeholder || ""}"
+                  class="${classNames.input}"
+                  role="textbox"
+                  autocapitalize="false"
+                  autocorrect="off"
+                  spellcheck="false"
+                  aria-label="${a11y.inputAriaLabel}"
+                  aria-autocomplete="both"
+                  aria-multiline="${mode === 'mix'}"></span>
+          `
+        },
+
+        // 3. Шаблон тега
+        tag(tagData, { settings: s }) {
+          const isFocusable = !!s?.a11y?.focusableTags
+          const isSelectMode = s.mode === 'select' && s.userInput
+
+          return `
+            <tag
+                 contenteditable="false"
+                 tabIndex="${isFocusable}"
+                 class="${s.classNames.tag} ${tagData.class || ""}"
+                 ${this.getAttributes(tagData)}>
+
+              <x title=""
+                 tabIndex="${isFocusable}"
+                 class="${s.classNames.tagX}"
+                 role="button"
+                 aria-label="remove tag"></x>
+
+              <div>
+                <span class="${s.classNames.tagText}"
+                      contenteditable="${isSelectMode ? 'true' : 'false'}"
+                      autocapitalize="false"
+                      autocorrect="off"
+                      spellcheck="false">
+                  ${tagData[s.tagTextProp] || tagData.value}
+                </span>
+              </div>
+            </tag>
+          `.replace(/\s+/g, ' ').trim()
+        },
+
+
+        // 4. Обертка выпадающего списка
+        // dropdown({ settings: s }) {
+        //   const isManual = s.dropdown.position === 'manual'
+        //   const className = isManual ? "" : s.classNames.dropdown
         //
-        //   // dropdownItem: (t, i) => {
-        //   // todo найти в исходниках tagify оригинальный шаблон
-        //   //   return `<div class='tagify__dropdown'>${t.value}</div>`
-        //   // }
+        //   return `
+        //     <div class="${className} ${s.dropdown.classname}"
+        //          role="listbox"
+        //          aria-labelledby="dropdown"
+        //          dir="${s.dropdown.RTL ? "rtl" : ""}">
+        //       <div data-selector="tagify-suggestions-wrapper"
+        //            class="${s.classNames.dropdownWrapper}"></div>
+        //     </div>
+        //   `
+        // },
+
+        // 5. Контент выпадающего списка
+        dropdownContent(suggestionsHTML) {
+          const { templates: t } = this.settings // @ts-ignore
+          const suggestions = this.state.dropdown.suggestions
+
+          return `
+            ${t.dropdownHeader.call(this, suggestions)}
+            ${suggestionsHTML}
+            ${t.dropdownFooter.call(this, suggestions)}
+          `.replace(/\s+/g, ' ').trim()
+        },
+
+        // 6. Элемент списка (Suggestion)
+        dropdownItem(item) {
+          const { classNames } = this.settings
+          const isSelected = this.isTagDuplicate(item.value)
+
+          return `<div ${this.getAttributes(item)}
+             class="${classNames.dropdownItem} ${
+              isSelected ? classNames.dropdownItemSelected : ''
+            } ${item.class || ''}"
+             tabindex="0"
+             role="option">
+          ${item.mappedValue || item.value}
+          </div>`.replace(/\s+/g, ' ').trim()
+        },
+
+        // 7. Шапка списка
+        dropdownHeader(suggestions) {
+          return `<header data-selector="tagify-suggestions-header" class="${
+            this.settings.classNames.dropdownHeader
+          }"></header>`.replace(/\s+/g, ' ').trim()
+        },
+
+        // 8. Подвал списка (счетчик оставшихся элементов)
+        dropdownFooter(suggestions) {
+          const diff = suggestions.length - this.settings.dropdown.maxItems
+          return diff > 0
+            ? `<footer data-selector="tagify-suggestions-footer" class="${this.settings.classNames.dropdownFooter}">
+                ${diff} more items. Refine your search.
+             </footer>`.replace(/\s+/g, ' ').trim()
+            : ''
+        },
       },
     }
     if (this.mode !== 'tags') {
@@ -237,12 +339,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.tagify?.removeAllTags?.()
     if (this.mode == 'select'){
       // console.log('select tags', this)
-      const value = (this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null)
+      const value = (
+        this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null
+      )
       if (value) {
+        this.isFirstValueSet = true
         this.value = value
-        this.nextTick(() => {
-          this.tagify?.addTags(this.value ?? '')
-        }, 2)
+        this.tagify?.addTags(this.value ?? '')
       }
     }
     else if (this.mode == 'multi'){
@@ -250,19 +353,17 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       if (Array.isArray(val)) {
         this.isFirstValueSet = true
         this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
-        this.nextTick(() => {
-          this.tagify?.addTags(this.value ?? '')
-        }, 2)
+        this.tagify?.addTags(this.value ?? '')
       }
     }
     else if (this.mode == 'tags'){
       const val =  this.inputValue || this.modelValue
       if (Array.isArray(val)) {
         this.isFirstValueSet = true
-        this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value)))
-        this.nextTick(() => {
-          this.tagify?.addTags(this.value ?? '')
-        }, 2)
+        this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter(
+          (v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value))
+        )
+        this.tagify?.addTags(this.value ?? '')
       }
     }
   }
@@ -273,7 +374,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.tagify.whitelist = this.itemsInner
     }
   }
-  @Watch('value', true) valueWatch(value: any) {
+  @Watch({deep: true}) watchValue(value: any) {
     if (this.isFirstValueSet) return this.isFirstValueSet = false
     this.$emit('update:modelValue', value)
   }
@@ -296,7 +397,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     }
   }
 
-  @Watch('loading') loadingWatch(inLoading: boolean) {
+  @Watch watchLoading(inLoading: boolean) {
     this.tagify?.loading?.(inLoading)
     if (!inLoading && this.items?.length) {
       this.nextTick(() => this.tagify?.dropdown.show(this.currentSearchValue))

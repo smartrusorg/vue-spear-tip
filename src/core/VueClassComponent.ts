@@ -59,9 +59,9 @@ function createComponent(constructor: any, decoratorParams: any) {
         const state = reactive(instance)
         
         // Не пробрасывает
-        watch(() => state.modelValue, (val, oldVal) => {
-          if (val !== oldVal) {
-            context.emit('update:modelValue', val)
+        watch(() => state.modelValue, (val, oldVal) => { // @ts-expect-error
+          if (val !== oldVal && val !== props?.['modelValue']) {
+            context.emit('update:modelValue', val?.value ?? val ?? null)
           }
         })
         
@@ -91,29 +91,26 @@ function createComponent(constructor: any, decoratorParams: any) {
         
         if ((schema as WatchSchemeReal).watch) {
           for (const methodName in schema.watch) {
-            if (!schema.computed?.[methodName] && !computedState?.[methodName]) {
-              // Создаем вочер
-              watch(
-                // Источник: если это свойство в классе, берем из state
-                function() {
-                  return schema.watch[methodName].propertyName in state
-                    ? state[schema.watch[methodName].propertyName]
-                    : (
-                      schema.watch[methodName].propertyName in props
-                        ? props[schema.watch[methodName].propertyName as any]
-                        : null
-                    )
-                }.bind(state),
-                // Вызываем метод класса
-                (newValue: any, oldValue: any) => {
-                  state[methodName].call(state, newValue, oldValue)
-                },
-                {
-                  immediate: schema.watch[methodName].immediate,
-                  deep: schema.watch[methodName].deep
-                }
-              )
-            }
+            watch(
+              // Источник: если это свойство в классе, берем из state
+              function() {
+                return schema.watch[methodName].propertyName in state
+                  ? state[schema.watch[methodName].propertyName]
+                  : (
+                    schema.watch[methodName].propertyName in props
+                      ? props[schema.watch[methodName].propertyName as any]
+                      : null
+                  )
+              }.bind(state),
+              // Вызываем метод класса
+              (newValue: any, oldValue: any) => {
+                state[methodName].call(state, newValue, oldValue)
+              },
+              {
+                immediate: schema.watch[methodName].immediate,
+                deep: schema.watch[methodName].deep
+              }
+            )
           }
         }
         
@@ -122,6 +119,16 @@ function createComponent(constructor: any, decoratorParams: any) {
           enumerable: false,
           configurable: true
         })
+        
+        // Внутри вашего цикла по vueDefaultProps в setup()
+        Object.defineProperty(state, '$refs', {
+          get: () => {
+            // Все ref="название", указанные в шаблоне, Vue складывает туда.
+            return vm.proxy?.$refs || {};
+          },
+          enumerable: false,
+          configurable: true
+        });
         
         // Прокидываем свойства через дескрипторы
         for (const key of vueDefaultProps) {
@@ -164,7 +171,7 @@ function createComponent(constructor: any, decoratorParams: any) {
           const stepRunner = () => {
             currentStep++
             if (currentStep < steps) {
-              requestAnimationFrame(stepRunner)
+              nextTick(stepRunner)
             } else {
               // Вызываем финальный колбэк один раз в конце цепочки
               if (typeof callback === 'function' && !(callback instanceof Promise)) {
@@ -173,20 +180,22 @@ function createComponent(constructor: any, decoratorParams: any) {
             }
           }
           
-          requestAnimationFrame(stepRunner)
+          nextTick(stepRunner)
         }.bind(state)
         
         // Синхронизация props (без .value!)
         watch(props, function (newProps: any) {
           for (const key in newProps) {
+            if (key === 'modelValue' && state[key] == newProps[key]) continue
             if (
               key in state && propsOuter?.[key]
+              && state[key] !== newProps?.[key]
               && !schema.computed?.[key]
               && !schema.watch?.[key]
               && !computedState?.[key]
               && ![
                 'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent', 'mixins', 'mixinsParent',
-                'instance', 'nextTick'
+                'instance', 'nextTick', '$refs'
               ].includes(key)
             ) {
               instance[key] = state[key] = newProps?.[key]

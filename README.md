@@ -1,13 +1,16 @@
 # [<img src="https://vue-spear-tip.smartrus.org/VST_LOGO.png" height="50"/>](https://vue-spear-tip.smartrus.org) Vue Spear Tip
 #### Reactive OOP frontend programming library on Vue
 
-Vue 3 TypeScript Class Components with @Watch, @Computed, @Prop decorators. 
+Vue 3 TypeScript Class Components with @Watch, Computed (as getter), @Prop decorators. 
 And UI KIT on them.
 
-## What is the Vue Spear Tip?
-**Vue Spear Tip** - is a global wrapper library for Vue 3 components using decorators. It allows you to describe a Vue component as an object-oriented class with inheritance, as well as provides a set of pre-built fields and components assembled from various open-source libraries that we constantly update. We are always looking for ways to improve our offerings.
+## What is the [Vue Spear Tip](https://www.npmjs.com/package/vue-spear-tip)?
+**[Vue Spear Tip](https://github.com/smartrusorg/vue-spear-tip)** - is a global wrapper library for Vue 3 components using decorators. It allows you to describe a Vue component as an object-oriented class with inheritance, as well as provides a set of pre-built fields and components assembled from various open-source libraries that we constantly update. We are always looking for ways to improve our offerings.
 
 Built documentation with examples: [vue-spear-tip.smartrus.org](https://vue-spear-tip.smartrus.org "Open demo with docs")
+
+VST uses the Composition API and works with a js proxy. 
+Which makes it compatible with current versions of vue.
 
 #### Install
 With [Bun.JS](https://bun.sh)
@@ -75,18 +78,23 @@ import 'vue-spear-tip/grid'
     components = {Button}
     @Prop(String, null) readonly text: string = ''
     test: string = ''
+    anotherParam: string = ''
     
     beforeMount() {
       console.log('test')
     }
-    
-    @Watch('test', false /* deep */, false /* immediate */) watchTest(newVal: string) {
-      console.log('test variable changed', newVal)
-    }
-    
+
     // Declare computed prop
     get computedProp(): boolean {
       return true
+    }
+
+    @Watch({deep: true, immediate: true}) watchTest(newVal: string) {
+      console.log('test variable changed', newVal)
+    }
+    
+    @Watch watchAnotherParam(newVal: string) {
+      console.log('watch anotherParam', newVal)
     }
   }
 </script>

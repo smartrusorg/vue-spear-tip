@@ -391,6 +391,7 @@ import IMask from 'imask'
   mountedParent() {
     this.nextTick(() => {
       if (this.$refs.selectInput) {
+        this.$refs.selectInput.value = this.value
         this.$refs.selectInput.addEventListener('focus', this.onFocus)
         this.$refs.selectInput.addEventListener('blur', this.onBlur)
         if (this.wheelNumber && typeof this.asNumber == 'boolean' && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
@@ -541,9 +542,11 @@ import IMask from 'imask'
     }
   }
 
-  private preResetValue: string = ''
-  private onReset() {
-    this.preResetValue = this.value || this.$refs.selectInput.value
+  preResetValue: string = ''
+  onReset() {
+    this.preResetValue = this.iMaskedInst
+      ? (this.$refs.selectInput.value || this.value)
+      : (this.value || this.$refs.selectInput.value)
     this.$emit('reset')
     this.isInnerSetValue = true
     this.setValue(this.$refs.selectInput.value = this.value = '')
@@ -551,14 +554,9 @@ import IMask from 'imask'
     // if (this.withTime) {
     //   this.$refs?.VSTStringField?.blur?.()
     // }
-    if (!this.isDateTime) {
-      this.$refs?.selectInput?.blur?.()
-    }
-    else {
-      this.nextTick(() => this.$refs?.selectInput?.focus?.())
-    }
+    this.nextTick(() => this.$refs?.selectInput?.focus?.())
   }
-  private onInput(event: any, reset: boolean = false) {
+  onInput(event: any, reset: boolean = false) {
     const val = event?.target?.value || event
 
     if (!['string', 'number'].includes(typeof val)) {
@@ -815,6 +813,12 @@ import IMask from 'imask'
     if (!this.disabled) return false
     const value = parseFloat(this.value as string)
     return !this.min || value > this.min
+  }
+
+  onValueChange(value: any) {
+    if (this.$refs.selectInput) {
+      this.$refs.selectInput.value = this.value
+    }
   }
 
   /** Является ли маска датой или датой со временем */

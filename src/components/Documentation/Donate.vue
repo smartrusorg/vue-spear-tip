@@ -1,5 +1,5 @@
 <template lang="pug">
-  div(class="mx-auto max-w1440px w100% min-h100%")
+  div(class="mx-auto max-w1440px w100% min-h100% user-select-auto!")
     h3(class="px20px py15px text-center") If you like Vue Spear Tip, you can donate for developmentin the following ways:
     .row(class="w100%")
       .col-6
@@ -8,10 +8,10 @@
         )
           b Crypto wallets
           div
-            b(class="text-amber-500 user-select-none") BTC&nbsp;
+            b(class="text-amber-500") BTC&nbsp;
             span 1FZ11aFGQQzvm7Y7JGZYPq1UAip8eo3tZ7
           div
-            b(class="text-emerald-500 user-select-none") USDT TRC20&nbsp;
+            b(class="text-emerald-500 user-select-auto!") USDT TRC20&nbsp;
             span TBQGoQwuoeK5xX4S6dSozGiU6UBsJwZpTV
           div
             b(class="text-emerald-500 user-select-none") USDT ERC20&nbsp;

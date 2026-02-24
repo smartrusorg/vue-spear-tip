@@ -79,8 +79,7 @@ import {Prop, VST, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import FPLocales from 'flatpickr/dist/l10n'
 import flatpickr from 'flatpickr'
-import 'flatpickr/dist/flatpickr.min.css' // @ts-ignore
-import { Instance } from 'flatpickr/dist/types/instance'
+import 'flatpickr/dist/flatpickr.min.css'
 import 'flatpickr/dist/plugins/confirmDate/confirmDate.css'
 import confirmDatePlugin from 'flatpickr/dist/plugins/confirmDate/confirmDate.js'
 import {StringField as VSTStringField} from '../../../kit'
@@ -206,7 +205,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   }
 
   /** Библиотека по работе  */
-  private fp: Instance|null = null
+  private fp: any|null = null
 
   addDate() {
     const zonedDate = $VST.DT()

@@ -1,5 +1,3 @@
-import VueClass from '../VueClass'
-
 type VuePropsTypes = typeof String | typeof Number | typeof Array | typeof Boolean | typeof Object |
   typeof Date | typeof Function | typeof Symbol | null // @ts-ignore
 
@@ -27,58 +25,30 @@ interface VuePropObj {
 
 import { getMeta } from '../registry'
 
-export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]) => (target: any, key: string) => {
+/**
+ * Объявление параметра класса vue prop
+ * ```js
+ * @VST export default class Component extends BaseComponent {
+ *   // String, Number, Array, Boolean, Object, Date, Function, Symbol, null
+ *   @Prop(Boolean) readonly loading: boolean = false
+ *   @Prop(Boolean) readonly autofocus: boolean = false
+ *   @Prop(String, null) readonly inputValidatePattern: string|null = null
+ * }
+ * 
+ * ```
+ * @param type Ожидаемый тип параметра
+ *
+ * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, null)*
+ * @param types Дополнительные типы
+ *
+ * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, null)*
+ * @constructor
+ */
+export const Prop = (
+  type: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]
+) => (target: any, key: string) => {
   const meta = getMeta(target.constructor)
-  meta.props[key] = typeof propDataOrType == 'object' ? propDataOrType : {...{
-    // default: meta.props?.[key]?.default,
-    type: [propDataOrType, ...types]
+  meta.props[key] = typeof type == 'object' ? type : {...{
+    type: [type, ...types]
   }}
 }
-
-//
-// let VstPrepareClassInstance: {[k:string]: any} = {}
-//
-// /**
-//  * Трансформация свойства во vue property
-//  * @param propDataOrType
-//  * @param types
-//  * @constructor
-//  */
-// export const Prop = (propDataOrType: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]): any => {
-//   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-//     if (typeof target?.constructor?.name != 'string') return
-//     let VST = target.constructor?.___VST ?? {}
-//     if (!VST.props) VST.props = {}
-//     if(!VstPrepareClassInstance[target.constructor.name]) {
-//       VstPrepareClassInstance[target.constructor.name] = new target.constructor
-//       VstPrepareClassInstance[target.constructor.name].name =
-//         VstPrepareClassInstance?.[target.constructor.name]?.constructor?.name?.toString()
-//         ?? VstPrepareClassInstance?.[target.constructor.name]?.['name']
-//         ??  ''
-//     }
-//
-//     let TypeObj: any = typeof propDataOrType == 'object' ? propDataOrType : {...{
-//       type: [propDataOrType, ...types]
-//     }}
-//     if(VstPrepareClassInstance[target.constructor.name][propertyKey]) {
-//       TypeObj.default = VstPrepareClassInstance[target.constructor.name][propertyKey]
-//     }
-//
-//     if(!VST.props[target.constructor.name]) {
-//       VST.props[target.constructor.name] = {}
-//     }
-//
-//     const parents = [];
-//     let proto = Object.getPrototypeOf(target.constructor)
-//
-//     while (proto && proto.constructor !== Object) {
-//       if (proto.name) parents.push(proto.name)
-//       proto = Object.getPrototypeOf(proto)
-//     }
-//
-//     VST.parents = parents
-//     VST.props[target.constructor.name][propertyKey] = TypeObj
-//     target.constructor.___VST = VST
-//   }
-// }
-// // ... existing code ..."

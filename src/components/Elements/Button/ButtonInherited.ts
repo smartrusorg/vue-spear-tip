@@ -59,7 +59,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   
   @Prop(String, null) readonly theme:
     'success'|'default'|'primary'|'warning'|'danger'|'info'|'pink'|'purple'|'indigo'|'grey'|'white' |
-    'yellow'|'black'|null = 'default'
+    'yellow'|'black'|'empty'|null = 'default'
   
   backgroundCss: string = ''
   boxShadowCss: string = ''
@@ -222,6 +222,16 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBoxShadowColor = '#626a71'
       this.currentColorActive = '#ffffff'
     }
+    else if (this.theme == 'empty'){
+      this.currentBg = 'transparent'
+      this.currentColor = '#1e1f22'
+      this.currentColorHover = 'transparent'
+      this.currentBorderColor = 'transparent'
+      this.currentBgActive = 'transparent'
+      this.currentBorderColorActive = 'transparent'
+      this.currentBoxShadowColor = 'transparent'
+      this.currentColorActive = 'transparent'
+    }
     this.currentBg = this.bg ?? (this.currentBg ?? bg)
     this.currentColor = this.color ?? (this.currentColor ?? color)
     this.currentBorderColor = this.borderColor ?? (this.currentBorderColor ?? borderColor)
@@ -280,6 +290,7 @@ export default abstract class ButtonInherited extends BaseComponent {
       // this.$emit('mouseupOrTouchend', e, this)
       // this.$emit('mousedownOrTouchstart', e, this)
       this.$emit('keydownEnter', e, this)
+      this.$emit('keypress.enter', e, this)
     }
   }
   
@@ -299,11 +310,11 @@ export default abstract class ButtonInherited extends BaseComponent {
   }
   onComponentClickOrTap() {}
   
-  @Watch('theme') private _onThemeChanged() {
+  @Watch watchTheme() {
     this.updateTheme()
   }
   
-  @Watch('title', false, true) private _onTitleChanged(title: string) {
+  @Watch('title', false, true) private onTitleChanged(title: string) {
     this.innerTitle = null
     if (title){
       this.nextTick(() => this.innerTitle = title)
@@ -311,7 +322,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   }
   
   
-  @Watch('disabled') private _onDisabledChanged(disabled: boolean) {
+  @Watch('disabled') private onDisabledChanged(disabled: boolean) {
     this.dataThemeInner = disabled ? this.dataDisabledTheme : this.dataTheme
     this.showButton = false
     this.nextTick(() => this.showButton = true)

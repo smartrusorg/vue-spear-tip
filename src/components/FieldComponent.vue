@@ -34,8 +34,7 @@ export default abstract class FieldComponent extends BaseComponent implements IF
   }
 
   onValueChange(value: any){}
-  @Watch('value', true) valueWatch(value: any) {
-    console.log('value', value)
+  @Watch({deep: true}) watchValue(value: any) {
     this.onValueChange(value)
   }
 
