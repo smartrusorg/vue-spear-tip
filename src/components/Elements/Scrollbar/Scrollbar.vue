@@ -5,6 +5,7 @@
     :class=`{
       [randomClass]: true
     }`
+    data-simplebar
     class="user-select-auto!"
     ref="scrollContainer"
   )
@@ -13,6 +14,14 @@
       .{{ randomClass }}
       > .simplebar-track
       > .simplebar-scrollbar::before {
+        background-color: {{ color }} !important;
+        margin: {{ margin }} !important;
+        cursor: grabbing !important;
+        width: {{ width }} !important;
+      }
+      .{{ randomClass }}
+      > .simplebar-track
+      > .simplebar-scrollbar:hover::before {
         background-color: {{ color }} !important;
         margin: {{ margin }} !important;
         cursor: grab !important;
@@ -35,7 +44,7 @@ import SimpleBar from 'simplebar'
   @Prop(String) readonly color: string = '#494747'
   @Prop(String) readonly margin: string = 'auto'
   @Prop(String) readonly width: string = '7px'
-  @Prop(String) readonly direction: string = 'ltr'
+  @Prop(String) readonly direction: 'rtl'|'ltr' = 'ltr'
 
   declare $refs: {scrollContainer: HTMLDivElement}
 
@@ -44,7 +53,10 @@ import SimpleBar from 'simplebar'
 
   mounted() {
     this.randomClass = 'scrollbar-c' + this.VST.generateRandomKey()
-    this.simpleBar = new SimpleBar(this.$refs.scrollContainer)
+    this.simpleBar = new SimpleBar(this.$refs.scrollContainer, {
+      autoHide: this.autoHide, // @ts-expect-error
+      direction: this.direction,
+    })
   }
 
   beforeMount() {
