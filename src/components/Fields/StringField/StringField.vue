@@ -60,6 +60,9 @@
             :disabled
             :placeholder
             @keypress.enter="$emit('keypress.enter')"
+            @keyup.esc="$emit('keyup.esc')"
+            @keydown.esc="$emit('keydown.esc')"
+            @keypress.esc="$emit('keypress.esc')"
             @keydown.up="keyUp"
             @keydown.down="keyDown"
             :autocomplete="maskPreset == 'email' ? 'email' : 'off'"
@@ -747,7 +750,7 @@ import IMask from 'imask'
             (this.value || '0')
               .replaceAll(this.thousandsSeparator, '').replaceAll(this.radix, '.')
           )
-        : this.value || ''
+        : this.value?.trim?.() || ''
   }
 
   replaceInMask(rule: string, mask: string, value: string, type = 'MM') {

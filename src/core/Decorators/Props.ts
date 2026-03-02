@@ -1,7 +1,7 @@
 type VuePropsTypes = typeof String | typeof Number | typeof Array | typeof Boolean | typeof Object |
-  typeof Date | typeof Function | typeof Symbol | null // @ts-ignore
+  typeof Date | typeof Function | typeof Symbol | null | typeof Error | 'required'
 
-import {DebuggerEvent} from 'vue/dist/vue.esm-bundler'
+import {DebuggerEvent} from 'vue'
 
 type WatchCallback<T> = (
   value: T,
@@ -38,17 +38,19 @@ import { getMeta } from '../registry'
  * ```
  * @param type Ожидаемый тип параметра
  *
- * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, null)*
+ * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, Error, null, 'required')*
  * @param types Дополнительные типы
  *
- * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, null)*
+ * *(String, Number, Array, Boolean, Object, Date, Function, Symbol, Error, null, 'required')*
  * @constructor
  */
 export const Prop = (
   type: VuePropsTypes | VuePropObj, ...types: (VuePropsTypes)[]
 ) => (target: any, key: string) => {
   const meta = getMeta(target.constructor)
+  let allTypes = [type, ...types]
   meta.props[key] = typeof type == 'object' ? type : {...{
-    type: [type, ...types]
+    type: allTypes,
+    ...(allTypes.includes('required') ? {required: true} : {})
   }}
 }

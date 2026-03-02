@@ -38,7 +38,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
 
   // Watch dynamic changes to items prop
-  @Watch('items', true) _itemsWatch(items: any) {
+  @Watch watchItems(items: any) {
 
   }
   // Generate computed class prop

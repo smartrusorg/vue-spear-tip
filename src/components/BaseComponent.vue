@@ -1,12 +1,14 @@
 <script lang="ts">
 import {reactive, computed, ref} from 'vue'
 import {IBaseVueComponent, BaseComponentEventInput, BaseComponentEvents} from '../Interfaces/IBaseVueComponent'
-import {VueClass} from '../core'
+import {Prop, VueClass} from '../core'
 import {IGlobalVST} from '../Interfaces/IGlobalVST'
 import {IHammerManager} from '../Interfaces/IHammer'
+import {VNode} from '@vue/runtime-core'
 
 /** Base component */
 export default abstract class BaseComponent extends VueClass implements IBaseVueComponent {
+  @Prop(String, Number, Array, Boolean, Object, Date, Function, Symbol, null) readonly modelValue = null
   readonly VST: IGlobalVST
 
   // readonly Settings: {
@@ -26,6 +28,12 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   declare readonly $refs: {
     [key: string]: any
   }
+  declare readonly $slots: {
+    default: () => VNode[]
+  } & {
+    [key: string]: (() => VNode[]) | undefined
+  }
+
 
   constructor() {
     super()
@@ -123,11 +131,11 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
       this.VSTBaseComponent.clickTapHammer.on('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
     }
     for (const h of this.VSTBaseComponent?.hammer ?? []) {
-      h.instance?.destroy?.()
-      const el = this.$el?.querySelector?.(h.selector)
+      h.instance?.destroy?.();
+      const el = this.$el?.querySelector?.(h.selector);
       if (el instanceof HTMLElement || el instanceof SVGElement) {
-        h.instance = new this.VST.Hammer(el) as any
-        h.instance!.on(h.event, h.callback as any)
+        h.instance = new this.VST.Hammer(el) as any;
+        h.instance!.on(h.event, h.callback as any);
       }
     }
   }
@@ -145,18 +153,12 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
-    const el = this.$el?.querySelector?.(componentSelector)
-    let hammer
-    if (el instanceof HTMLElement || el instanceof SVGElement) {
-      hammer = new this.VST.Hammer(el) as any
-      hammer.on(event, callback)
-    }
     this.VSTBaseComponent.hammer.push({
       event,
       callback,
-      instance: hammer,
+      instance: undefined, // будет создан позже
       selector: componentSelector,
-    })
+    });
   }
 
   onViewPortResize() {

@@ -191,6 +191,7 @@ export interface IVueClass {
     context?: SetupContext,
     self?: IVueClass
   ): {[k:string]:any}|void
+  /** @deprecated используйте created, в composition api они идентичны. Будет удалено в версии 1. */
   beforeCreate(): void
   created(): void
   beforeMount(): void
@@ -206,6 +207,7 @@ export interface IVueClass {
     context?: SetupContext,
     self?: IVueClass
   ): {[k:string]:any}|void
+  /** @deprecated используйте created, в composition api они идентичны. Будет удалено в версии 1. */
   beforeCreateParent(): void
   createdParent(): void
   beforeMountParent(): void

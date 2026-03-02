@@ -48,9 +48,8 @@ export interface IBaseVueComponent extends IVueClass {
   
   /**
    * Регистрация пользовательских реактивных событий с автоматическим отключением при размонтировании.
-   * Внимание! На данный момент поддерживается регистрация только видимых компонентов или скрытых при помощи v-show!
    * @param event Название события
-   * @param componentSelector Селектор элемента, который будет захвачен при ренеринге/ререндеринге
+   * @param componentSelector Селектор элемента, который будет захвачен при отрисовке/повторной отрисовке
    * @param callback
    */
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: () => any): void

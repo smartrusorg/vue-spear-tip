@@ -32,9 +32,10 @@
         shine,
         [randomClass + '-click-tap']: true,
         [randomClass + (isOnHover ? ' hover' : '')]: true,
-        'py10px px8px': size == 'sm',
-        'py10px px13px': size == 'md',
-        'py10px px18px': size == 'lg',
+        'py10px px1px': theme == 'empty',
+        'py10px px8px': size == 'sm' && theme != 'empty',
+        'py10px px13px': size == 'md' && theme != 'empty',
+        'py10px px18px': size == 'lg' && theme != 'empty',
         // mobile: viewPortType == 'mobile',
         // tablet: viewPortType == 'tablet',
       }`

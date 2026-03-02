@@ -1,7 +1,5 @@
 import { VNode, SetupContext, TriggerOpTypes, TrackOpTypes, ReactiveEffect } from '@vue/runtime-core'
 import {IVueClass} from '../Interfaces/IVueClass'
-import {IFieldComponent} from '../Interfaces/IFieldComponent'
-import IBaseVueComponent from '../Interfaces/IBaseVueComponent'
 
 export default abstract class VueClass implements IVueClass {
   public readonly mixins: Array<any> = []
@@ -26,19 +24,8 @@ export default abstract class VueClass implements IVueClass {
   declare readonly $parent?: any
   declare readonly $props: Object
   declare readonly $refs: {[key:string]:any}
-  //   [key:string]:
-  //     HTMLElement|HTMLInputElement|HTMLElement[]|HTMLInputElement[]|IFieldComponent|IFieldComponent[]|
-  //     IVueClass|VueClass|typeof VueClass|IVueClass[]|(typeof VueClass)[]|VueClass[]|IBaseVueComponent|IBaseVueComponent[]
-  // }
-  readonly $root: {
-    // [key:string]:any
-    readonly APP?: any
-  }|this|any
-  declare readonly $slots: {
-    default: () => VNode[]
-  } & {
-    [key: string]: (() => VNode[]) | undefined
-  }
+  readonly $root: {[key:string]:any}|this|any
+  declare readonly $slots: {default: () => VNode[]} & {[key: string]: (() => VNode[]) | undefined}
 
   $emit(eventName: string, ...args: any[]): void {}
   $forceUpdate(callback?: Function): void {}
@@ -80,7 +67,6 @@ export default abstract class VueClass implements IVueClass {
     context?: SetupContext,
     self?: IVueClass
   ) {}
-  /** @deprecated */
   beforeCreateParent() {}
   createdParent() {}
   beforeMountParent() {}
@@ -106,21 +92,21 @@ export default abstract class VueClass implements IVueClass {
   onRenderTracked(callback: {
     effect: ReactiveEffect
     target: object
-    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    type: TrackOpTypes
     key: any
   }): void {}
   
   onRenderTrackedParent(callback: {
     effect: ReactiveEffect
     target: object
-    type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+    type: TrackOpTypes
     key: any
   }): void {}
   
   onRenderTriggered(callback: {
     effect: ReactiveEffect
     target: object
-    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    type: TriggerOpTypes
     key: any
     newValue?: any
     oldValue?: any
@@ -130,7 +116,7 @@ export default abstract class VueClass implements IVueClass {
   onRenderTriggeredParent(callback: {
     effect: ReactiveEffect
     target: object
-    type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+    type: TriggerOpTypes
     key: any
     newValue?: any
     oldValue?: any

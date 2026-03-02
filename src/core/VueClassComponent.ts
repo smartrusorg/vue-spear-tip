@@ -2,9 +2,9 @@ import VueClass from './VueClass'
 import type {IGlobalVST} from '../Interfaces/IGlobalVST'
 
 import {
-  defineComponent, reactive, computed, toRefs, watch, nextTick, onMounted, onUpdated, onUnmounted, onBeforeMount,
+  defineComponent, reactive, computed, toRef, watch, nextTick, onMounted, onUpdated, onUnmounted, onBeforeMount,
   onBeforeUpdate, onBeforeUnmount, onErrorCaptured, onRenderTracked, onRenderTriggered, onDeactivated, onActivated,
-  getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect
+  getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect, isRef
 } from 'vue'
 import { metadataRegistry } from './registry'
 
@@ -37,7 +37,7 @@ function createComponent(constructor: any, decoratorParams: any) {
     }
     else {
       propsOuter[p] = {
-        type: [String, Number, Array, Boolean, Object, Date, Function, Symbol, null],
+        type: [String, Number, Array, Boolean, Object, Date, Function, Symbol, Error, null],
         default: inst[p],
       }
     }
@@ -52,33 +52,48 @@ function createComponent(constructor: any, decoratorParams: any) {
       provide: {...inst.provideParent, ...inst.provide},
       emits: [...new Set([...(inst.emitsParent || []), ...(inst.emits || [])])],
       setup(props, context) {
-        const vm = getCurrentInstance()! // Получаем внутренний инстанс Vue
+        const vm = getCurrentInstance()! // Получаем внутренний экземпляр Vue
         const instance = new constructor()
-        instance.$props = props || {}
-        instance.$emit = context.emit
         const state = reactive(instance)
-        
-        // Не пробрасывает
-        watch(() => state.modelValue, (val, oldVal) => { // @ts-expect-error
-          if (val !== oldVal && val !== props?.['modelValue']) {
-            context.emit('update:modelValue', val?.value ?? val ?? null)
-          }
-        })
         
         const computedState: any = {}
         const proto = Object.getPrototypeOf(instance)
         const descriptors = Object.getOwnPropertyDescriptors(proto)
         
-        // fixme поддержка @Computed, удалить в версии 1 оставив геттеры
-        for (const [vueName, originalKey] of Object.entries(schema.computed)) {
-          computedState[vueName] = computed(() => {
-            const latestMethod = constructor.prototype[originalKey]
-            if (typeof latestMethod === 'function') {
-              return latestMethod.call(state)
+        const thisProxy: any = new Proxy({}, {
+          get(target, prop) {
+            if (prop in state) { // Приоритет: данные класса
+              const value = state[prop]
+              return isRef(value) ? value.value : value // Автоматически разворачиваем ref
             }
-            return null
-          })
-        }
+            
+            // Явная обработка служебных полей
+            if (prop === '$emit') return context.emit
+            if (prop === '$props') return props
+            if (prop === '$slots') return context.slots
+            if (prop === '$attrs') return context.attrs
+            if (prop === '$nextTick') return nextTick
+            
+            // Всё остальное — из публичного экземпляра Vue (уже развёрнуто)
+            return (vm.proxy as any)[prop]
+          },
+          set(target, prop, value) {
+            if (prop in state) {
+              const current = state[prop]
+              if (isRef(current)) {
+                // Если это ref, устанавливаем его .value
+                current.value = value
+                return true
+              } else {
+                state[prop] = value
+                return true
+              }
+            }
+            // Если свойство не в state, можно попытаться установить в vm.proxy (осторожно)
+            (vm.proxy as any)[prop] = value
+            return true
+          }
+        })
         
         // Автоматическое создание computed из геттеров
         for (const key in descriptors) {
@@ -91,32 +106,24 @@ function createComponent(constructor: any, decoratorParams: any) {
               const latestDescriptor = Object.getOwnPropertyDescriptor(latestProto, key)
               
               if (latestDescriptor && latestDescriptor.get) {
-                return latestDescriptor.get.call(state)
+                return latestDescriptor.get.call(thisProxy)
               }
-              return descriptors[key].get!.call(state)
+              return descriptors[key].get!.call(thisProxy)
             })
           }
         }
         
-        // Обработка проллушивателей
+        
+        // Обработка прослушивателей
         if ((schema as WatchSchemeReal).watch) {
           for (const methodName in schema.watch) {
             watch(
-              // Источник: если это свойство в классе, берем из state
-              function() {
-                return schema.watch[methodName].propertyName in state
-                  ? state[schema.watch[methodName].propertyName]
-                  : (
-                    schema.watch[methodName].propertyName in props
-                      ? props[schema.watch[methodName].propertyName as any]
-                      : null
-                  )
-              }.bind(state),
-              // Вызываем метод класса
-              (newValue: any, oldValue: any) => {
-                const latestMethod = constructor.prototype[methodName]
-                if (typeof latestMethod === 'function') {
-                  latestMethod.call(state, newValue, oldValue)
+              () => thisProxy?.[schema.watch[methodName].propertyName],
+              // обработчик
+              (newValue, oldValue) => {
+                const method = constructor.prototype[methodName]
+                if (typeof method === 'function') {
+                  method.call(thisProxy, newValue, oldValue)
                 }
               },
               {
@@ -127,13 +134,20 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         
+        // Отслеживание v-model
+        watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
+          if (val !== oldVal && val !== props?.['modelValue']) {
+            context.emit('update:modelValue', val?.value ?? val ?? null)
+          }
+        })
+        
         if (schema.watchEffect && Array.isArray(schema.watchEffect)) {
           schema.watchEffect.forEach((effect) => {
             const { methodName } = effect
             watchEffect((onCleanup) => {
               const latestMethod = constructor.prototype[methodName]
               if (typeof latestMethod === 'function') {
-                latestMethod.call(state, onCleanup)
+                latestMethod.call(thisProxy, onCleanup)
               }
             })
           })
@@ -144,7 +158,7 @@ function createComponent(constructor: any, decoratorParams: any) {
             watchPostEffect((onCleanup) => {
               const latestMethod = constructor.prototype[methodName]
               if (typeof latestMethod === 'function') {
-                latestMethod.call(state, onCleanup)
+                latestMethod.call(thisProxy, onCleanup)
               }
             })
           })
@@ -155,39 +169,20 @@ function createComponent(constructor: any, decoratorParams: any) {
             watchSyncEffect((onCleanup) => {
               const latestMethod = constructor.prototype[methodName]
               if (typeof latestMethod === 'function') {
-                latestMethod.call(state, onCleanup)
+                latestMethod.call(thisProxy, onCleanup)
               }
             })
           })
         }
         
-        Object.defineProperty(state, '$el', {
-          get: () => vm.proxy?.$el, // proxy.$el появится сразу после Mount
-          enumerable: false,
-          configurable: true
-        })
-        
-        // Внутри вашего цикла по vueDefaultProps в setup()
-        Object.defineProperty(state, '$refs', {
-          get: () => {
-            // Все ref="название", указанные в шаблоне, Vue складывает туда.
-            return vm.proxy?.$refs || {};
-          },
-          enumerable: false,
-          configurable: true
-        });
-        
         // Прокидываем свойства через дескрипторы
         for (const key of vueDefaultProps) {
           Object.defineProperty(state, key, {
             get: () => {
-              // Берем актуальное значение из Proxy-контекста Vue
               if (key === '$nextTick') return nextTick
               if (key === '$emit') return context.emit
               if (key === '$slots') return context.slots
               if (key === '$attrs') return context.attrs
-              
-              // Для остальных (refs, root, parent и т.д.) берем из proxy инстанса
               return (vm.proxy as any)[key]
             },
             enumerable: false, // Чтобы не засорять логи и циклы
@@ -200,7 +195,7 @@ function createComponent(constructor: any, decoratorParams: any) {
         const methods: any = {}
         for (const key in descriptors) {
           if (typeof descriptors[key].value === 'function' && key !== 'constructor') {
-            instance[key] = methods[key] = descriptors[key].value.bind(state)
+            instance[key] = methods[key] = descriptors[key].value.bind(thisProxy)
           }
         }
         Object.assign(state, methods)
@@ -222,13 +217,13 @@ function createComponent(constructor: any, decoratorParams: any) {
             } else {
               // Вызываем финальный колбэк один раз в конце цепочки
               if (typeof callback === 'function' && !(callback instanceof Promise)) {
-                callback.call(state)
+                callback.call(thisProxy)
               }
             }
           }
           
           nextTick(stepRunner)
-        }.bind(state)
+        }.bind(thisProxy)
         
         // Синхронизация props (без .value!)
         watch(props, function (newProps: any) {
@@ -241,72 +236,83 @@ function createComponent(constructor: any, decoratorParams: any) {
               && !schema.watch?.[key]
               && !computedState?.[key]
               && ![
-                'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent', 'mixins', 'mixinsParent',
-                'instance', 'nextTick', '$refs'
+                'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent',
+                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs', 'modelValue' // ← добавить 'modelValue'
               ].includes(key)
             ) {
-              instance[key] = state[key] = newProps?.[key]
+              const current = state[key]
+              if (isRef(current)) {
+                current.value = newProps[key]
+              } else {
+                state[key] = newProps[key]
+              }
+              instance[key] = newProps[key]
             }
           }
-        }.bind(state), {immediate: true})
+        }.bind(thisProxy), { immediate: true })
         
         
+        if (instance.setup) instance.setup.call(thisProxy, props, context, state)
+        if (instance.setupParent) instance.setupParent.call(thisProxy, props, context, state)
         
-        if (instance.setup) instance.setup.call(state, props, context, state)
-        if (instance.setupParent) instance.setupParent.call(state, props, context, state)
         
-        
-        if (instance.beforeCreateParent) instance.beforeCreateParent.call(state)
-        if (instance.beforeCreate) instance.beforeCreate.call(state)
+        if (instance.beforeCreateParent) instance.beforeCreateParent.call(thisProxy)
+        if (instance.beforeCreate) instance.beforeCreate.call(thisProxy)
         
         // onActivated(() => {})
         // onDeactivated(() => {})
         onMounted(function () {
-          if (instance.mountedParent) instance.mountedParent.call(state)
-          if (instance.mounted) instance.mounted.call(state)
-        }.bind(state))
+          if (instance.mountedParent) instance.mountedParent.call(thisProxy)
+          if (instance.mounted) instance.mounted.call(thisProxy)
+        }.bind(thisProxy))
         onBeforeUpdate(function () {
-          if (instance.beforeUpdateParent) instance.beforeUpdateParent.bind(state)()
-          if (instance.beforeUpdate) instance.beforeUpdate.bind(state)()
-        }.bind(state))
+          if (instance.beforeUpdateParent) instance.beforeUpdateParent.call(thisProxy)
+          if (instance.beforeUpdate) instance.beforeUpdate.call(thisProxy)
+        }.bind(thisProxy))
         onBeforeUnmount(function () {
-          if (instance.beforeUnmountParent) instance.beforeUnmountParent.bind(state)()
-          if (instance.beforeUnmount) instance.beforeUnmount.bind(state)()
-        }.bind(state))
+          if (instance.beforeUnmountParent) instance.beforeUnmountParent.call(thisProxy)
+          if (instance.beforeUnmount) instance.beforeUnmount.call(thisProxy)
+        }.bind(thisProxy))
         onErrorCaptured(function(callback: any) {
-          if (instance.onErrorCapturedParent) instance.onErrorCapturedParent.bind(state)(callback)
-          if (instance.onErrorCaptured) instance.onErrorCaptured.bind(state)(callback)
-        }.bind(state))
+          if (instance.onErrorCapturedParent) instance.onErrorCapturedParent.call(thisProxy, callback)
+          if (instance.onErrorCaptured) instance.onErrorCaptured.call(thisProxy, callback)
+        }.bind(thisProxy))
         onRenderTracked(function(callback: any) {
-          if (instance.onRenderTrackedParent) instance.onRenderTrackedParent.bind(state)(callback)
-          if (instance.onRenderTracked) instance.onRenderTracked.bind(state)(callback)
-        }.bind(state))
+          if (instance.onRenderTrackedParent) instance.onRenderTrackedParent.call(thisProxy, callback)
+          if (instance.onRenderTracked) instance.onRenderTracked.call(thisProxy, callback)
+        }.bind(thisProxy))
         onRenderTriggered(function(callback: any) {
-          if (instance.onRenderTriggeredParent) instance.onRenderTriggeredParent.bind(state)(callback)
-          if (instance.onRenderTriggered) instance.onRenderTriggered.bind(state)(callback)
-        }.bind(state))
+          if (instance.onRenderTriggeredParent) instance.onRenderTriggeredParent.call(thisProxy, callback)
+          if (instance.onRenderTriggered) instance.onRenderTriggered.call(thisProxy, callback)
+        }.bind(thisProxy))
         onUpdated(function(callback: any) {
-          if (instance.updatedParent) instance.updatedParent.bind(state)(callback)
-          if (instance.updated) instance.updated.bind(state)(callback)
-        }.bind(state))
+          if (instance.updatedParent) instance.updatedParent.call(thisProxy, callback)
+          if (instance.updated) instance.updated.call(thisProxy, callback)
+        }.bind(thisProxy))
         onUnmounted(function(callback: any) {
-          if (instance.unmountedParent) instance.unmountedParent.bind(state)(callback)
-          if (instance.unmounted) instance.unmounted.bind(state)(callback)
-        }.bind(state))
+          if (instance.unmountedParent) instance.unmountedParent.call(thisProxy, callback)
+          if (instance.unmounted) instance.unmounted.call(thisProxy, callback)
+        }.bind(thisProxy))
         onBeforeMount(function(callback: any) {
-          if (instance.beforeMountParent) instance.beforeMountParent.bind(state)(callback)
-          if (instance.beforeMount) instance.beforeMount.bind(state)(callback)
-        }.bind(state))
+          if (instance.beforeMountParent) instance.beforeMountParent.call(thisProxy, callback)
+          if (instance.beforeMount) instance.beforeMount.call(thisProxy, callback)
+        }.bind(thisProxy))
         
         
-        if (instance.createdParent) instance.createdParent.call(state)
-        if (instance.created) instance.created.call(state)
+        if (instance.createdParent) instance.createdParent.call(thisProxy)
+        if (instance.created) instance.created.call(thisProxy)
         
         
+        let dataForTemplate: any = {}
+        for (const key in state) {
+          if (!key.startsWith('$') && !key.startsWith('_')) {
+            dataForTemplate[key] = toRef(state, key)
+          }
+        }
         return {
-          ...toRefs(state),   // Обычные свойства (data)
-          ...computedState,   // Геттеры ставшие computed
-          ...methods,         // Методы
+          ...dataForTemplate,
+          ...computedState,
+          ...methods
         }
       }
     })

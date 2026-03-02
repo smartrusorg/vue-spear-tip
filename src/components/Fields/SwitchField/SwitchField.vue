@@ -141,7 +141,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   value: boolean = false
 
   beforeMount() {
-    this.value = this.modelValue || this.inputValue
+    this.value = this.inputValue || this.modelValue || false
     this.randomId = $VST.generateRandomKey(32)
   }
   emits = ['update:modelValue', 'change']

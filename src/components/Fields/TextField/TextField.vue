@@ -15,9 +15,9 @@
         }`
     )
       div(class="text-stone w25px z999")
-        NoSymbolIcon.vst-text-field-reset(v-if="!preResetValue" class="pointer-events-auto cursor-pointer hover:scale-130")
+        NoSymbolIcon.vst-text-field-reset(v-show="!preResetValue" class="pointer-events-auto cursor-pointer hover:scale-130")
         svg(
-          v-else
+          v-show="preResetValue"
           xmlns="http://www.w3.org/2000/svg"
           width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -37,7 +37,7 @@
         :data-simplebar-auto-hide="!disabled ? 'true' : 'false'"
       )
         mixin additionalButtons()
-          // РЕДАКТИРОВАНИЕ ССЫЛКИ
+          //- РЕДАКТИРОВАНИЕ ССЫЛКИ
           div(class="w100%")
             div(
               v-if="(isEditorLinkActive || showLinkModal) && bubbleMenuPlacementY"
@@ -48,7 +48,7 @@
               }`
             )
               div(class="flex gap-2px justify-center")
-                // Поле ввода URL
+                //- Поле ввода URL
                 VSTStringField(
                   :inputValue="linkUrl"
                   v-model="linkUrl"
@@ -60,13 +60,13 @@
                   size="md"
                   ref="linkUrlInput"
                 )
-                //// Чекбокс для target="_blank"
-                //label(class="flex items-center text-12px cursor-pointer")
-                //  input(type="checkbox" class="mr-5px")
-                //  span Открывать в новом окне
+                //- Чекбокс для target="_blank"
+                //- label(class="flex items-center text-12px cursor-pointer")
+                //-  input(type="checkbox" class="mr-5px")
+                //-  span Открывать в новом окне
 
               div(class="flex items-center ml-5px")
-                // Кнопка Сохранить/Изменить
+                //- Кнопка Сохранить/Изменить
                 VSTButton(theme="empty" @clickTap="addLink" size="md" :disabled="!linkUrl")
                   span(
                     :class=`{
@@ -92,7 +92,7 @@
                       path(d="M12.603 18.534a5.07 5.07 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463")
                       path(d="M16 19h6")
                       path(d="M19 16v6")
-                // Кнопка Удалить
+                //- Кнопка Удалить
                 VSTButton(v-if="isEditorLinkActive" theme="empty" @clickTap="removeLink" size="sm")
                   span(class="text-red-600/80")
                     svg(
@@ -112,7 +112,7 @@
                       )
 
 
-            // Курсор внутри таблицы
+            //- Курсор внутри таблицы
             div(
               v-if="isEditTable"
               class=`flex items-center justify-center gap-2px bg-white p-5px rounded-xl shadow-lg border-1
@@ -122,7 +122,7 @@
                 'mt12px': bubbleMenuPlacementY == 'bottom',
               }`
             )
-              // Добавить столбец
+              //- Добавить столбец
               VSTButton(size="sm" theme="empty" @clickTap="editor.chain().focus().addColumnAfter().run()")
                 span(class="relative mt-0 flex items-center")
                   svg(
@@ -139,7 +139,7 @@
                     path(d="M10 12l-7 7")
                     path(d="M10 17l-4 4")
 
-              // Добавить строку
+              //- Добавить строку
               VSTButton(size="sm" theme="empty" @clickTap="editor.chain().focus().addRowAfter().run()")
                 span(class="relative mt-0 flex items-center")
                   svg(
@@ -155,7 +155,7 @@
                     path(d='M3 10h18')
                     path(d='M10 10v11')
 
-              // Удалить столбец
+              //- Удалить столбец
               VSTButton(size="sm" theme="empty" @clickTap="editor.chain().focus().deleteColumn().run()")
                 span(class="relative mt-0 flex items-center")
                   svg(
@@ -172,7 +172,7 @@
                     path(d="M10 12l-7 7")
                     path(d="M10 17l-4 4")
 
-              // Удалить строку
+              //- Удалить строку
               VSTButton(size="sm" theme="empty" @clickTap="editor.chain().focus().deleteRow().run()")
                 span(class="relative mt-0 flex items-center")
                   svg(
@@ -243,11 +243,11 @@
             'mt--8px!' : bubbleMenuPlacementY == 'top' && isEditTable,
             'op-0!': !enabledTableRowsShowEditorButtons || !bubbleMenuPlacementY,
           }`
-          class="flex ml15px!"
+          class="flex ml15px! flex-col"
         )
           template(v-if="bubbleMenuPlacementY == 'top'")
             +additionalButtons
-          // ОБЫЧНОЕ ТЕКСТОВОЕ МЕНЮ
+          //- ОБЫЧНОЕ ТЕКСТОВОЕ МЕНЮ
           div(
             class="bubble-menu flex"
             :class=`{
@@ -308,11 +308,11 @@
                   :style=`{
                     textDecoration: editor.isActive('strike') ? 'line-through' : undefined,
                     textDecorationColor: editor.isActive('strike') ? '#fff' : undefined,
-                    // textDecorationThickness: editor.isActive('strike') ? '3px' : undefined,
+                    //- textDecorationThickness: editor.isActive('strike') ? '3px' : undefined,
                   }`
                 ) S
 
-              // Кнопка добавления ссылки
+              //- Кнопка добавления ссылки
               VSTButton(
                 v-if="!isAtEmptyLine"
                 size="md"
@@ -344,7 +344,7 @@
 
 
             div(class="flex items-center my4px justify-center w100%")
-              // Добавляем кнопки для списков
+              //- Добавляем кнопки для списков
               VSTButton(
                 size="md"
                 :theme="editor.isActive('bulletList') ? activeButtonsTheme : defaultButtonsTheme"
@@ -382,7 +382,7 @@
                     path(d="M12 18h8" stroke="currentColor" fill="none")
                     path(d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4" stroke="currentColor" fill="none")
                     path(d="M6 10v-6l-2 2" stroke="currentColor" fill="none")
-              // Кнопка чекбокс-список
+              //- Кнопка чекбокс-список
               VSTButton(
                 :theme="editor.isActive('taskList') ? activeButtonsTheme : defaultButtonsTheme"
                 :class="{ 'fw-bold!': editor.isActive('taskList'), 'text-white! fill-white! stroke-white!': true, }"
@@ -409,7 +409,7 @@
                     path(d="M11 6l9 0")
                     path(d="M11 12l9 0")
                     path(d="M11 18l9 0")
-              // Кнопка создания таблицы
+              //- Кнопка создания таблицы
               VSTButton(
                 size="md"
                 :theme="defaultButtonsTheme"
@@ -417,7 +417,7 @@
                 @keypress.enter="editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()"
                 title="Вставить таблицу 3x3"
               )
-                // Можно использовать иконку из Heroicons или просто текст
+                //- Можно использовать иконку из Heroicons или просто текст
                 div(class="fs-12px fw-bold text-white! flex items-center")
                   svg(
                     height="25"
@@ -441,7 +441,7 @@
                 @mousedown.stop
                 @touchstart.stop
               )
-                // Иконка или текст, например "Original Size"
+                //- Иконка или текст, например "Original Size"
                 div(class="fs-1rem px-5px") 1:1
 
 
@@ -485,11 +485,11 @@
           template(v-if="bubbleMenuPlacementY == 'bottom'")
             +additionalButtons
 
-        // НЕПОСРЕДСТВЕННО РЕДАКТОР
+        //- НЕПОСРЕДСТВЕННО РЕДАКТОР
         EditorContent(:editor="editor" @clickTap="clickEditor")
 
 
-    // КОЛИЧЕСТВО СИМВОЛОВ И ЛИМИТ
+    //- КОЛИЧЕСТВО СИМВОЛОВ И ЛИМИТ
     div(
       v-if="!disabled"
       class="pos-sticky bottom-6px p0! text-stone/80 text-right pr15px! w100%"
@@ -514,6 +514,11 @@
             'text-red/90 fw-bold': charactersCount >= limit
           }`
       ) {{ limit }}
+    component(is="style" v-if="disabled").
+      .vst-field-editor .tiptap [data-resize-handle] {
+        display: none
+      }
+
 </template>
 
 <script lang="ts">
@@ -1248,7 +1253,7 @@ import SimpleBar from 'simplebar'
     :first-child
       margin-top: 0
 
-    img
+    img[data-resize-handle]
       display: block
 
     [data-resize-handle]

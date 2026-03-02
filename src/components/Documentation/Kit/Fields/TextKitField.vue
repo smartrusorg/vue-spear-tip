@@ -3,12 +3,12 @@
 </template>
 
 <script lang="ts">
-import {VST, Prop, BaseComponent} from '../../../../core'
+import {VST, BaseComponent} from '../../../../core'
 import TextFieldKit from '../../../Fields/TextField/TextFieldKit.vue'
 import GuidesMenu from '../../../../components/Documentation/GuidesMenu.vue'
 
 /**
- * StringKitField
+ * TextKitField
  * @author CHORNY
  * @copyright https://smartrus.org
  */

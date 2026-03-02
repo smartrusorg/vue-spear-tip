@@ -1,3 +1,3 @@
-import {defineAsyncComponent} from 'vue'
-import IDateField from './IDateField' // @ts-ignore need to build types
-export default defineAsyncComponent(() => import('./DateField.vue')) as IDateField
+import { defineAsyncComponent } from 'vue'
+import type StringFieldClass from './DateField.vue'
+export default defineAsyncComponent(() => import('./DateField.vue')) as unknown as InstanceType<typeof StringFieldClass>
