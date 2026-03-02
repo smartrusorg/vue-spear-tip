@@ -8,7 +8,6 @@ import {VNode} from '@vue/runtime-core'
 
 /** Base component */
 export default abstract class BaseComponent extends VueClass implements IBaseVueComponent {
-  @Prop(String, Number, Array, Boolean, Object, Date, Function, Symbol, null) readonly modelValue = null
   readonly VST: IGlobalVST
 
   // readonly Settings: {
