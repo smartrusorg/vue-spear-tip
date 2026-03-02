@@ -134,7 +134,8 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         
-        // Отслеживание v-model
+        // @ts-expect-error Отслеживание v-model
+        if (props?.modelValue) thisProxy.modelValue = props?.modelValue
         watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
           if (val !== oldVal && val !== props?.['modelValue']) {
             context.emit('update:modelValue', val?.value ?? val ?? null)
@@ -228,7 +229,6 @@ function createComponent(constructor: any, decoratorParams: any) {
         // Синхронизация props (без .value!)
         watch(props, function (newProps: any) {
           for (const key in newProps) {
-            if (key === 'modelValue' && state[key] == newProps[key]) continue
             if (
               key in state && propsOuter?.[key]
               && state[key] !== newProps?.[key]
@@ -237,7 +237,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               && !computedState?.[key]
               && ![
                 'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent',
-                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs'
+                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs', 'modelValue'
               ].includes(key)
             ) {
               const current = state[key]
