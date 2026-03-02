@@ -139,7 +139,7 @@ function createComponent(constructor: any, decoratorParams: any) {
           if (val !== oldVal && val !== props?.['modelValue']) {
             context.emit('update:modelValue', val?.value ?? val ?? null)
           }
-        })
+        }, {immediate: true})
         
         if (schema.watchEffect && Array.isArray(schema.watchEffect)) {
           schema.watchEffect.forEach((effect) => {
@@ -237,7 +237,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               && !computedState?.[key]
               && ![
                 'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent',
-                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs', 'modelValue' // ← добавить 'modelValue'
+                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs'
               ].includes(key)
             ) {
               const current = state[key]

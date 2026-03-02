@@ -1,6 +1,6 @@
 {
   "name": "vue-spear-tip",
-  "version": "0.5.4",
+  "version": "0.5.7",
   "type": "module",
   "scripts": {
     "build": "vite build --mode examples-build",
@@ -64,6 +64,8 @@
     "flatpickr": "^4.6.13",
     "highlight.js": "^11.11.1",
     "imask": "^7.6.1",
+    "js-md5": "^0.8.3",
+    "jszip": "^3.10.1",
     "pug": "^3.0.3",
     "sass-embedded": "^1.93.2",
     "simplebar": "^6.3.3",
@@ -80,7 +82,8 @@
     "vue": "^3.5.22",
     "vue-highlight-code": "^0.2.0",
     "vue-imask": "^7.6.1",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "vue-zoomable": "^1.2.8"
   },
   "license": "MIT",
   "keywords": [
