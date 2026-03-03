@@ -61,35 +61,25 @@ function createComponent(constructor: any, decoratorParams: any) {
         const descriptors = Object.getOwnPropertyDescriptors(proto)
         
         const thisProxy: any = new Proxy({}, {
-          get(target, prop) {
+          get(t, prop) {
             if (prop in state) { // Приоритет: данные класса
               const value = state[prop]
               return isRef(value) ? value.value : value // Автоматически разворачиваем ref
             }
-            
-            // Явная обработка служебных полей
-            if (prop === '$emit') return context.emit
-            if (prop === '$props') return props
-            if (prop === '$slots') return context.slots
-            if (prop === '$attrs') return context.attrs
-            if (prop === '$nextTick') return nextTick
-            
-            // Всё остальное — из публичного экземпляра Vue (уже развёрнуто)
             return (vm.proxy as any)[prop]
           },
-          set(target, prop, value) {
+          set(t, prop, value) {
             if (prop in state) {
               const current = state[prop]
               if (isRef(current)) {
-                // Если это ref, устанавливаем его .value
                 current.value = value
                 return true
-              } else {
+              }
+              else {
                 state[prop] = value
                 return true
               }
             }
-            // Если свойство не в state, можно попытаться установить в vm.proxy (осторожно)
             (vm.proxy as any)[prop] = value
             return true
           }
@@ -100,7 +90,6 @@ function createComponent(constructor: any, decoratorParams: any) {
           const descriptor = descriptors[key]
           if (typeof descriptors[key]?.get === 'function' /*typeof descriptors[key].value === 'function' && key !== 'constructor'*/) {
             schema.computed[key] = true
-            // computedState[key] = computed(() => descriptor.get!.call(state))
             computedState[key] = computed(() => {
               const latestProto = constructor.prototype
               const latestDescriptor = Object.getOwnPropertyDescriptor(latestProto, key)
@@ -184,6 +173,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               if (key === '$emit') return context.emit
               if (key === '$slots') return context.slots
               if (key === '$attrs') return context.attrs
+              if (key === '$props') return props
               return (vm.proxy as any)[key]
             },
             enumerable: false, // Чтобы не засорять логи и циклы
@@ -215,7 +205,8 @@ function createComponent(constructor: any, decoratorParams: any) {
             currentStep++
             if (currentStep < steps) {
               nextTick(stepRunner)
-            } else {
+            }
+            else {
               // Вызываем финальный колбэк один раз в конце цепочки
               if (typeof callback === 'function' && !(callback instanceof Promise)) {
                 callback.call(thisProxy)
@@ -237,16 +228,22 @@ function createComponent(constructor: any, decoratorParams: any) {
               && !computedState?.[key]
               && ![
                 'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent',
-                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs', 'modelValue'
+                'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs'
               ].includes(key)
             ) {
-              const current = state[key]
-              if (isRef(current)) {
-                current.value = newProps[key]
-              } else {
-                state[key] = newProps[key]
+              if (key == 'modelValue') {
+                instance[key] = newProps[key]
               }
-              instance[key] = newProps[key]
+              else {
+                const current = state[key]
+                if (isRef(current)) {
+                  current.value = newProps[key]
+                }
+                else {
+                  state[key] = newProps[key]
+                }
+                instance[key] = newProps[key]
+              }
             }
           }
         }.bind(thisProxy), { immediate: true })
