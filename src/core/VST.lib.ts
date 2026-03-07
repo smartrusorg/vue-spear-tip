@@ -225,6 +225,18 @@ window.addEventListener('keydown', (e: KeyboardEvent) => {
   else if (['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12'].includes(e.code?.toLowerCase())) {
     keyName = e.code?.toLowerCase()
   }
+  else if (e.code == 'ArrowLeft') {
+    keyName = 'arrowLeft'
+  }
+  else if (e.code == 'ArrowRight') {
+    keyName = 'arrowRight'
+  }
+  else if (e.code == 'ArrowUp') {
+    keyName = 'arrowUp'
+  }
+  else if (e.code == 'ArrowDown') {
+    keyName = 'arrowDown'
+  }
   else {
     keyName = e.code?.toString().toLowerCase()
     if (typeof keyName == 'string') {

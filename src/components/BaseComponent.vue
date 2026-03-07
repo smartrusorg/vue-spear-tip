@@ -172,7 +172,7 @@ export default abstract class BaseComponent extends VueClass implements IBaseVue
   registerHotKey(key:
      '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'-'|'='|'q'|'w'|'e'|'r'|'t'|'y'|'u'|'i'|'o'|'p'|'['|']'|'a'|'s'|'d'|
      'f'|'g'|'h'|'j'|'k'|'l'|';'|"'"|'\\'|'z'|'x'|'c'|'v'|'b'|'n'|'m'|','|'.'|'/'|'f1'|'f2'|'f3'|'f4'|'f5'|'f6'|
-     'f7'|'f8'|'f9'|'f10'|'f11'|'f12',
+     'f7'|'f8'|'f9'|'f10'|'f11'|'f12'|'escape'|'enter'|'arrowLeft'|'arrowRight'|'arrowUp'|'arrowDown',
    callback: (e: Event) => any,
    ctrlOrCommand: boolean,
    alt: boolean,

@@ -9,6 +9,8 @@ import TabsKit from '../../Elements/Tabs/TabsKit.vue'
 import TextKitField from './Fields/TextKitField.vue'
 import SwitchKitField from './Fields/SwitchKitField.vue'
 import ScrollbarKit from '../../Elements/Scrollbar/ScrollbarKit.vue'
+import FilesAreaKit from '../../Fields/FilesArea/FilesAreaKit.vue'
+import FilesAreaKitField from './Fields/FilesAreaKitField.vue'
 
 export default [
   {
@@ -94,6 +96,11 @@ export default [
     name: 'Text',
     component: TextKitField
   },
+  // {
+  //   path: '/fields/files',
+  //   name: 'FilesArea',
+  //   component: FilesAreaKitField
+  // },
   {
     name: '<hr style="border: solid #ccc; border-width: 1px 0 0">',
   },

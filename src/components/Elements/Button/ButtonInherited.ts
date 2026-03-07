@@ -78,7 +78,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   currentBoxShadowColor: string|null = null
   currentColorActive: string|null = null
   innerTitle: string|null = null
-  mountedParent() {
+  createdParent() {
     this.randomClass = 'button-c' + Math.random().toString().split('.')[1]
     this.updateTheme()
     this.registerReactiveEvent(

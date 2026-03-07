@@ -6,6 +6,9 @@ export interface IGlobalVST {
   /** Параметры, которые будут отработаны реактивно внутри шаблонов */
   $reactive: IGlobalReactiveElements
   
+  // TODO Подумать над langs
+  $lang: {[key: string]: string}
+  
   /**
    * Подписаться на событие
    * @param event
