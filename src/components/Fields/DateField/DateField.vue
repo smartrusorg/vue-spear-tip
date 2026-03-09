@@ -10,10 +10,17 @@
     div(
       class=`flex items-center min-w240px h100% bg-white rounded-3xl justify-center text-stone w100%`
       v-if="!value"
+      :class=`{
+       // 'h20px' : true,
+      }`
     )
       div(
-        class=`h[calc(100%-2px)]! h44px! text-stone border-y-solid border-l-solid rounded-l-3xl
+        class=`h[calc(100%-2px)]! text-stone border-y-solid border-l-solid rounded-l-3xl
           cursor-pointer px10px border-1px! flex items-center border-#D0CCC9FF`
+        :class=`{
+          'h44px!' : size == 'lg',
+          'h35px! pt4px' : size == 'md',
+        }`
       )
         div
           .vst-date-field-calendar-icon(
@@ -27,11 +34,13 @@
         @focusin="!disabled ? addDate() : null"
         @click="!disabled ? addDate() : null"
         class=`flex items-center min-w240px bg-white rounded-r-3xl justify-center text-#c1c7cf
-            border-solid border-solid border-1px w100% z2
-            mx-auto min-h44px! cursor-text my1px`
+            border-solid border-solid border-1px w100% z2 fs-1rem text-#c1c7cf!
+            mx-auto cursor-text my1px`
         :class=`{
           'hover:border-stone hover:text-stone border-#c1c7cf' : !disabled,
           'border-#D0CCC9FF cursor-no-drop' : disabled,
+          'min-h44px!' : size == 'lg',
+          'min-h35px!' : size == 'md',
         }`
       ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
     // @blur="v => _onBlur(v)"
@@ -40,6 +49,12 @@
       :maskPreset
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
       class=`z2`
+      :style=`{
+        // 'height': '10px !important',
+      }`
+      :class=`{
+        'h33px!': size == 'md',
+      }`
       @focus="inputFocus()"
       @change="(v, reset) => changeInput(v, reset)"
       @dateMaskChange="dateMaskChange"
@@ -50,11 +65,15 @@
       @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
       @reset="onReset"
       ref="VSTStringField"
+      :size
     )
       template(#start v-if="!disabled")
         .vst-date-field-calendar-icon(
           class="w24px h24px text-stone cursor-pointer hover:scale-130 w100% mx5px"
           v-if="!disabled"
+          :class=`{
+            'pt2px' : size == 'md',
+          }`
         )
           CalendarDaysIcon(
             @click="value ? inputFocus() : addDate()"
@@ -67,6 +86,7 @@
         @mousedown.prevent
       )
     component(is="style" v-if="!showCalendar") .flatpickr-calendar {display: none !important}
+    component(is="style" v-if="size == 'md'") .vst-date-field input {height: 100% !important}
     component(is="style") .flatpickr-calendar {box-shadow: 0px 2px 13px var(--un-shadow-color, rgb(193 193 193)) !important}
     //div {{ value }}
 </template>
@@ -557,7 +577,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       @apply border-#d6ff63! border-width-1px! shadow-none! outline-solid-stone outline-2px
 
   input
-    @apply px-5px border bg-white cursor-pointer min-w240px 1rem! h28px! py0
+    @apply px-5px border bg-white cursor-pointer min-w240px 1rem! py0
     @apply user-select-none w[calc(100%-12px)]
     @apply border-y-1px border-y-#c1c7cf border-t-solid text-center
     @apply disabled:(bg-gray-100 cursor-not-allowed)

@@ -58,6 +58,22 @@
                 mask="+7 (999) 999-99-99"
                 :alwaysCopyIcon="true"
               )
+            .col-6
+              b.text-center Disabled
+              DateField(
+                size="md"
+                :withTime="true"
+                inputValue="2012-12-12 00:01:22"
+              )
+            .col-6
+              span.text-center
+                b InputMask StringField
+                span  to check compatibility
+              StringField(
+                size="md"
+                mask="+7 (999) 999-99-99"
+                :alwaysCopyIcon="true"
+              )
         //template(#$title-props) 123123
         template(#props)
           CodeHighlight(

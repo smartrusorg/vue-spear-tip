@@ -5,10 +5,18 @@
     data-offset="[-15, 15]"
     :class=`{
       'min-w64px': type != 'checkbox',
+      '44px!' : size == 'lg',
+      'h25px!' : size == 'md',
     }`
   )
     | &nbsp;
-    .switch(:class="disabled ? 'disabled' : ''" v-if="type == 'switcher'")
+    .switch(
+      v-if="type == 'switcher'"
+      :class=`{
+        'min-h25px! scale-80' : size == 'md',
+        'disabled' :disabled,
+      }`
+    )
       .switch_box
         div(@click="!disabled ? (value = !value) : null" class="cursor-pointer fs-1rem mb2px")
           slot
@@ -164,7 +172,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 <style lang="sass">
 .container-switch
   @apply h100% p-0 m-0 text-center z-10! flex! user-select-none
-  @apply min-h44px
 .switch
   @apply z-10! rounded-15px relative!
   input
@@ -307,7 +314,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
 .typical-checkbox
-  @apply flex px10px min-h44px! items-center mx-auto
+  @apply flex px10px items-center mx-auto
   label.check
     @apply rounded-3px flex! items-center justify-center
     display: inline-block

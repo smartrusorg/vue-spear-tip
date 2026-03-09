@@ -55,7 +55,7 @@
 
               'min-h45px fs-1rem' : size == 'lg',
               'h24px': size == 'sm',
-              'h35px fs-0.9rem pt5px': size == 'md',
+              'h35px fs-0.9rem pt4px': size == 'md',
             }`
             :disabled
             :placeholder
@@ -169,6 +169,9 @@
           NoSymbolIcon(
             v-else
             @click="onReset()"
+            :class=`{
+              'scale-75 mt--3px': size == 'md' && (maskPreset == 'datetime' || maskPreset == 'datetimeSec'),
+            }`
           )
 
       div(
@@ -833,7 +836,7 @@ import IMask from 'imask'
 
 <style scoped lang="sass">
 input
-  @apply w100%! border-0 border-color-#c1c7cf border-solid border-y-1px!
+  @apply w100%! border-0 border-stone-400/60 border-solid border-y-1px!
   @apply outline-stone-400 outline-1px focus:bg-white bg-white
   &[disabled]
     @apply bg-stone-200 text-stone-500!

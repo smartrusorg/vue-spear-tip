@@ -3,10 +3,36 @@
     class="d-inline-block mx2px my1px w100%"
     :class=`{
       'vst-select-multi': mode == 'multi' || mode == 'tags',
+      'h45px' : size == 'lg',
+      'h24px': size == 'sm',
+      'h35px': size == 'md',
+      ['vst-select-'+randKey]: true,
     }`
   )
-    input(ref="selectInput" :id="randKey" :value="reactiveValue" :autofocus)
-
+    input(ref="selectInput" :id="`vst-s-${randKey}`" :value="reactiveValue" :autofocus)
+    component(is="style" v-if="(size == 'md' || size == 'sm') && mode == 'select'").
+      .vst-select-field.vst-select-{{randKey}} .tagify {
+        height: 35px !important;
+        min-height: auto !important;
+        padding-left: 12px !important;
+        padding-top: 2px !important;
+        border-color: #a8a29e99 !important;
+      }
+      .vst-select-field.vst-select-{{randKey}} .tagify__tag {
+        height: 33px !important;
+      }
+      .vst-select-field.vst-select-{{randKey}} .tagify__input {
+        height: 20px !important;
+        padding: 0 !important;
+      }
+      .vst-select-field.vst-select-{{randKey}} .tagify__tag-text {
+        padding: 0 0 0 0 !important;
+      }
+      .vst-select-dropdown-{{randKey}} .tagify__dropdown__item  {
+        height: 32px !important;
+        line-height: 29px !important;
+        padding: 1px 7px 3px  !important;
+      }
     //svg(
     //  data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
     //)
@@ -46,7 +72,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   tagify: TagifyEsm
   reactiveValue: any = null
-  randomClass: string = ''
   itemsInner: any[] = []
   randKey: string = ''
   createdParent() {
@@ -56,13 +81,16 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
 
   beforeMountParent() {
-    this.randomClass = 'vst-select-'+Math.random().toString().split('.')[1]
     this.isFirstValueSet = false
     this.isIgnoreSetTags = false
   }
 
   private isFirstValueSet: boolean = false
   private isIgnoreSetTags: boolean = false
+  beforeUpdate() { // @ts-expect-error
+    this.$el.__vst_select = this
+  }
+
   mountedParent() {
     let settings: Tagify.TagifySettings = {
       mode: this.mode == 'select' ? 'select' : undefined,
@@ -229,7 +257,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                  tabIndex="${isFocusable}"
                  class="${s.classNames.tagX}"
                  role="button"
-                 aria-label="remove tag"></x>
+                 aria-label="remove tag"
+                 onmousedown="this.closest('.vst-select-field').__vst_select.reset()"></x>
 
               <div>
                 <span class="${s.classNames.tagText}"
@@ -266,11 +295,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           const { templates: t } = this.settings // @ts-ignore
           const suggestions = this.state.dropdown.suggestions
 
-          return `
+          return `<div class="vst-select-dropdown-${ // @ts-expect-error
+              this.DOM.originalInput?.closest?.('.vst-select-field')?.__vst_select?.randKey
+          }">
             ${t.dropdownHeader.call(this, suggestions)}
             ${suggestionsHTML}
             ${t.dropdownFooter.call(this, suggestions)}
-          `.replace(/\s+/g, ' ').trim()
+          </div>`.replace(/\s+/g, ' ').trim()
         },
 
         // 6. Элемент списка (Suggestion)
@@ -318,21 +349,29 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         }
       }
     }
-    this.tagify = new TagifyEsm(this.$el.querySelector(`#${this.randKey}`), settings)
-    this.tagify.setDisabled(this.disabled)
-    this.tagify.loading(this.loading)
-    this.tagify.on('input', (e:any) => {
-      this.$emit('input', this.currentSearchValue = e?.detail?.value ?? '')
-    })
-    this.tagify.on('blur', (e:any) => { // Оставляем загрузку, если включена
-      this.nextTick(() => {
-        this.tagify?.loading?.(this.loading)
-        this.tagify?.setDisabled?.(this.disabled)
+    this.nextTick(() => {
+      this.tagify = new TagifyEsm(this.$el.querySelector(`#vst-s-${this.randKey}`), settings)
+      this.tagify.setDisabled(this.disabled)
+      this.tagify.loading(this.loading)
+      this.tagify.on('input', (e:any) => {
+        this.$emit('input', this.currentSearchValue = e?.detail?.value ?? '')
       })
+      this.tagify.on('blur', (e:any) => { // Оставляем загрузку, если включена
+        this.nextTick(() => {
+          this.tagify?.loading?.(this.loading)
+          this.tagify?.setDisabled?.(this.disabled)
+        })
+      })
+      this.setTags()
     })
-    this.setTags()
   }
   currentSearchValue: string = ''
+
+  reset() {
+    this.value = this.reactiveValue = null
+    this.tagify?.removeAllTags?.() // @ts-expect-error
+    this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
+  }
 
   setTags() {
     // console.log('set tags', this)
@@ -340,9 +379,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     if (this.mode == 'select'){
       // console.log('select tags', this)
       const value = (
-        this.itemsInner.find(v => (v?.key || v?.value) === (this.inputValue || this.modelValue))?.value ?? null
+        this.itemsInner.find(v => (
+          v?.key === 0 ? v?.key : (v?.key || v?.value)
+        ) === (this.inputValue || this.modelValue))?.value ?? null
       )
-      if (value) {
+      if (value || value === 0) {
         this.isFirstValueSet = true
         this.value = value
         this.tagify?.addTags(this.value ?? '')
@@ -437,11 +478,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 .tagify__tag__removeBtn
   @apply h25px! w25px text-stone!
-  //content: url("ban.svg") !important
   mask-image: url("ban.svg")
   -webkit-mask-size: contain
   mask-size: contain
   mask-repeat: no-repeat
+  touch-action: auto
 
   /* Цвет иконки */
   @apply bg-stone
@@ -471,7 +512,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
   .tagify
     outline: 2px solid transparent !important
-    @apply min-h44px! flex! items-center justify-center rounded-3xl
+    @apply flex! items-center justify-center rounded-3xl
     --tags-border-color: #c1c7cf !important
     --tag-hide-transition: .1ms !important
     transition: 100ms !important

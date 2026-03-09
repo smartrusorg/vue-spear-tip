@@ -72,6 +72,49 @@
               placeholder="Select tags values with preset"
               :items="selectTagsItems"
             )
+          .col-6(class="px30px")
+            b Large
+            SelectField(
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
+          .col-6(class="px30px")
+            b Middle
+            SelectField(
+              size="md"
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
+          .col-6(class="px30px")
+            b Small
+            SelectField(
+              size="sm"
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
+          .col-6(class="px30px")
+            b Large
+            SelectField(
+              mode="multi"
+              placeholder="Select tags values with preset"
+              :items="selectTagsItems"
+            )
+          .col-4(class="px30px")
+            b Middle
+            SelectField(
+              size="md"
+              mode="multi"
+              placeholder="Select tags values with preset"
+              :items="selectMultiItems"
+            )
+          .col-8(class="px30px")
+            b Small
+            SelectField(
+              size="sm"
+              mode="multi"
+              :items="selectMultiItems"
+              placeholder="Select tags values with preset"
+            )
 
 </template>
 

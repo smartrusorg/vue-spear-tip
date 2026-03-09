@@ -13,7 +13,7 @@
     @mouseleave="dropZoneDroppable = false"
     class="relative "
   )
-    .dropzone-active(@click="fileUpload" class="w100%")
+    .dropzone-active(class="w100%")
       div(v-if="onlyImages")
         span(v-if="maxNumberOfFiles == 1 && files.length" ) Заменить файл <i class="fa fa-duotone fa-arrows-rotate-reverse"></i>
         span(v-else) Для загрузки изображений бростье их в этот блок или кликните по нему
@@ -50,7 +50,6 @@
       div(v-show="!files.length")
       .dropzone-empty-files(
         v-if="!files.length"
-        @click="fileUpload"
         :class="{'dropzone-empty-files-blocked':!canChange}"
         class="text-#dfa955 hover:color-red w100%"
       )
@@ -60,7 +59,6 @@
             i.fa-duotone.fa-cloud-arrow-up(class="text-35px mx-2 top-4")
         span(v-else style="color: #b3b3b3; user-select: none") Файлов нет
           br
-          | Добавление новых ограничено
           | Добавление новых ограничено
       //- Просмотр файлов
       ViewerFilesField(
@@ -99,7 +97,7 @@
           'fa-sync': onUploadInProcess && (files.length != maxNumberOfFiles || maxNumberOfFiles == 0),
           'text-primary': files.length < maxNumberOfFiles || !maxNumberOfFiles,
         }`
-          @click="fileUpload"
+          @clickTap="fileUpload"
           title="Загрузить файл"
           v-if="canChange"
           class="mb-5px"
@@ -196,7 +194,7 @@
           }`
           type="button"
           title="Скачать в виде .zip архива"
-          @click="fileDownloadAll"
+          @clickTap="fileDownloadAll"
           :disabled="!totalFiles || onZipDownloadInProcess || onUploadInProcess"
         )
           svg(
@@ -323,6 +321,11 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   editFileIndex: null|number = null
   editFileExt: string = ''
   editFileName: string = ''
+
+  created() {
+    this.registerReactiveEvent('tap', '.dropzone-active', this.fileUpload)
+    this.registerReactiveEvent('tap', '.dropzone-empty-files', this.fileUpload)
+  }
 
   mounted() {
     this.deleteFileTimeouts = []

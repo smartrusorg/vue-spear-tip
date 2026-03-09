@@ -106,6 +106,15 @@
             :inputValue="true"
             :disabled="true"
           )
+        .col-2
+          SwitchField(
+            :inputValue="true"
+          )
+        .col-2
+          SwitchField(
+            size="md"
+            :inputValue="true"
+          )
 </template>
 
 

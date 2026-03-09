@@ -52,7 +52,6 @@
         :title="canChange && !file.deleted ? `<i class='text-lime'><b>Клик</b>: переименовать</i>` : null"
         data-placement="left"
         class="cursor-text text-center"
-        @click="canChange ? $emit('rename', file) : null"
       )
         b {{ fileName.split('.').slice(0, -1).join('.') }}
     .file-content(
@@ -140,7 +139,6 @@
           title="Посмотреть содержимое"
           data-theme="yellow"
           data-placement="bottom"
-          @click="$emit('view', fileName)"
           class="z2"
         )
           svg(
@@ -293,6 +291,15 @@ import IFilesField from '../IFilesField'
   
   created() {
     this.fileExt = this.fileName?.split?.('.')?.pop()?.trim() ?? ''
+
+    this.registerReactiveEvent(
+      'tap', '.file-view-text', () => this.$emit('view', this.fileName)
+    )
+    this.registerReactiveEvent(
+      'tap', '.file-title > div', () => this.canChange
+        ? this.$emit('rename', this.file)
+        : null
+    )
   }
 
   mounted() {
