@@ -66,6 +66,7 @@
         :files
         :docViewComponent
         :excelViewComponent
+        :videoViewComponent
         ref="viewer"
         @download="fileDownload"
         @viewerOpened="$emit('viewerOpened')"
@@ -302,6 +303,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   @Prop(String, null) readonly docViewComponent: string|null = ''
   @Prop(String, null) readonly excelViewComponent: string|null = ''
+  @Prop(String, null) readonly videoViewComponent: string|null = ''
 
   totalSize = 0
   totalFiles = 0

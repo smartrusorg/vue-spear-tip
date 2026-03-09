@@ -8,8 +8,8 @@
     //@click="!$root.APP.hasTouchpad ? addDate() : null"
     //@touchstart="$root.APP.hasTouchpad ? addDate() : null"
     div(
-      class=`flex items-center min-w240px h100% bg-white rounded-3xl justify-center text-stone w100%`
-      v-if="!value"
+      class=`flex items-center h100% bg-white rounded-3xl justify-center text-stone w100%`
+      v-show="!value"
       :class=`{
        // 'h20px' : true,
       }`
@@ -33,7 +33,7 @@
         tabindex="-1"
         @focusin="!disabled ? addDate() : null"
         @click="!disabled ? addDate() : null"
-        class=`flex items-center min-w240px bg-white rounded-r-3xl justify-center text-#c1c7cf
+        class=`flex items-center bg-white rounded-r-3xl justify-center text-#c1c7cf
             border-solid border-solid border-1px w100% z2 fs-1rem text-#c1c7cf!
             mx-auto cursor-text my1px`
         :class=`{
@@ -50,7 +50,7 @@
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
       class=`z2`
       :style=`{
-        // 'height': '10px !important',
+        // 'width': '170px !important',
       }`
       :class=`{
         'h33px!': size == 'md',
@@ -148,7 +148,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   /** Максимальная дата для выбора. Будет наложено поверх maxField при его наличии. */
   @Prop(String, Number, Date) readonly max: string|number|Date = 0
-  /** Минимальная дата для выбора. Будет наложено поверх maxField при его наличии. */
+  /** Минимальная дата для выбора. Будет наложено поверх minField при его наличии. */
   @Prop(String, Number, Date) readonly min: string|number|Date = 0
 
   /** Поле даты, в котором указывается максимальная возможная дата и время для текущего. */
@@ -183,7 +183,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   maskPreset: 'date'|'datetime'|'datetimeSec' = 'date'
   showCalendar: boolean = true
   DT: Temporal.ZonedDateTime|null = null
-  beforeMount() {
+  created() {
     if (this.withTime) {
       this.maskPreset = 'datetime'
       if (this.withSeconds) {
@@ -205,6 +205,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       this.nextTick(() => {
         if (this.value) {
           this.addDate()
+          this.onValueChange()
         }
       })
     })
@@ -446,8 +447,13 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   onReset() {
     if (this.withTime) {
-      this.value = ''
-      this.fp?.open?.()
+      // this.value = null
+      // this.fp?.open?.()
+      this.nextTick(() => this.fp?.open?.())
+      this.nextTick(() => this.$emit('update:modelValue', this.value = null), 5)
+    }
+    else {
+      this.$emit('update:modelValue', null)
     }
   }
 
@@ -577,8 +583,8 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       @apply border-#d6ff63! border-width-1px! shadow-none! outline-solid-stone outline-2px
 
   input
-    @apply px-5px border bg-white cursor-pointer min-w240px 1rem! py0
-    @apply user-select-none w[calc(100%-12px)]
+    @apply px-5px border bg-white cursor-pointer 1rem! py0 w-auto min-w-auto!
+    @apply user-select-none
     @apply border-y-1px border-y-#c1c7cf border-t-solid text-center
     @apply disabled:(bg-gray-100 cursor-not-allowed)
     &:focus
@@ -657,7 +663,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     .flatpickr-weekday
       @apply text-gray-400! self-start text-gray-500! op-80
   .dayContainer
-    @apply py4px px5px grid grid-cols-7 gap-1 items-center justify-items-center w240px! max-w240px! min-w-auto!
+    @apply py4px px5px grid grid-cols-7 gap-1 items-center justify-items-center min-w-auto!
 
 
 // Кастомизация flatpickr

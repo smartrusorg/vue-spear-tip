@@ -19,7 +19,7 @@
         border-color: #a8a29e99 !important;
       }
       .vst-select-field.vst-select-{{randKey}} .tagify__tag {
-        height: 33px !important;
+        height: 28px !important;
       }
       .vst-select-field.vst-select-{{randKey}} .tagify__input {
         height: 20px !important;
@@ -32,6 +32,18 @@
         height: 32px !important;
         line-height: 29px !important;
         padding: 1px 7px 3px  !important;
+      }
+      .vst-select-field.vst-select-{{randKey}} .tagify--select tag > div,
+      .vst-select-field.vst-select-{{randKey}} .tagify--select tag,
+      .vst-select-field.vst-select-{{randKey}} .tagify__tag,
+      {
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 20px !important;
+      }
+    component(is="style").
+      .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
+        max-width: {{ maxPlaceholderWidth ? maxPlaceholderWidth+'px' : 'auto' }};
       }
     //svg(
     //  data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
@@ -74,6 +86,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   reactiveValue: any = null
   itemsInner: any[] = []
   randKey: string = ''
+  maxPlaceholderWidth: number = 0
   createdParent() {
     super.createdParent()
     this.value = this.inputValue || this.modelValue || null
@@ -87,9 +100,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
   private isFirstValueSet: boolean = false
   private isIgnoreSetTags: boolean = false
-  beforeUpdate() { // @ts-expect-error
-    this.$el.__vst_select = this
-  }
 
   mountedParent() {
     let settings: Tagify.TagifySettings = {
@@ -365,6 +375,18 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.setTags()
     })
   }
+
+  resizeObserver: ResizeObserver|null = null
+  observedElement: HTMLElement|null = null
+  beforeUpdate() { // @ts-expect-error
+    this.$el.__vst_select = this
+    const w = this.$el.querySelector?.('.tagify__input')?.closest?.('.vst-select-field')?.offsetWidth ?? 0
+    if (w) {
+      this.maxPlaceholderWidth = w - w * 0.25
+    }
+  }
+
+
   currentSearchValue: string = ''
 
   reset() {
@@ -373,40 +395,47 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
   }
 
+  onViewPortResize() {
+    this.setTags()
+  }
+
   setTags() {
     // console.log('set tags', this)
-    this.tagify?.removeAllTags?.()
-    if (this.mode == 'select'){
-      // console.log('select tags', this)
-      const value = (
-        this.itemsInner.find(v => (
-          v?.key === 0 ? v?.key : (v?.key || v?.value)
-        ) === (this.inputValue || this.modelValue))?.value ?? null
-      )
-      if (value || value === 0) {
-        this.isFirstValueSet = true
-        this.value = value
-        this.tagify?.addTags(this.value ?? '')
-      }
-    }
-    else if (this.mode == 'multi'){
-      const val = this.inputValue || this.modelValue
-      if (Array.isArray(val)) {
-        this.isFirstValueSet = true
-        this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
-        this.tagify?.addTags(this.value ?? '')
-      }
-    }
-    else if (this.mode == 'tags'){
-      const val =  this.inputValue || this.modelValue
-      if (Array.isArray(val)) {
-        this.isFirstValueSet = true
-        this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter(
-          (v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value))
+    this.beforeUpdate()
+    this.nextTick(() => {
+      this.tagify?.removeAllTags?.()
+      if (this.mode == 'select'){
+        // console.log('select tags', this)
+        const value = (
+            this.itemsInner.find(v => (
+                v?.key === 0 ? v?.key : (v?.key || v?.value)
+            ) === (this.inputValue || this.modelValue))?.value ?? null
         )
-        this.tagify?.addTags(this.value ?? '')
+        if (value || value === 0) {
+          this.isFirstValueSet = true
+          this.value = value
+          this.tagify?.addTags(this.value ?? '')
+        }
       }
-    }
+      else if (this.mode == 'multi'){
+        const val = this.inputValue || this.modelValue
+        if (Array.isArray(val)) {
+          this.isFirstValueSet = true
+          this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
+          this.tagify?.addTags(this.value ?? '')
+        }
+      }
+      else if (this.mode == 'tags'){
+        const val =  this.inputValue || this.modelValue
+        if (Array.isArray(val)) {
+          this.isFirstValueSet = true
+          this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter(
+              (v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value))
+          )
+          this.tagify?.addTags(this.value ?? '')
+        }
+      }
+    })
   }
 
   @Watch('items', true, true) itemsWatch(items: any) {
@@ -421,7 +450,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('modelValue', true) modelValueWatch(modelValue: any) {
     if (this.isIgnoreSetTags) return this.isIgnoreSetTags = false
-    this.nextTick(() => this.setTags())
+    this.nextTick(() => this.setTags(), 2)
   }
   @Watch('disabled', true, true) disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
@@ -531,6 +560,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   .tagify--empty
     .tagify__input:before
       @apply color-#c1c7cf!
+      white-space: nowrap
+      overflow: hidden
+      text-overflow: ellipsis
 
   .tagify--empty.tagify--select
     @apply text-stone

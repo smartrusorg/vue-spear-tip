@@ -15,14 +15,20 @@
         }`
     )
       div(class="text-stone w25px z999")
-        NoSymbolIcon.vst-text-field-reset(v-show="!preResetValue" class="pointer-events-auto cursor-pointer hover:scale-130")
+        NoSymbolIcon(
+          v-show="!preResetValue"
+          class="pointer-events-auto cursor-pointer hover:scale-130"
+          @click="!VST.$reactive.hasTouchpad ? resetValue() : null"
+          @touchstart="VST.$reactive.hasTouchpad ? resetValue() : null"
+        )
         svg(
           v-show="preResetValue"
           xmlns="http://www.w3.org/2000/svg"
           width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="w25px h25px text-teal-500 absolute r-12px z4 cursor-pointer hover:scale-13 pointer-events-auto cursor-pointer hover:scale-130"
-          @click="restoreValue"
+          @click="!VST.$reactive.hasTouchpad ? restoreValue() : null"
+          @touchstart="VST.$reactive.hasTouchpad ? restoreValue() : null"
         )
           path(stroke="none" d="M0 0h24v24H0z" fill="none")
           path(d="M9 14l-4 -4l4 -4")
@@ -665,7 +671,6 @@ import SimpleBar from 'simplebar'
 
 
   mounted() {
-    this.registerReactiveEvent('tap', '.vst-text-field-reset', this.resetValue)
     this.value = (this.inputValue || this.modelValue || '')
 
     // Блокируем горизонтальную прокрутку
@@ -1067,12 +1072,11 @@ import SimpleBar from 'simplebar'
     }
   }
 
-  resetValue(e: BaseComponentEventInput) {
-    console.log('reset')
+  resetValue() {
     this.preResetValue = this.value
     this.editor.chain().clearContent().focus().run()
   }
-  restoreValue(e: BaseComponentEventInput) {
+  restoreValue() {
     if (this.preResetValue) {
       this.editor?.commands?.setContent?.(this.value = this.preResetValue, false)
     }

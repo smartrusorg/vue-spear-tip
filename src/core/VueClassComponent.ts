@@ -50,7 +50,7 @@ function createComponent(constructor: any, decoratorParams: any) {
       components: {...inst.componentsParent, ...inst.components},
       inject: {...inst.injectParent, ...inst.inject},
       provide: {...inst.provideParent, ...inst.provide},
-      emits: [...new Set([...(inst.emitsParent || []), ...(inst.emits || [])])],
+      emits: [...new Set([...(inst.emitsParent || []), ...(inst.emits || []), ...['update:modelValue']])],
       setup(props, context) {
         const vm = getCurrentInstance()! // Получаем внутренний экземпляр Vue
         const instance = new constructor()
@@ -123,12 +123,14 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         
-        // @ts-expect-error Отслеживание v-model
-        if (props?.modelValue) thisProxy.modelValue = props?.modelValue
+        // Отслеживание v-model
         watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
           if (val !== oldVal && val !== props?.['modelValue']) {
             context.emit('update:modelValue', val?.value ?? val ?? null)
           }
+        }, {immediate: true}) // @ts-expect-error
+        watch(() => props?.modelValue, (val, oldVal) => {
+          thisProxy.modelValue = val
         }, {immediate: true})
         
         if (schema.watchEffect && Array.isArray(schema.watchEffect)) {

@@ -50,7 +50,8 @@
               'rounded-r-3xl border-r-1px! pr35px' : !endText && !endIcon && !$slots.end,
               'border-r-0!': endText || endIcon || $slots.end,
               // fixme костыль при вставленном блоке даты, переделать когда будет какая-то общая концепция по размерам блоков
-              'pr65px!': isDateTime && (startText || startIcon || $slots.start),
+              'w100%! pr40px! pt4px!': (isDateTime && (startText || startIcon || $slots.start || disabled)) && size != 'md',
+              'w100%! pr40px!': (isDateTime && (startText || startIcon || $slots.start || disabled)) && size == 'md',
               // 'rounded-l-none!' : !startText && !startIcon && !$slots.start,
 
               'min-h45px fs-1rem' : size == 'lg',
@@ -123,9 +124,12 @@
           //- Идентификатор часового пояса, при выборе маски даты со временем
           div(
             v-if="maskPreset == 'datetime' || maskPreset == 'datetimeSec'"
-            class="absolute! r-15px! t-2 fs-0.7rem text-stone-500 hover:scale-110 hover:fw-bold"
+            class="absolute! r-17px! t-2  fs-0.7rem text-stone-500 hover:scale-110 hover:fw-bold"
             :style=`{
               pointerEvents: disabled ? 'none !important' : undefined,
+            }`
+            :class=`{
+              '-translate-y-3px': size == 'md',
             }`
           ) {{ utc }}
 
@@ -151,7 +155,7 @@
           :class=`{
              't-15px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'lg',
              't-9px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'lg',
-             't-10px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'md',
+             't-13px!': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'md',
              't-6px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'md',
           }`
         )
@@ -836,7 +840,7 @@ import IMask from 'imask'
 
 <style scoped lang="sass">
 input
-  @apply w100%! border-0 border-stone-400/60 border-solid border-y-1px!
+  @apply w100% border-0 border-stone-400/60 border-solid border-y-1px!
   @apply outline-stone-400 outline-1px focus:bg-white bg-white
   &[disabled]
     @apply bg-stone-200 text-stone-500!

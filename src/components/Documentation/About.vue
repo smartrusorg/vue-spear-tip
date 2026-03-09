@@ -232,6 +232,7 @@ import 'uno.css'
     this.selectMultiItems = [{key:1, value: 'Test'}, {key:2, value: 'Second value'}, {key:3, value: 'Third'}]
     this.selectTagsItems = [{key:1, value: 'Test'}, {key:2, value: 'Second value'}, {key:4, value: 'Fourth'}]
     setTimeout(() => this.selectOnce = 3, 2000)
+    setTimeout(() => this.selectOnce = 1, 5000)
     setTimeout(() => this.selectMulti = [1,3], 1000)
     setTimeout(() => this.selectOnceItems.push({ "key": 3, "value": "S3" }), 1000)
     setTimeout(() => this.selectOnceItems.push({ "key": 9, "value": "Some 9" }), 6000)

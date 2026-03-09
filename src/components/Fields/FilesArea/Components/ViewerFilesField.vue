@@ -87,27 +87,31 @@
           :uri="currentFile?.uri"
         )
       div(v-else-if="fileType == 'video'")
-        div video
+        component(
+          :is="videoViewComponent"
+          :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
+          :ext="currentFile?.ext"
+          :uri="currentFile?.uri"
+          :size="currentFile?.size"
+        )
       div(v-else-if="fileType == 'archive'")
         div archive
       div(v-else-if="fileType == 'excel' && excelViewComponent")
-        div
-          component(
-            :is="excelViewComponent"
-            :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
-            :ext="currentFile?.ext"
-            :uri="currentFile?.uri"
-            :size="currentFile?.size"
-          )
+        component(
+          :is="excelViewComponent"
+          :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
+          :ext="currentFile?.ext"
+          :uri="currentFile?.uri"
+          :size="currentFile?.size"
+        )
       div(v-else-if="fileType == 'doc' && docViewComponent")
-        div
-          component(
-            :is="docViewComponent"
-            :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
-            :ext="currentFile?.ext"
-            :size="currentFile?.size"
-            :uri="currentFile?.uri"
-          )
+        component(
+          :is="docViewComponent"
+          :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
+          :ext="currentFile?.ext"
+          :size="currentFile?.size"
+          :uri="currentFile?.uri"
+        )
       div(v-else-if="currentFile.ext == 'pdf'")
         PDFViewerFilesField(
           :fileName="currentFile?.name.split('.').slice(0, -1).join('.')"
@@ -142,6 +146,7 @@ import PDFViewerFilesField from './Viewer/PDFViewerFilesField.vue'
   @Prop(Array, null) readonly files: FileFieldItemInterface[] = []
   @Prop(String, null) readonly docViewComponent: string|null = ''
   @Prop(String, null) readonly excelViewComponent: string|null = ''
+  @Prop(String, null) readonly videoViewComponent: string|null = ''
   currentKey: number = 0
 
   created() {
