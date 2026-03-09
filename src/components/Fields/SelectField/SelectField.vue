@@ -379,7 +379,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   resizeObserver: ResizeObserver|null = null
   observedElement: HTMLElement|null = null
   beforeUpdate() { // @ts-expect-error
-    this.$el.__vst_select = this
+    this.$el.__vst_select = this // @ts-expect-error
     const w = this.$el.querySelector?.('.tagify__input')?.closest?.('.vst-select-field')?.offsetWidth ?? 0
     if (w) {
       this.maxPlaceholderWidth = w - w * 0.25
@@ -390,9 +390,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   currentSearchValue: string = ''
 
   reset() {
-    this.value = this.reactiveValue = null
     this.tagify?.removeAllTags?.() // @ts-expect-error
     this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
+    this.nextTick(() => this.$emit('update:modelValue', this.reactiveValue = null), 4)
   }
 
   onViewPortResize() {

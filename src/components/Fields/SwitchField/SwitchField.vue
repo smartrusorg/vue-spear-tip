@@ -154,7 +154,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   emits = ['update:modelValue', 'change']
 
+
   onValueChange() {
+    if (this.ignoreOuter) return this.ignoreOuter = false
     this.$emit('update:modelValue', this.value)
     this.$emit('change', this.value)
   }
@@ -162,7 +164,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   randomId: string = ''
 
 
+  ignoreOuter: boolean = false
   @Watch('modelValue', true) modelValueChanged(value: any) {
+    this.ignoreOuter = true
     this.setValue(value)
   }
 }
