@@ -57,8 +57,7 @@ function createComponent(constructor: any, decoratorParams: any) {
         const state = reactive(instance)
         
         const computedState: any = {}
-        const proto = Object.getPrototypeOf(instance)
-        const descriptors = Object.getOwnPropertyDescriptors(proto)
+        const descriptors = getAllDescriptors(instance)
         
         const thisProxy: any = new Proxy({}, {
           get(t, prop) {
@@ -87,7 +86,6 @@ function createComponent(constructor: any, decoratorParams: any) {
         
         // Автоматическое создание computed из геттеров
         for (const key in descriptors) {
-          const descriptor = descriptors[key]
           if (typeof descriptors[key]?.get === 'function' /*typeof descriptors[key].value === 'function' && key !== 'constructor'*/) {
             schema.computed[key] = true
             computedState[key] = computed(() => {
@@ -102,36 +100,6 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         
-        
-        // Обработка прослушивателей
-        if ((schema as WatchSchemeReal).watch) {
-          for (const methodName in schema.watch) {
-            watch(
-              () => thisProxy?.[schema.watch[methodName].propertyName],
-              // обработчик
-              (newValue, oldValue) => {
-                const method = constructor.prototype[methodName]
-                if (typeof method === 'function') {
-                  method.call(thisProxy, newValue, oldValue)
-                }
-              },
-              {
-                immediate: schema.watch[methodName].immediate,
-                deep: schema.watch[methodName].deep
-              }
-            )
-          }
-        }
-        
-        // Отслеживание v-model
-        watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
-          if (val !== oldVal && val !== props?.['modelValue']) {
-            context.emit('update:modelValue', val?.value ?? val ?? null)
-          }
-        }, {immediate: true}) // @ts-expect-error
-        watch(() => props?.modelValue, (val, oldVal) => {
-          thisProxy.modelValue = val
-        }, {immediate: true})
         
         if (schema.watchEffect && Array.isArray(schema.watchEffect)) {
           schema.watchEffect.forEach((effect) => {
@@ -175,6 +143,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               if (key === '$emit') return context.emit
               if (key === '$slots') return context.slots
               if (key === '$attrs') return context.attrs
+              if (key === '$refs') return vm.refs
               if (key === '$props') return props
               return (vm.proxy as any)[key]
             },
@@ -192,7 +161,39 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         Object.assign(state, methods)
+        Object.assign(thisProxy, methods)
         state.name = constructor.name
+        
+        // Обработка прослушивателей
+        if ((schema as WatchSchemeReal).watch) {
+          for (const methodName in schema.watch) {
+            watch(
+              () => thisProxy?.[schema.watch[methodName].propertyName],
+              // обработчик
+              (newValue, oldValue) => {
+                const method = constructor.prototype[methodName]
+                if (typeof method === 'function') {
+                  method.call(thisProxy, newValue, oldValue)
+                }
+              },
+              {
+                immediate: schema.watch[methodName].immediate,
+                deep: schema.watch[methodName].deep
+              }
+            )
+          }
+        }
+        
+        // Отслеживание v-model
+        watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
+          if (val !== oldVal && val !== props?.['modelValue']) {
+            context.emit('update:modelValue', val?.value ?? val ?? null)
+          }
+        }, {immediate: true}) // @ts-expect-error
+        watch(() => props?.modelValue, (val, oldVal) => {
+          thisProxy.modelValue = val
+        }, {immediate: true})
+        
         
         /**
          * Рекурсивный пропуск шагов
@@ -472,6 +473,33 @@ function getObjProps(obj: any, ignoreVueClassBreak: boolean = false): any[] {
     }
   )
 }
+
+function getAllDescriptors(instance: object): PropertyDescriptorMap {
+  let allDescriptors: PropertyDescriptorMap = {}
+  let obj = instance
+  const pipeline: PropertyDescriptorMap[] = []
+  
+  while (obj && obj !== Object.prototype) {
+    const descriptors = Object.getOwnPropertyDescriptors(obj)
+    // Оставляем только те ключи, которые не начинаются с _ или $
+    // Также обычно исключают конструктор
+    const filteredDescriptors: PropertyDescriptorMap = {}
+    for (const key in descriptors) {
+      if (!key.startsWith('_') && !key.startsWith('$') && key !== 'constructor') {
+        filteredDescriptors[key] = descriptors[key]
+      }
+    }
+    
+    pipeline.push(filteredDescriptors)
+    obj = Object.getPrototypeOf(obj)
+  }
+  // Склеиваем от родителей к детям (у детей приоритет)
+  for (let i = pipeline.length - 1; i >= 0; i--) {
+    allDescriptors = { ...allDescriptors, ...pipeline[i] }
+  }
+  return allDescriptors
+}
+
 
 export const VueClassComponent = VueClassComponentDecorator
 
