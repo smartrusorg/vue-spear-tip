@@ -161,7 +161,6 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }
         Object.assign(state, methods)
-        Object.assign(thisProxy, methods)
         state.name = constructor.name
         
         // Обработка прослушивателей
@@ -485,7 +484,7 @@ function getAllDescriptors(instance: object): PropertyDescriptorMap {
     // Также обычно исключают конструктор
     const filteredDescriptors: PropertyDescriptorMap = {}
     for (const key in descriptors) {
-      if (!key.startsWith('_') && !key.startsWith('$') && key !== 'constructor') {
+      if (!key.startsWith('_') && !key.startsWith('$') && key !== 'constructor' && key !== 'instance') {
         filteredDescriptors[key] = descriptors[key]
       }
     }

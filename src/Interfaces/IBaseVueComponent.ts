@@ -5,9 +5,6 @@ import {HammerEvents, HammerInput} from './IHammer'
 
 export interface IBaseVueComponent extends IVueClass {
   readonly VST: IGlobalVST
-  readonly $root: {
-    [key:string]:any
-  }
   /** Event on window change */
   onViewPortResize(): void
   

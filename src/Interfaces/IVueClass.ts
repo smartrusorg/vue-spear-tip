@@ -124,8 +124,7 @@ export interface IVueClass {
    * Если у текущего экземпляра нет родителя, то значением будет он сам.
    */
   readonly $root: {
-    // [key:string]:any
-    readonly APP?: any
+    [key:string]:any
   }|this|any
   
   /**

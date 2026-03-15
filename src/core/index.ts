@@ -16,7 +16,7 @@ export * from './Decorators/Props'
 export * from './Decorators/Watch'
 export * from './Decorators/Computed'
 
-import BaseComponent from '../components/BaseComponent.vue'
+import BaseComponent from '../replaceable/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
 const VST = VueClassComponent
 

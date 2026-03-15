@@ -285,10 +285,6 @@ import IMask from 'imask'
   }
 
   beforeMountParent() {
-    let value = (this.modelValue || this.inputValue || '')
-    if (!['string', 'number'].includes(typeof value)) value = ''
-    this.preResetValue = ''
-    this.value = value
     if (this.isDateTime) {
       const parts = (new Intl.DateTimeFormat((
           this.dtPresetLocale || this.VST.$reactive.locale
@@ -471,6 +467,7 @@ import IMask from 'imask'
       if (this.min) inputMaskOptionsPrepare.min = this.min
 
       this.maskInner = 'numeric'
+      // if ()
       if (!this.mask) {
         inputMaskOptionsPrepare.alias = 'numeric'
       }
@@ -482,6 +479,11 @@ import IMask from 'imask'
       this.maskInner = this.mask
     }
     if (this.maskInner && !this.isDateTime) {
+      if (typeof this.asNumber === 'number' && typeof this.value === 'number' && this.value % 1 !== 0) {
+        // Для установки с плавающей точкой, при входящей строке в виде значения с ней,
+        // необходима конвертация для InputMask. В виде строки срабатывает корректно.
+        this.value = this.value.toString().replace('.', this.radix)
+      }
       new InputMask(this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
         ...this.inputMaskOptionsPrepare,
       }))).mask(el)
@@ -727,6 +729,9 @@ import IMask from 'imask'
 
   isInnerSetValue: boolean = false
   setValue(value: any) {
+    if (this.asNumber && typeof value == 'string') {
+      value = typeof this.asNumber == 'number' ? parseFloat(value) : parseInt(value)
+    }
     if (this.isDateTime && this.iMaskedInst) {
       this.nextTick(this.$refs.selectInput.value = this.value = value?.toString())
       return this.nextTick(() => {
@@ -735,7 +740,6 @@ import IMask from 'imask'
     }
 
     this.value = value
-    // if (this.$refs?.selectInput) this.$refs.selectInput.value = value
     if (this.isInnerSetValue) {
       this.isInnerSetValue = false
       this.$emit('input', value)

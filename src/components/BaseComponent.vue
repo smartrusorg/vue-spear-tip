@@ -1,38 +1,18 @@
 <script lang="ts">
 import {reactive, computed, ref} from 'vue'
 import {IBaseVueComponent, BaseComponentEventInput, BaseComponentEvents} from '../Interfaces/IBaseVueComponent'
-import {Prop, VueClass} from '../core'
+import {VueClass} from '../core'
 import {IGlobalVST} from '../Interfaces/IGlobalVST'
 import {IHammerManager} from '../Interfaces/IHammer'
-import {VNode} from '@vue/runtime-core'
 
 /** Base component */
-export default abstract class BaseComponent extends VueClass implements IBaseVueComponent {
+abstract class BaseComponent extends VueClass implements IBaseVueComponent {
   readonly VST: IGlobalVST
-
-  // readonly Settings: {
-  //   directives: {
-  //     clickTap: boolean|string
-  //   }
-  // } = {
-  //   directives: {
-  //     clickTap: 'onViewPortResize'
-  //   }
-  // }
-
   emitsParent = ['update:modelValue', 'clickTap']
-  declare readonly $root: {
-    [key: string]: any
-  }
   declare readonly $refs: {
     [key: string]: any
   }
-  declare readonly $slots: {
-    default: () => VNode[]
-  } & {
-    [key: string]: (() => VNode[]) | undefined
-  }
-
+  declare readonly $slots: VueClass['$slots']
 
   constructor() {
     super()
@@ -205,4 +185,5 @@ interface IVSTBaseBaseComponent {
     shift: boolean
   }}
 }
+export default BaseComponent
 </script>
