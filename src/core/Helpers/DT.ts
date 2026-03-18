@@ -7,7 +7,7 @@ import { Temporal } from 'temporal-polyfill'
  */
 function DT (dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZone?: string): Temporal.ZonedDateTime {
   if (dateTimeString instanceof Temporal.ZonedDateTime) return dateTimeString // @ts-ignore
-  if (dateTimeString instanceof Date) return $VST.DT(dateTimeString.getTime())
+  if (dateTimeString instanceof Date) return DT(dateTimeString.getTime())
   if (!timeZone) { // @ts-ignore
     timeZone = $VST.DTTZ ?? Temporal.Now.timeZoneId()
   }
@@ -21,7 +21,6 @@ function DT (dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZon
   
   try {
     let isoDateTimeString = ''
-    // todo Если строка содержит пробел и не содержит временной зоны, парсим как локальное время в указанной зоне
     if (typeof dateTimeString == 'string') {
       try {
         return Temporal.PlainDateTime.from(dateTimeString).toZonedDateTime(timeZone)
@@ -61,10 +60,9 @@ function DT (dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZon
           isoDateTimeString += ':00'
         }
       }
-      
       return Temporal.Instant.from(isoDateTimeString).toZonedDateTimeISO(timeZone)
     }
-  } catch (e: any) { 
+  } catch (e: any) {
     const error = 'Не удалось преобразовать строку в формат ISO 8601' // @ts-ignore
     console.error?.(error, e)
     return Temporal.Now.zonedDateTimeISO(timeZone)

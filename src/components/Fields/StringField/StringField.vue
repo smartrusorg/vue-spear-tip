@@ -203,7 +203,7 @@
 
 
 <script lang="ts">
-import {Computed, IVueClass, Prop, VST, Watch} from '../../../core'
+import {IVueClass, Prop, VST, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import { ClipboardDocumentListIcon, CheckBadgeIcon } from "@heroicons/vue/24/solid"
 import { NoSymbolIcon } from "@heroicons/vue/20/solid" // @ts-ignore
@@ -733,7 +733,11 @@ import IMask from 'imask'
       value = typeof this.asNumber == 'number' ? parseFloat(value) : parseInt(value)
     }
     if (this.isDateTime && this.iMaskedInst) {
-      this.nextTick(this.$refs.selectInput.value = this.value = value?.toString())
+      this.nextTick(() => {
+        if (this.$refs.selectInput) {
+          this.$refs.selectInput.value = this.value = value?.toString()
+        }
+      }, 2)
       return this.nextTick(() => {
         this.iMaskedInst.unmaskedValue = value?.toString()
       })

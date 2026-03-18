@@ -98,8 +98,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.isIgnoreSetTags = false
   }
 
-  private isFirstValueSet: boolean = false
-  private isIgnoreSetTags: boolean = false
+  isFirstValueSet: boolean = false
+  isIgnoreSetTags: boolean = false
+  currentSearchValue: string = ''
 
   mountedParent() {
     let settings: Tagify.TagifySettings = {
@@ -268,7 +269,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                  class="${s.classNames.tagX}"
                  role="button"
                  aria-label="remove tag"
-                 onmousedown="this.closest('.vst-select-field').__vst_select.reset()"></x>
+                 onmousedown="this.closest('.vst-select-field').__vst_select.reset(this)"></x>
 
               <div>
                 <span class="${s.classNames.tagText}"
@@ -376,8 +377,6 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     })
   }
 
-  resizeObserver: ResizeObserver|null = null
-  observedElement: HTMLElement|null = null
   beforeUpdate() { // @ts-expect-error
     this.$el.__vst_select = this // @ts-expect-error
     const w = this.$el.querySelector?.('.tagify__input')?.closest?.('.vst-select-field')?.offsetWidth ?? 0
@@ -387,10 +386,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
 
 
-  currentSearchValue: string = ''
-
-  reset() {
-    this.tagify?.removeAllTags?.() // @ts-expect-error
+  reset(tag: HTMLElement) {
+    if (this.mode == 'select') {
+      this.tagify?.removeAllTags?.()
+    } // @ts-expect-error
     this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
     this.nextTick(() => this.$emit('update:modelValue', this.reactiveValue = null), 4)
   }

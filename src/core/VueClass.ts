@@ -22,7 +22,7 @@ export default abstract class VueClass implements IVueClass {
     __file: string
   }
   declare readonly $parent?: any
-  declare readonly $props: Object
+  declare readonly $props: {[key:string]:any}
   declare readonly $refs: {[key:string]:any}
   readonly $root: {[key:string]:any}|this|any
   declare readonly $slots: {default: () => VNode[]} & {[key: string]: (() => VNode[]) | undefined}
