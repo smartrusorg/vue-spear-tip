@@ -214,6 +214,7 @@
 
       input(
         type="file"
+        ref="filesInput"
         :class=`{
           ['dropzone-input-' + randomKey]: true,
         }`
@@ -221,6 +222,7 @@
         :accept=`onlyImages
           ? 'image/apng image/avif, image/bmp, image/gif, image/jpeg, image/png, image/svg+xml, image/webp'
           : null`
+        @input="uploadFiles"
       )
     div(
       class="absolute w100% h100% top-0 left-0 bg-amber-100/70 z3 rounded-13px flex flex-col items-center justify-center"
@@ -273,6 +275,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   declare $refs: {
     editFileInput: typeof VSTStringField,
     viewer: ViewerFilesField,
+    filesInput: HTMLInputElement,
   }
   emits = ['viewerOpened', 'viewerClosed', 'change']
   /** Максимальный размер загружаемого файла */
@@ -307,7 +310,6 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   totalSize = 0
   totalFiles = 0
-  dropZoneInput: any = null
   dropZoneDroppable: boolean = false
   isUploadStarted: boolean = false
   onUploadInProcess: boolean = false
@@ -332,14 +334,6 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   mounted() {
     this.deleteFileTimeouts = []
     this.randomKey = this.VST.generateRandomKey()
-    this.nextTick(() => {
-      this.dropZoneInput = this.$el.querySelector(`.dropzone-input-${this.randomKey}`)
-      this.dropZoneInput.addEventListener('change', this.uploadFiles.bind(this), false)
-      this.hookWhenComponentDestroy(
-    () => this.dropZoneInput.removeEventListener('change', this.uploadFiles.bind(this), false)
-      )
-    })
-    this.setValue(this.value ?? [])
     this.setSizeAll()
   }
 
@@ -426,7 +420,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   fileUpload() {
     if(this.canChange) {
-      this.dropZoneInput.click()
+      this.$refs?.filesInput?.click?.()
     }
   }
 
