@@ -9,15 +9,18 @@ export * from '../Interfaces/IVueClass'
 export * from '../Interfaces/IBaseVueComponent'
 
 export * from '../Interfaces/IFieldComponent'
+export * from '../Interfaces/IVSTContext'
 
 export * from './VueClassComponent'
 export * from './VueClass'
 export * from './Decorators/Props'
 export * from './Decorators/Watch'
 export * from './Decorators/Computed'
+export * from '../types/VueSetupContext'
 
 import BaseComponent from '../replaceable/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
+
 const VST = VueClassComponent
 
-export {BaseComponent, VST,/* IGlobalVST*/}
+export {BaseComponent, VST, /* IGlobalVST*/}

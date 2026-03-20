@@ -7,6 +7,7 @@ import {
   getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect, isRef
 } from 'vue'
 import { metadataRegistry } from './registry'
+import {IVSTContext} from '../Interfaces/IVSTContext'
 
 
 /** Параметры readonly из экземпляра vue */
@@ -134,7 +135,6 @@ function createComponent(constructor: any, decoratorParams: any) {
             })
           })
         }
-        
         // Прокидываем свойства через дескрипторы
         for (const key of vueDefaultProps) {
           Object.defineProperty(state, key, {
@@ -144,6 +144,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               if (key === '$slots') return context.slots
               if (key === '$attrs') return context.attrs
               if (key === '$refs') return vm.refs
+              if (key === '$parent') return vm?.parent?.proxy
               if (key === '$props') return props
               return (vm.proxy as any)[key]
             },
@@ -152,9 +153,29 @@ function createComponent(constructor: any, decoratorParams: any) {
           })
         }
         
+        let toReturn: any = {}
         
+        let setupProps = {}
+        const computedKeys = []
+        for (const f in computedState) computedKeys.push(f)
+        const VSTContext: IVSTContext = {
+          computedKeys
+        }
+        if (instance.setupParent) {
+          setupProps = {...setupProps, ...(instance.setupParent.call(thisProxy, props, context, state, VSTContext) ?? {})}
+        }
+        if (instance.setup) {
+          setupProps = {...setupProps, ...(instance.setup.call(thisProxy, props, context, state, VSTContext) ?? {})}
+        }
+        toReturn = {...setupProps}
+        
+        const isComputedProperty = (prop: string) => (
+          computedState?.[prop] !== undefined
+          || !!(toReturn?.[prop] && toReturn?.[prop]?.effect && toReturn?.[prop]?.__v_isRef)
+        )
+        toReturn.isComputedProperty = isComputedProperty
         // Привязка методов (чтобы не писать .value и не терять this)
-        const methods: any = {}
+        const methods: any = {isComputedProperty}
         for (const key in descriptors) {
           if (typeof descriptors[key].value === 'function' && key !== 'constructor') {
             instance[key] = methods[key] = descriptors[key].value.bind(thisProxy)
@@ -227,7 +248,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               && state[key] !== newProps?.[key]
               && !schema.computed?.[key]
               && !schema.watch?.[key]
-              && !computedState?.[key]
+              && !isComputedProperty(key)
               && ![
                 'provide', 'provideParent', 'inject', 'injectParent', 'emits', 'emitsParent',
                 'mixins', 'mixinsParent', 'instance', 'nextTick', '$refs'
@@ -250,10 +271,12 @@ function createComponent(constructor: any, decoratorParams: any) {
           }
         }.bind(thisProxy), { immediate: true })
         
-        
-        if (instance.setup) instance.setup.call(thisProxy, props, context, state)
-        if (instance.setupParent) instance.setupParent.call(thisProxy, props, context, state)
-        
+        let dataForTemplate: any = {}
+        for (const key in state) {
+          if (!key.startsWith('$') && !key.startsWith('_')) {
+            dataForTemplate[key] = toRef(state, key)
+          }
+        }
         
         if (instance.beforeCreateParent) instance.beforeCreateParent.call(thisProxy)
         if (instance.beforeCreate) instance.beforeCreate.call(thisProxy)
@@ -300,17 +323,10 @@ function createComponent(constructor: any, decoratorParams: any) {
         
         if (instance.createdParent) instance.createdParent.call(thisProxy)
         if (instance.created) instance.created.call(thisProxy)
-        
-        
-        let dataForTemplate: any = {}
-        for (const key in state) {
-          if (!key.startsWith('$') && !key.startsWith('_')) {
-            dataForTemplate[key] = toRef(state, key)
-          }
-        }
         return {
           ...dataForTemplate,
           ...computedState,
+          ...toReturn,
           ...methods
         }
       }

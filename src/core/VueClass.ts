@@ -1,5 +1,7 @@
-import { VNode, SetupContext, TriggerOpTypes, TrackOpTypes, ReactiveEffect } from '@vue/runtime-core'
+import { VNode, TriggerOpTypes, TrackOpTypes, ReactiveEffect } from 'vue'
 import {IVueClass} from '../Interfaces/IVueClass'
+import {VueSetupContext} from '../types/VueSetupContext'
+import {IVSTContext} from '../Interfaces/IVSTContext'
 
 export default abstract class VueClass implements IVueClass {
   public readonly mixins: Array<any> = []
@@ -7,10 +9,6 @@ export default abstract class VueClass implements IVueClass {
   public readonly componentsParent: {[key:string|symbol|number]:any} = {}
   public readonly emits: Array<string> = []
   public readonly emitsParent: Array<string> = []
-  public readonly inject: Array<string> = []
-  public readonly injectParent: Array<string> = []
-  public readonly provide: {[key:string]:any} = {}
-  public readonly provideParent: {[key:string]:(...args: any) => any} = {}
   
   declare readonly name: string
   readonly instance?: this = this
@@ -50,9 +48,10 @@ export default abstract class VueClass implements IVueClass {
 
   setup(
     props?: {[key:string]: any},
-    context?: SetupContext,
-    self?: IVueClass
-  ) {}
+    context?: VueSetupContext,
+    self?: IVueClass,
+    vst?: IVSTContext,
+  ): {[k:string]:any}|void {}
   beforeCreate() {}
   created() {}
   beforeMount() {}
@@ -64,9 +63,10 @@ export default abstract class VueClass implements IVueClass {
   
   setupParent(
     props?: {[key:string]: any},
-    context?: SetupContext,
-    self?: IVueClass
-  ) {}
+    context?: VueSetupContext,
+    self?: IVueClass,
+    vst?: IVSTContext,
+  ): {[k:string]:any}|void {}
   beforeCreateParent() {}
   createdParent() {}
   beforeMountParent() {}
@@ -75,6 +75,8 @@ export default abstract class VueClass implements IVueClass {
   updatedParent() {}
   beforeUnmountParent() {}
   unmountedParent() {}
+  
+  declare isComputedProperty: (prop: string) => boolean
   
   onErrorCaptured<T = this>(callback: (error: {
     err: unknown,

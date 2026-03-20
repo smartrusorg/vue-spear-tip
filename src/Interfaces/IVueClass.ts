@@ -1,7 +1,6 @@
-import {LooseRequired} from '@vue/shared'
-import {SetupContext, VNode, ReactiveEffect, TriggerOpTypes, TrackOpTypes} from '@vue/runtime-core'
-import {VueClass} from '../core'
-import {IFieldComponent} from './IFieldComponent'
+import {VNode, ReactiveEffect, TriggerOpTypes, TrackOpTypes} from 'vue'
+import {VueSetupContext} from '../types/VueSetupContext'
+import {IVSTContext} from './IVSTContext'
 
 /**
  * Наследуемый интерфейс компонента vue
@@ -14,10 +13,12 @@ export interface IVueClass {
   readonly componentsParent: {[key:string|symbol|number]:any}
   readonly emits: Array<string>
   readonly emitsParent: Array<string>
-  readonly inject: Array<string>
-  readonly injectParent: Array<string>
-  readonly provide: {[key:string]:any}
-  readonly provideParent: {[key:string]:(...args: any) => any}
+  
+  // fixme реализовать через декораторы
+  // readonly inject: Array<string>
+  // readonly injectParent: Array<string>
+  // readonly provide: {[key:string]:any}
+  // readonly provideParent: {[key:string]:(...args: any) => any}
   
   /**
    * Название компонента. Определяется автоматически по названию класса если наследовать от IVueClass.
@@ -187,8 +188,9 @@ export interface IVueClass {
   // Хуки жизненного цикла
   setup(
     props?: {[key:string]: any},
-    context?: SetupContext,
-    self?: IVueClass
+    context?: VueSetupContext,
+    self?: IVueClass,
+    vst?: IVSTContext,
   ): {[k:string]:any}|void
   /** @deprecated используйте created, в composition api они идентичны. Будет удалено в версии 1. */
   beforeCreate(): void
@@ -203,8 +205,9 @@ export interface IVueClass {
   // Родительские хуки
   setupParent(
     props?: {[key:string]: any},
-    context?: SetupContext,
-    self?: IVueClass
+    context?: VueSetupContext,
+    self?: IVueClass,
+    vst?: IVSTContext,
   ): {[k:string]:any}|void
   /** @deprecated используйте created, в composition api они идентичны. Будет удалено в версии 1. */
   beforeCreateParent(): void
