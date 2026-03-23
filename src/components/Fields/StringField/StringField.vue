@@ -403,7 +403,7 @@ import IMask from 'imask'
         if (this.wheelNumber && typeof this.asNumber == 'boolean' && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
           const self = this
           this.$refs.selectInput.addEventListener(
-            'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
+            'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self), {passive: true}
           )
         }
         if (!this.isDateTime) {

@@ -398,7 +398,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.setTags()
   }
 
-  setTags() {
+  setTags(defaultValue?: any) {
     // console.log('set tags', this)
     this.beforeUpdate()
     this.nextTick(() => {
@@ -408,7 +408,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         const value = (
             this.itemsInner.find(v => (
                 v?.key === 0 ? v?.key : (v?.key || v?.value)
-            ) === (this.inputValue || this.modelValue))?.value ?? null
+            ) === (defaultValue ?? (this.inputValue || this.modelValue)))?.value ?? null
         )
         if (value || value === 0) {
           this.isFirstValueSet = true
@@ -417,7 +417,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         }
       }
       else if (this.mode == 'multi'){
-        const val = this.inputValue || this.modelValue
+        const val = (defaultValue ?? (this.inputValue || this.modelValue))
         if (Array.isArray(val)) {
           this.isFirstValueSet = true
           this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
@@ -425,7 +425,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         }
       }
       else if (this.mode == 'tags'){
-        const val =  this.inputValue || this.modelValue
+        const val =  (defaultValue ?? (this.inputValue || this.modelValue))
         if (Array.isArray(val)) {
           this.isFirstValueSet = true
           this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter(
@@ -449,7 +449,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch('modelValue', true) modelValueWatch(modelValue: any) {
     if (this.isIgnoreSetTags) return this.isIgnoreSetTags = false
-    this.nextTick(() => this.setTags(), 2)
+    this.nextTick(() => this.setTags(modelValue), 2)
   }
   @Watch('disabled', true, true) disabledWatch(disabled: boolean) {
     this.tagify?.setDisabled?.(disabled)
