@@ -567,7 +567,7 @@ import IMask from 'imask'
     this.nextTick(() => this.$refs?.selectInput?.focus?.())
   }
   onInput(event: any, reset: boolean = false) {
-    event.preventDefault()
+    event?.preventDefault?.()
     const val = event?.target?.value || event
 
     if (!['string', 'number'].includes(typeof val)) {
@@ -592,7 +592,6 @@ import IMask from 'imask'
       // else
       let emitVal: string|number = ''
       if (this.mask || !this.asNumber && this.maskInner) {
-        console.log(this.inputMaskOptions, this.maskInner)
         emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
       }
       else {
