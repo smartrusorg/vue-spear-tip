@@ -203,7 +203,7 @@
 
 
 <script lang="ts">
-import {IVueClass, Prop, VST, Watch} from '../../../core'
+import {Prop, VST} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import { ClipboardDocumentListIcon, CheckBadgeIcon } from "@heroicons/vue/24/solid"
 import { NoSymbolIcon } from "@heroicons/vue/20/solid" // @ts-ignore
@@ -267,8 +267,7 @@ import IMask from 'imask'
   createdParent() {
     super.createdParent()
     this.inputMaskOptionsPrepare = {}
-    this.randKey = $VST.generateRandomKey() // @ts-ignore
-    StringField['__init_'+this.randKey] = this
+    this.randKey = $VST.generateRandomKey()
     if (!this.is12hours && this.isDateTime) {
       try {
         const options = new Intl.DateTimeFormat(
@@ -403,7 +402,7 @@ import IMask from 'imask'
         if (this.wheelNumber && typeof this.asNumber == 'boolean' && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
           const self = this
           this.$refs.selectInput.addEventListener(
-            'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self), {passive: true}
+            'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
           )
         }
         if (!this.isDateTime) {
@@ -467,7 +466,6 @@ import IMask from 'imask'
       if (this.min) inputMaskOptionsPrepare.min = this.min
 
       this.maskInner = 'numeric'
-      // if ()
       if (!this.mask) {
         inputMaskOptionsPrepare.alias = 'numeric'
       }
@@ -569,6 +567,7 @@ import IMask from 'imask'
     this.nextTick(() => this.$refs?.selectInput?.focus?.())
   }
   onInput(event: any, reset: boolean = false) {
+    event.preventDefault()
     const val = event?.target?.value || event
 
     if (!['string', 'number'].includes(typeof val)) {
@@ -593,15 +592,18 @@ import IMask from 'imask'
       // else
       let emitVal: string|number = ''
       if (this.mask || !this.asNumber && this.maskInner) {
-        this.value = emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
+        console.log(this.inputMaskOptions, this.maskInner)
+        emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
       }
       else {
-        this.value = val
         if (this.asNumber) {
           emitVal = parseFloat(val?.replaceAll?.(this.thousandsSeparator, '').replaceAll(this.radix, '.'))
         }
-        else emitVal = val
+        else {
+          emitVal = val
+        }
       }
+
       if ((this.asNumber && this.mask) || this.mask?.includes('\\')) {
         // Извлекаем цифры на позициях, где в маске стоит '9' (пользовательский ввод)
         let userDigits = '';
@@ -630,13 +632,16 @@ import IMask from 'imask'
         }
 
         // Сохраняем оба значения
-        this.value = emitVal = userDigits;
+        emitVal = userDigits
       }
-      else emitVal = val
+      else if (!emitVal) {
+        emitVal = val
+      }
+      // this.value = emitVal
 
       this.$emit('input', emitVal, reset)
       this.$emit('change', emitVal, reset)
-      this.$emit('update:modelValue', emitVal)
+      this.$emit('update:modelValue', this.value = emitVal)
     }
   }
   private onFocus() {

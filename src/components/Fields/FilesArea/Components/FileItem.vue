@@ -408,12 +408,18 @@ import IFilesField from '../IFilesField'
     let el = e.target
     // Проверка условия hover и наличия изображения с атрибутом src
     if(hover && el?.querySelector?.('img')?.getAttribute?.('src')?.split('/').slice(-1)[0] !== 'file.png') {
-      el.querySelector('.file-view-text').style.display = 'block'
-      el.querySelector('.file-view-text').style.cursor = 'zoom-in'
+      const text = el.querySelector('.file-view-text')
+      if (text) {
+        text.style.display = 'block'
+        text.style.cursor = 'zoom-in'
+      }
     }
     else {
-      el.querySelector('.file-view-text').style.display = 'none'
-      el.querySelector('.file-view-text').style.cursor = 'auto'
+      const text = el.querySelector('.file-view-text')
+      if (text) {
+        text.style.display = 'none'
+        text.style.cursor = 'auto'
+      }
     }
   }
 
