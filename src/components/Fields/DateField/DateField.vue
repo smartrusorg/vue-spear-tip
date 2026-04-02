@@ -43,7 +43,6 @@
           'min-h35px!' : size == 'md',
         }`
       ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
-    // @blur="v => _onBlur(v)"
     VSTStringField(
       v-if="value"
       :maskPreset
@@ -65,6 +64,7 @@
       @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
       @reset="onReset"
       ref="VSTStringField"
+      @blur="v => onBlur(v)"
       :size
     )
       template(#start v-if="!disabled")
@@ -429,6 +429,14 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }
     this.$refs?.VSTStringField?.blur?.()
     // this._onBlur(val)
+  }
+
+  onBlur() {
+    if (!this.withTime && this.asTemporal) { // Обновление даты без времени при ручном вводе
+      this.DT = this.VST.DT(this.fp.selectedDates[0])
+      this.$emit('update:modelValue', this.DT)
+      this.$refs.VSTStringField.setValue(this.DT.toPlainDate().toLocaleString())
+    }
   }
 
   onReset() {

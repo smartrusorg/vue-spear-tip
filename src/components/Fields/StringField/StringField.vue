@@ -262,7 +262,7 @@ import IMask from 'imask'
   @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
 
   is12hours: boolean = false
-  private randKey: string = ''
+  randKey: string = ''
 
   createdParent() {
     super.createdParent()
