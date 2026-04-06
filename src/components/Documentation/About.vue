@@ -10,7 +10,8 @@
         It allows you to describe a Vue component as an object-oriented class with inheritance,
         as well as provides a set of pre-built fields and components assembled from various open-source
         libraries that we constantly update. We are always looking for ways to improve our offerings.
-        Supporteb by <a class="text-lightblue-500" href="https://smartrus.org">SMARTRUS.ORG®</a>
+        Supporteb by SMARTRUS.ORG®
+      //  Supporteb by <a class="text-lightblue-500" href="https://smartrus.org">SMARTRUS.ORG®</a>
       div(class="text-left w100% ")
         b Why? -&nbsp;
         b(
