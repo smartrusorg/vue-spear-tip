@@ -18,8 +18,8 @@ export * from './Decorators/Watch'
 export * from './Decorators/Computed'
 export * from '../types/VueSetupContext'
 
-import BaseComponent from '../replaceable/BaseComponent.vue'
 import {VueClassComponent} from './VueClassComponent'
+import BaseComponent from '../replaceable/BaseComponent.vue'
 
 const VST = VueClassComponent
 

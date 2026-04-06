@@ -1,5 +1,5 @@
 <script lang="ts">
-import {BaseComponent, VueClass} from '../core'
+import BaseComponent from '../components/BaseComponent.vue'
 import 'uno.css'
 
 /**
