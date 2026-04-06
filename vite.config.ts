@@ -1,5 +1,5 @@
 import { normalizePath, defineConfig } from 'vite'
-import pugPlugin from 'vite-plugin-pug'
+import pugPlugin from 'vite-plugin-pug' // @ts-ignore
 import UnoCSS from 'unocss/vite' // @ts-ignore
 import vue from '@vitejs/plugin-vue' // @ts-ignore
 import { fileURLToPath } from 'node:url' // @ts-ignore

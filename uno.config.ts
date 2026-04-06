@@ -3,9 +3,7 @@ import {
   presetAttributify,
   presetIcons,
   presetTypography,
-  presetUno,
-  // presetWebFonts,
-  presetWind,
+  presetWind3,
   presetTagify,
   transformerDirectives,
   // transformerVariantGroup
@@ -32,9 +30,8 @@ export default defineConfig({
     }
   },
   presets: [
-    presetUno(),
     presetAttributify(),
-    presetWind(),
+    presetWind3(),
     presetIcons(),
     presetTagify(),
     presetScalpel(),
@@ -49,7 +46,7 @@ export default defineConfig({
     transformerCompileClass(),
     transformerDirectives(),
   ],
-  
+
   // TODO написать свой pug extractor без esm
   // extractors: [
   //   extractorPug()
