@@ -528,7 +528,7 @@
 </template>
 
 <script lang="ts">
-import { findParentNode, posToDOMRect, InputRule } from '@tiptap/core'
+import { Extension, InputRule } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { Editor, EditorContent } from '@tiptap/vue-3' // @ts-ignore
@@ -552,6 +552,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import SimpleBar from 'simplebar'
 
 @VST export default class TextField extends FieldComponent {
+  emits = ['ctrlEnter']
   components = {
     EditorContent,
     BubbleMenu,
@@ -792,6 +793,23 @@ import SimpleBar from 'simplebar'
           TaskItem.configure({
             nested: true, // Позволяет вложенные чекбоксы
           }),
+          Extension.create({
+            name: 'customKeymap',
+            addKeyboardShortcuts: () => {
+              return {
+                // Обработчик для Ctrl+Enter
+                'Ctrl-Enter': () => {
+                  this.$emit('ctrlEnter')
+                  return true
+                },
+                // Для Mac (Cmd+Enter)
+                'Mod-Enter': () => {
+                  this.$emit('ctrlEnter')
+                  return true
+                },
+              }
+            },
+          })
         ],
 
         // Markdown разметка
