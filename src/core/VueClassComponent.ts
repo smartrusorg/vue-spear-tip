@@ -1,10 +1,10 @@
 import VueClass from './VueClass'
 import type {IGlobalVST} from '../Interfaces/IGlobalVST'
 
-import {
+import Vue, {
   defineComponent, reactive, computed, toRef, watch, nextTick, onMounted, onUpdated, onUnmounted, onBeforeMount,
   onBeforeUpdate, onBeforeUnmount, onErrorCaptured, onRenderTracked, onRenderTriggered, onDeactivated, onActivated,
-  getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect, isRef
+  getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect, isRef, ComponentOptions
 } from 'vue'
 import { metadataRegistry } from './registry'
 import {IVSTContext} from '../Interfaces/IVSTContext'

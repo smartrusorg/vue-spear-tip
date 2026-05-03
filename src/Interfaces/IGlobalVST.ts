@@ -39,6 +39,22 @@ export interface IGlobalVST {
   DT(dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZone?: string): Temporal.ZonedDateTime
   
   /**
+   * Получение временного штампа (epochMilliseconds) из даты
+   * @param dateTimeString
+   * @param timeZone
+   * @constructor
+   */
+  DTE(dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZone?: string): number
+  
+  /**
+   * Работа с UTC датой. На выходе дата с актуальной временной зоной браузера
+   * @alias IGlobalVST.DT
+   * @param dateTimeString Время в UTC (будет преобразовано в UTC)
+   * @constructor
+   */
+  DTU(dateTimeString: string|number|Temporal.ZonedDateTime|Date): Temporal.ZonedDateTime
+  
+  /**
    * Скопировать текст в буфер обмена
    * @param text
    */
@@ -110,4 +126,6 @@ interface IGlobalReactiveElements {
   readonly viewPortWidth: number
   /** Высота экрана пользователя в пикселях */
   readonly viewPortHeight: number
+  /** Название текушей временной зоны */
+  readonly timezone: string
 }

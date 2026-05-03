@@ -9,6 +9,10 @@ let VSTLib: IGlobalVST = {} as IGlobalVST
 import DT from './Helpers/DT'
 
 VSTLib.DT = DT
+VSTLib.DTE = (...args) => DT(...args).epochMilliseconds
+VSTLib.DTU = (dateTimeString: any) => DT(dateTimeString, 'UTC').withTimeZone(
+  Intl ? Intl?.DateTimeFormat?.()?.resolvedOptions?.()?.timeZone ?? 'UTC' : 'UTC'
+)
 
 // -----------------------
 // Встроенный менеджер событий

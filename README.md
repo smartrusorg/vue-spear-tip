@@ -67,14 +67,14 @@ import 'vue-spear-tip/grid'
 
 
 <script lang="ts">
-  import {VST, Prop, Watch, BaseComponent, Button} from 'vue-spear-tip'
+  import {Component, Prop, Watch, BaseComponent, Button} from 'vue-spear-tip'
 
   /**
    * Component example
    * @author CHORNY
    * @copyright https://smartrus.org
    */
-  @VST export default class Example extends BaseComponent {
+  @Component export default class Example extends BaseComponent {
     components = {Button}
     @Prop(String, null) readonly text: string = ''
     test: string = ''

@@ -22,5 +22,6 @@ import {VueClassComponent} from './VueClassComponent'
 import BaseComponent from '../replaceable/BaseComponent.vue'
 
 const VST = VueClassComponent
+const Component = VueClassComponent
 
-export {BaseComponent, VST, /* IGlobalVST*/}
+export {BaseComponent, VST, Component, /* IGlobalVST*/}

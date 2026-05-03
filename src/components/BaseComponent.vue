@@ -33,6 +33,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
 
       this.VST.$reactive = reactive({
         locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
+        timezone: Intl ? Intl?.DateTimeFormat?.()?.resolvedOptions?.()?.timeZone ?? 'UTC' : 'UTC',
         isMobile: computed(() => windowWidth.value < 768 || (windowHeight.value < 768 && windowWidth.value < 1000)),
         isMobileHorizontal: computed(() => windowHeight.value < windowWidth.value && windowHeight.value < 768 && windowWidth.value < 1000),
         isTablet: computed(() => windowWidth.value < 1280 && windowWidth.value >= 768),

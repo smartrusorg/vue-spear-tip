@@ -249,7 +249,7 @@
             'mt--8px!' : bubbleMenuPlacementY == 'top' && isEditTable,
             'op-0!': !enabledTableRowsShowEditorButtons || !bubbleMenuPlacementY,
           }`
-          class="flex ml15px! flex-col"
+          class="flex ml15px!"
         )
           template(v-if="bubbleMenuPlacementY == 'top'")
             +additionalButtons
@@ -258,8 +258,8 @@
             class="bubble-menu flex"
             :class=`{
               'flex-col-reverse!': bubbleMenuPlacementY == 'top',
-              'flex-col!': !isAtEmptyLine || isEditTable,
-              'flex-row!': isAtEmptyLine && !isEditTable,
+              'flex-col!': /*!isAtEmptyLine || */isEditTable,
+              // 'flex-row!': isAtEmptyLine && !isEditTable,
             }`
           )
             div(class="flex items-center justify-center w100%" v-if="!isAtEmptyLine || isEditTable")
@@ -268,8 +268,6 @@
                 :theme="editor.isActive('bold') ? activeButtonsTheme : defaultButtonsTheme"
                 @clickTap="editor.chain().focus().toggleBold().run()"
                 @keypress.enter="editor.chain().focus().toggleBold().run()"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(
                   class="mt-0 flex items-center"
@@ -280,8 +278,6 @@
                 :theme="editor.isActive('italic') ? activeButtonsTheme : defaultButtonsTheme"
                 @clickTap="editor.chain().focus().toggleItalic().run()"
                 @keypress.enter="editor.chain().focus().toggleItalic().run()"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(
                   class="mt-0 flex items-center"
@@ -292,8 +288,6 @@
                 :theme="editor.isActive('underline') ? activeButtonsTheme : defaultButtonsTheme"
                 @clickTap="editor.chain().focus().toggleUnderline().run()"
                 @keypress.enter="editor.chain().focus().toggleUnderline().run()"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(
                   class="mt-0 flex items-center"
@@ -305,8 +299,6 @@
                 @clickTap="editor.chain().focus().toggleStrike().run()"
                 @keypress.enter="editor.chain().focus().toggleStrike().run()"
                 class="p-0"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(
                   class="mt-0 flex items-center"
@@ -326,8 +318,6 @@
                 :class="{ 'fw-bold!': isEditorLinkActive, 'text-white! fill-white! stroke-white!': true, }"
                 @clickTap="openLinkCreateBlock"
                 @keypress.enter="openLinkCreateBlock"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center")
                   svg(
@@ -395,8 +385,6 @@
                 @clickTap="editor.chain().focus().toggleTaskList().run()"
                 @keypress.enter="editor.chain().focus().toggleTaskList().run()"
                 size="md"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center")
                   svg(
@@ -444,8 +432,6 @@
                 class="w100%"
                 @clickTap="resetImageSize"
                 title="Вернуть исходный размер"
-                @mousedown.stop
-                @touchstart.stop
               )
                 //- Иконка или текст, например "Original Size"
                 div(class="fs-1rem px-5px") 1:1
@@ -456,32 +442,24 @@
                 size="md"
                 @clickTap="editor.chain().focus().toggleHeading({ level: 1 }).run()"
                 :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center") H1
               VSTButton(
                 size="md"
                 @clickTap="editor.chain().focus().toggleHeading({ level: 2 }).run()"
                 :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center") H2
               VSTButton(
                 size="md"
                 @clickTap="editor.chain().focus().toggleHeading({ level: 3 }).run()"
                 :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center") H3
               VSTButton(
                 size="md"
                 @clickTap="editor.chain().focus().toggleHeading({ level: 4 }).run()"
                 :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
-                @mousedown.stop
-                @touchstart.stop
               )
                 div(class="mt-0 flex items-center") H4
               template(v-if="!isAtEmptyLine && isEditorLinkActive")
@@ -533,7 +511,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { Editor, EditorContent } from '@tiptap/vue-3' // @ts-ignore
 import { BubbleMenu } from '@tiptap/vue-3/menus'
-import {VST, Watch, Prop, BaseComponentEventInput} from '../../../core'
+import {Component, Watch, Prop, BaseComponentEventInput} from '../../../core'
 import {default as VSTButton} from '../../Elements/Button'
 import {default as VSTButtonOrig} from '../../Elements/Button/Button.vue'
 import {default as VSTStringField} from '../StringField'
@@ -551,8 +529,8 @@ import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
 import SimpleBar from 'simplebar'
 
-@VST export default class TextField extends FieldComponent {
-  emits = ['ctrlEnter']
+@Component export default class TextField extends FieldComponent {
+  emits = ['ctrlEnter', 'focus', 'blur']
   components = {
     EditorContent,
     BubbleMenu,
@@ -568,6 +546,7 @@ import SimpleBar from 'simplebar'
   @Prop(Boolean) readonly linksEnabled: boolean = true
   @Prop(Boolean) readonly markdownEnabled: boolean = true
   @Prop(Boolean) readonly imagesEnabled: boolean = true
+  @Prop(Boolean) readonly showBubbleAtEmptyLine: boolean = true
   @Prop(Number) readonly compressedPasteImageWidthLimit: number = 1920
   @Prop(Number) readonly compressedPasteImageHeightLimit: number = 1080
 
@@ -582,7 +561,7 @@ import SimpleBar from 'simplebar'
     vstFieldEditor: HTMLDivElement & {sbInstance?: typeof SimpleBar}
   }
 
-  editor: any|(typeof Editor) = undefined
+  editor?: Editor = undefined
   isEditable: boolean = true
   showMenu: boolean = true
   loading: boolean = true
@@ -590,9 +569,6 @@ import SimpleBar from 'simplebar'
   showLinkModal: boolean = false
   preResetValue: string = ''
   linkUrl: string = ''
-  beforeMount() {
-    this.vstTextId = `vst-text-field-${this.VST.generateRandomKey()}`
-  }
 
   isFromEditorValueChanged: boolean = false
   enabledTableRowsShowEditorButtons: boolean = true
@@ -600,13 +576,13 @@ import SimpleBar from 'simplebar'
   bubbleMenuPlacementY: 'top'|'bottom'|null = null
 
   get isEditTable(): boolean {
-    return this.editor?.isActive?.('table')
+    return !!this.editor?.isActive?.('table')
   }
   get isEditTableEnabled(): boolean {
     return this.isEditTable && this.enabledTableRowsShowEditorButtons
   }
   get isEditorLinkActive(): boolean {
-    return this.editor?.isActive?.('link')
+    return !!this.editor?.isActive?.('link')
   }
   get isSelectingImageResized(): boolean {
     if (!this.editor || !this.editor.isActive('image')) {
@@ -644,35 +620,17 @@ import SimpleBar from 'simplebar'
     return this.editor && this.showMenu && this.markdownEnabled && this.shouldBubbleMenuShow()
   }
 
-  @Watch watchShowLinkModal(showLinkModal: boolean) {
-    this.bubbleMenuPlacementY = null
-    this.nextTick(() => {
-      this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-      this.nextTick(this.recalculateAdditionalOpenedBlocks)
-    })
+  beforeMount() {
+    this.vstTextId = `vst-text-field-${this.VST.generateRandomKey()}`
   }
-  @Watch({immediate: true}) watchDisabled(disabled: boolean) {
-    this.isEditable = !disabled
-  }
-  @Watch watchIsEditable(value: boolean) {
-    this.editor?.setEditable?.(value)
-  }
-  /** @see isEditTableEnabled */
-  @Watch watchIsEditTableEnabled(isEditTable: boolean) {
-    this.nextTick(() => {
-      this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
-      this.nextTick(this.recalculateAdditionalOpenedBlocks, 2)
-    }, 3)
-  }
-
-  @Watch watchIsBubbleMenuShowed(showed: boolean) {
-    this.nextTick(() => this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition'))
-    setTimeout(this.recalculateAdditionalOpenedBlocks, 300)
-  }
-
-
   mounted() {
     this.value = (this.inputValue || this.modelValue || '')
+
+    this.registerHotKey('enter', () => {
+      if (this.editor?.isFocused) {
+        this.$emit('ctrlEnter')
+      }
+    }, true, false, false)
 
     // Блокируем горизонтальную прокрутку
     const scrollListener = (event: WheelEvent) => {
@@ -697,7 +655,7 @@ import SimpleBar from 'simplebar'
 
         editor.state.doc.descendants(node => {
           if (node.type.name === 'image') {
-            this.editor.commands.updateAttributes('image', node.attrs)
+            this.editor!.commands.updateAttributes('image', node.attrs)
           }
         })
 
@@ -743,7 +701,7 @@ import SimpleBar from 'simplebar'
 
               // Проверка на корректность границ, чтобы не вызвать Range Error
               if (newFrom < newTo) {
-                this.editor.chain()
+                this.editor!.chain()
                     .setTextSelection({ from: newFrom, to: newTo })
                     .run()
 
@@ -759,6 +717,12 @@ import SimpleBar from 'simplebar'
         if (!this.isEditorLinkActive) {
           this.showLinkModal = false
         }
+      },
+      onFocus: ({ editor, event }) => {
+        this.$emit('focus')
+      },
+      onBlur: ({ editor, event }) => {
+        this.$emit('blur')
       },
       extensions: [
         ...[
@@ -793,23 +757,6 @@ import SimpleBar from 'simplebar'
           TaskItem.configure({
             nested: true, // Позволяет вложенные чекбоксы
           }),
-          Extension.create({
-            name: 'customKeymap',
-            addKeyboardShortcuts: () => {
-              return {
-                // Обработчик для Ctrl+Enter
-                'Ctrl-Enter': () => {
-                  this.$emit('ctrlEnter')
-                  return true
-                },
-                // Для Mac (Cmd+Enter)
-                'Mod-Enter': () => {
-                  this.$emit('ctrlEnter')
-                  return true
-                },
-              }
-            },
-          })
         ],
 
         // Markdown разметка
@@ -960,9 +907,9 @@ import SimpleBar from 'simplebar'
     })
 
     // Отслеживание выделения текста
-    this.$watch(() => this.editor.state.selection, () => {
+    this.$watch(() => this.editor?.state.selection, () => {
       if (this.isEditorLinkActive) {
-        const attrs = this.editor.getAttributes('link')
+        const attrs = this.editor!.getAttributes('link')
         this.linkUrl = attrs.href || ''
         this.nextTick(() => this.showLinkModal = true, 14)
       }
@@ -973,11 +920,11 @@ import SimpleBar from 'simplebar'
       this.bubbleMenuPlacementY = null
       this.showAdditionalButtons = false
 
-      const { from, to, empty } = this.editor.state.selection
+      const { from, to, empty } = this.editor!.state.selection
       // Не пустой ли курсор. Не является ли текст только пробелами
-      const hasTextSelection = !empty && !!this.editor.state.doc.textBetween(from, to).trim()
+      const hasTextSelection = !empty && !!this.editor?.state.doc.textBetween(from, to).trim()
 
-      if (hasTextSelection || this.isAtEmptyLine) {
+      if (hasTextSelection || (this.isAtEmptyLine && this.showBubbleAtEmptyLine)) {
         this.showMenu = true // Включается возможность активации меню
       }
 
@@ -999,20 +946,23 @@ import SimpleBar from 'simplebar'
   }
 
   beforeUnmount() {
+    if (this.editor?.isFocused) {
+      this.$emit('blur')
+    }
     this.editor?.destroy?.()
   }
 
   onValueChange(value: any) {
     if (this.isFromEditorValueChanged) return this.isFromEditorValueChanged = false
-    this.editor?.commands?.setContent?.(value, false)
+    this.editor?.commands?.setContent?.(value, {emitUpdate: false})
   }
 
   getValue(): string {
-    if (this.outputFormat === 'markdown') {
-      return this.editor.storage.markdown.getMarkdown()
+    if (this.outputFormat === 'markdown') { // @ts-expect-error
+      return this.editor?.storage?.markdown!?.getMarkdown() as string
     }
     else {
-      return this.editor.getHTML()
+      return this.editor!.getHTML()
     }
   }
 
@@ -1028,7 +978,7 @@ import SimpleBar from 'simplebar'
       url = `https://${url}`
     }
 
-    this.editor
+    this.editor!
         .chain()
         .focus()
         .extendMarkRange('link')
@@ -1046,7 +996,7 @@ import SimpleBar from 'simplebar'
 
     // сравнение координат
     const menuRect = menuEl.getBoundingClientRect()
-    const view = this.editor.view
+    const view = this.editor!.view
     const selection = view.state.selection
     const coords = view.coordsAtPos(selection.from)
 
@@ -1057,13 +1007,15 @@ import SimpleBar from 'simplebar'
   /** Показывать ли всплывающее меню */
   shouldBubbleMenuShow() {
     return !this.disabled && this.value && (
-      (this.editor.isFocused && this.isAtEmptyLine) || (this.editor.isFocused && !this.editor?.state?.selection?.empty)
+      (
+        this.editor?.isFocused && this.isAtEmptyLine && this.showBubbleAtEmptyLine
+      ) || (this.editor?.isFocused && !this.editor?.state?.selection?.empty)
     )
   }
 
   /** Удалить ссылку */
   removeLink() {
-    this.editor.chain().focus().extendMarkRange('link').unsetLink().run()
+    this.editor?.chain().focus().extendMarkRange('link').unsetLink().run()
     this.linkUrl = ''
     this.showLinkModal = false
   }
@@ -1090,38 +1042,43 @@ import SimpleBar from 'simplebar'
     }
   }
 
+  setValue(value: any) {
+    super.setValue(value)
+    if (!value) {
+      this.editor?.chain().clearContent().focus().run()
+    }
+  }
+
   resetValue() {
     this.preResetValue = this.value
-    this.editor.chain().clearContent().focus().run()
+    this.editor?.chain().clearContent().focus().run()
   }
   restoreValue() {
     if (this.preResetValue) {
-      this.editor?.commands?.setContent?.(this.value = this.preResetValue, false)
+      this.editor?.commands?.setContent?.(this.value = this.preResetValue, {emitUpdate: false})
     }
     this.preResetValue = ''
   }
-
   clickEditor(e: MouseEvent) {
     const target = e.target! // @ts-ignore
     if (target?.tagName === 'A') {
       e.preventDefault() // Останавливает переход
 
-      this.editor.chain().focus().extendMarkRange('link').run()
+      this.editor?.chain().focus().extendMarkRange('link').run()
 
       // Достаем объект со всеми атрибутами ссылки
-      const attrs = this.editor.getAttributes('link')
+      const attrs = this.editor?.getAttributes('link')
 
       // Записываем в реактивные переменные для вашей формы
-      this.linkUrl = attrs.href || ''
+      this.linkUrl = attrs?.href || ''
       // this.linkTarget = attrs.target || '_self' // если использовать target
 
       this.showLinkModal = true
     }
   }
-
   /** Сброс размера изображения */
   resetImageSize() {
-    const { state, view } = this.editor
+    const { state, view } = this.editor!
     const { selection } = state
     const pos = selection.from
     const node = state.doc.nodeAt(pos)
@@ -1144,7 +1101,7 @@ import SimpleBar from 'simplebar'
         }
 
         // Теперь обновляем атрибуты в Tiptap
-        this.editor.chain()
+        this.editor!.chain()
             .focus()
             .updateAttributes('image', {
               width: null,
@@ -1205,7 +1162,7 @@ import SimpleBar from 'simplebar'
       }
 
       // Вставляем в редактор
-      this.editor.chain().focus().setImage({ src: finalSrc }).run()
+      this.editor?.chain().focus().setImage({ src: finalSrc }).run()
 
     } catch (e) {
       console.error('VST Editor Error:', e)
@@ -1253,6 +1210,32 @@ import SimpleBar from 'simplebar'
       }
       reader.onerror = (e) => reject(e)
     })
+  }
+
+
+  @Watch watchShowLinkModal(showLinkModal: boolean) {
+    this.bubbleMenuPlacementY = null
+    this.nextTick(() => {
+      this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
+      this.nextTick(this.recalculateAdditionalOpenedBlocks)
+    })
+  }
+  @Watch({immediate: true}) watchDisabled(disabled: boolean) {
+    this.isEditable = !disabled
+  }
+  @Watch watchIsEditable(value: boolean) {
+    this.editor?.setEditable?.(value)
+  }
+  /** @see isEditTableEnabled */
+  @Watch watchIsEditTableEnabled(isEditTable: boolean) {
+    this.nextTick(() => {
+      this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition')
+      this.nextTick(this.recalculateAdditionalOpenedBlocks, 2)
+    }, 3)
+  }
+  @Watch watchIsBubbleMenuShowed(showed: boolean) {
+    this.nextTick(() => this.editor?.commands?.setMeta?.('bubbleMenu', 'updatePosition'))
+    setTimeout(this.recalculateAdditionalOpenedBlocks, 300)
   }
 
 }
