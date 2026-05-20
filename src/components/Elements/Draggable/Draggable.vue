@@ -20,6 +20,7 @@ import BaseComponent from '../../BaseComponent.vue'
   @Prop(String) readonly group: string = 'GLOBAL'
   @Prop({ default: null }) readonly data: any = null
   @Prop(Boolean) readonly disabled: boolean = false
+  @Prop(String) readonly ignoreTopSelector: string = ''
 
   isDragging = false
   clone: HTMLElement | null = null
@@ -34,7 +35,12 @@ import BaseComponent from '../../BaseComponent.vue'
   }
 
   onPointerDown(e: PointerEvent) {
-    if (this.disabled || this.isDragging) return
+    if (this.disabled || this.isDragging || (
+      this.ignoreTopSelector && (
+        !!e?.srcElement?.classlist?.includes?.(this.ignoreTopSelector)
+        || !!e.srcElement.closest?.(this.ignoreTopSelector)
+      )
+    )) return
     const el = this.$el as HTMLElement
     const rect = el.getBoundingClientRect()
     this.startX = e.clientX
