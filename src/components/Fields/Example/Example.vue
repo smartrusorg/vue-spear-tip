@@ -11,7 +11,7 @@
 
 <script lang="ts">
 
-import {Prop, VST, Watch} from '../../../core'
+import {Prop, Component, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 /**
@@ -20,7 +20,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
  * @copyright https://smartrus.org
  */
 // if not extendable
-@VST export default class Example extends FieldComponent {
+@Component export default class Example extends FieldComponent {
 // if extendable
 // export default abstract class Example extends FieldComponent {
   emits = ['click']

@@ -34,6 +34,9 @@
 import {BaseComponent, Prop, VST, Watch} from '../../../core'
 import SimpleBar from 'simplebar'
 
+// fixme посмотреть для следующей версии https://kingsora.github.io/OverlayScrollbars/
+// fixme вроде поддерживает плавную прокрутку
+
 /**
  * Custom cross browser scrollbar
  * @author CHORNY (created 11.01.2026 19:22)
