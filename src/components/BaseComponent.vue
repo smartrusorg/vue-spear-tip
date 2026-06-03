@@ -158,13 +158,15 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
    ctrlOrCommand: boolean,
    alt: boolean,
    shift: boolean,
+   prevent: boolean = false,
   ): void {
     const k = `${key}_${ctrlOrCommand ? 1 : 0}_${alt ? 1 : 0}_${shift ? 1 : 0}`
     this.VSTBaseComponent.keyBindingsCallbacks[k] = $VST.__REGISTERED_HOTKEYS[k] = {
       callback,
       ctrlOrCommand,
       alt,
-      shift
+      shift,
+      prevent
     }
   }
 }

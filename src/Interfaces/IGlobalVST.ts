@@ -94,6 +94,7 @@ export interface IGlobalVST {
       ctrlOrCommand: boolean
       alt: boolean
       shift: boolean
+      prevent: boolean
     }
   }
 }

@@ -127,7 +127,7 @@
 </template>
 
 <script lang="ts">
-import {Prop, BaseComponent, VST, Watch} from '../../../../core'
+import {Prop, BaseComponent, Component, Watch} from '../../../../core'
 import {Button as VSTButton} from '../../../../kit'
 
 import { FileFieldItemInterface } from './FileItem.vue'
@@ -136,30 +136,34 @@ import ExcelViewerFilesField from './Viewer/ExcelViewerFilesField.vue'
 import DocxViewerFilesField from './Viewer/DocxViewerFilesField.vue'
 import PDFViewerFilesField from './Viewer/PDFViewerFilesField.vue'
 
-@VST export default class ViewerFilesField extends BaseComponent {
+@Component export default class ViewerFilesField extends BaseComponent {
   components = {
     ImageViewerFilesField, ExcelViewerFilesField, DocxViewerFilesField, VSTButton, PDFViewerFilesField,
   }
   emits = ['viewerOpened', 'viewerClosed']
-  currentFile: FileFieldItemInterface|null = null
-  
+  currentFile: FileFieldItemInterface = null
+
   @Prop(Array, null) readonly files: FileFieldItemInterface[] = []
   @Prop(String, null) readonly docViewComponent: string|null = ''
   @Prop(String, null) readonly excelViewComponent: string|null = ''
   @Prop(String, null) readonly videoViewComponent: string|null = ''
+  /** Уникальный ключ файлового поля */
+  @Prop(String) readonly areaKey: string = ''
   currentKey: number = 0
 
   created() {
     this.registerHotKey('escape', () => this.currentFile = null, false, false, false)
     this.registerHotKey('arrowLeft', () => {
-      if (this.hasPreviousFile) {
+      if (this.currentFile && this.hasPreviousFile) {
         this.view(this.currentKey-1)
       }
     }, false, false, false)
     this.registerHotKey('arrowRight', () => {
-      if (this.hasNextFile) {
-        this.view(this.currentKey+1)
-      }
+      this.nextTick(() => {
+        if (this.currentFile && this.hasNextFile) {
+          this.view(this.currentKey+1)
+        }
+      })
     }, false, false, false)
   }
 
@@ -221,7 +225,7 @@ import PDFViewerFilesField from './Viewer/PDFViewerFilesField.vue'
   }
 
   get hasNextFile(): boolean {
-    return this.currentKey < this.files.length - 1
+    return this.currentKey < (this.files.length - 1)
   }
 
   @Watch watchCurrentFile(currentFile: string|null) {

@@ -27,6 +27,7 @@ export interface IBaseVueComponent extends IVueClass {
    * @param ctrlOrCommand Удерживается ли CTRL или COMMAND на Mac OS. По умолчанию отслеживание включено.
    * @param alt Удерживается ли alt
    * @param shift Удерживается ли shift
+   * @param prevent
    * @protected
    * @example
    * this.registerHotKey('k', (e: KeyboardEvent) => console.log('CTRL+K pressed'))
@@ -41,6 +42,7 @@ export interface IBaseVueComponent extends IVueClass {
    ctrlOrCommand: boolean,
    alt: boolean,
    shift: boolean,
+   prevent?: boolean
   ): void
   
   /**

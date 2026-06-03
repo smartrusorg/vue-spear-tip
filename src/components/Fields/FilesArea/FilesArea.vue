@@ -4,29 +4,31 @@
       'dz-valid':isValid,
       'dz-invalid':!isValid,
       'dz-droppable':dropZoneDroppable,
-      'only-images':onlyImages
+      'only-images':onlyImages,
+      ['vst-ds-key-'+randomKey]: true,
     }`
-    @drop="hasDeleted ? null : onDrop"
-    @dragover="hasDeleted || !canChange ? null : dragOver"
-    @dragenter="hasDeleted || !canChange ? null : dragEnter"
-    @dragleave="hasDeleted || !canChange ? null : dragLeave"
-    @mouseleave="dropZoneDroppable = false"
+    @drop="hasDeleted ? null : onDrop($event)"
+    @dragover="(hasDeleted || !canChange) ? null : dragOver($event)"
+    @dragenter="(hasDeleted || !canChange) ? null : dragEnter($event)"
+    @dragleave="(hasDeleted || !canChange) ? null : dragLeave($event)"
+
     class="relative "
   )
-    .dropzone-active(class="w100%")
+    .dropzone-active(class="w100% z999!" v-if="dropZoneDroppable")
       div(v-if="onlyImages")
-        span(v-if="maxNumberOfFiles == 1 && files.length" ) Заменить файл <i class="fa fa-duotone fa-arrows-rotate-reverse"></i>
-        span(v-else) Для загрузки изображений бростье их в этот блок или кликните по нему
-      div(v-else class="w100%") Для загрузки бросьте файл в этот блок или кликните по нему
+        span(v-if="maxNumberOfFiles == 1 && files.length") Заменить файл <i class="fa fa-duotone fa-arrows-rotate-reverse"></i>
+        span(v-else) Бросьте изображение для загрузки
+      div(v-else class="w100%") Для загрузки файла бросьте его в этот блок или нажмите на него
     div(
       :class=`{
         'text-center my12px': VST.$reactive.viewPortType == 'mobile',
         'min-h8px': VST.$reactive.viewPortType != 'mobile',
         'grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-5px': files.length,
+        'w100% flex items-center justify-center': maxNumberOfFiles == 1,
       }`
       class=" w100% pt5px pb3px px5px"
     )
-      div(v-show="files.length" v-for="(file, key) in files")
+      div(v-show="files.length" v-for="(file, key) in files" :key="file.id")
         FileItem(
           v-if="canChange || (!canChange && file?.found)"
           :file
@@ -35,11 +37,13 @@
           :fileSize="file.size ? file.size : null"
           :fileHash="file.hash ? file.hash : null"
           :fileMime="file.mime ? file.mime : null"
+          :isImage="isImage(file.mime)"
           :fileLastModifiedStamp="file.fileLastModifiedStamp ? file.fileLastModifiedStamp : null"
           :fileFound="file.found ? file.found : false"
           :hasDeleted="hasDeleted || maxNumberOfFiles == 1"
           :onlyImages
           :canChange
+          :areaKey="randomKey"
           @delete="fileDelete(key)"
           @restore="fileRestore(key)"
           @download="fileDownload(key)"
@@ -51,11 +55,12 @@
       .dropzone-empty-files(
         v-if="!files.length"
         :class="{'dropzone-empty-files-blocked':!canChange}"
-        class="text-#dfa955 hover:color-red w100%"
+        class="text-#dfa955 hover:color-red w100% min-h120px"
       )
         span(v-if="canChange")
-          div
-            | Для загрузки бросьте файл в этот блок или кликните по нему
+          div(v-if="onlyImages") Нажмите для выбора изображения или бросьте его в этот блок
+          div(v-else)
+            | Для загрузки файла бросьте его в этот блок или нажмите на него
             i.fa-duotone.fa-cloud-arrow-up(class="text-35px mx-2 top-4")
         span(v-else style="color: #b3b3b3; user-select: none") Файлов нет
           br
@@ -68,15 +73,17 @@
         :excelViewComponent
         :videoViewComponent
         ref="viewer"
-        @download="fileDownload"
+        :areaKey="randomKey"
+        @download="fileDownload($event)"
         @viewerOpened="$emit('viewerOpened')"
         @viewerClosed="$emit('viewerClosed')"
       )
     .dz-footer(
-      v-if="canChange || files.length"
+      v-if="(canChange || files.length)"
       class="flex flex-row w[calc(100%-12px)] items-center"
     )
       div(
+        v-if="maxNumberOfFiles != 1"
         :title=`files.length >= maxNumberOfFiles && maxNumberOfFiles > 0
         ? 'Достигнуто максимальное количество файлов: <b>'+files.length+'</b>'+
           (hasDeleted ? '<br>(Удалённые тоже учитываются, сначала сохраните их удаление)' : '' )
@@ -98,7 +105,7 @@
           'fa-sync': onUploadInProcess && (files.length != maxNumberOfFiles || maxNumberOfFiles == 0),
           'text-primary': files.length < maxNumberOfFiles || !maxNumberOfFiles,
         }`
-          @clickTap="fileUpload"
+          @clickTap="fileUpload($event)"
           title="Загрузить файл"
           v-if="canChange"
           class="mb-5px"
@@ -127,13 +134,56 @@
             path(d='M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1')
             path(d='M9 15l3 -3l3 3')
             path(d='M12 12l0 9')
-      div(
-        class="mx5px"
+
+      div(v-else-if="canChange")
+        VSTButton(
+          theme="empty"
+          size="sm"
+          fontSize="2rem"
+          :title="`${files.length ? 'Заменить' : 'Загрузить'} ${onlyImages ? 'изображение' : 'файл'}`"
+          data-placement="bottom-start"
+          data-theme="info"
+          @clickTap="fileUpload($event)"
+        )
+          svg(
+            v-if="!files.length"
+            xmlns='http://www.w3.org/2000/svg' viewbox='0 0 24 24' fill='none'
+            width='24'
+            height='24'
+            stroke="currentColor"
+            stroke-width='2' stroke-linecap='round' stroke-linejoin='round'
+            class="scale-90 text-stone hover:text-#0f83d0"
+          )
+            path(stroke='none' d='M0 0h24v24H0z' fill='none')
+            path(d='M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1')
+            path(d='M9 15l3 -3l3 3')
+            path(d='M12 12l0 9')
+          div(v-else  class="p0 ml4px mt--3px text-stone hover:text-#0f83d0")
+            svg(
+              xmlns='http://www.w3.org/2000/svg'
+              width="30"
+              height="30"
+              x='0px' y='0px' viewbox='0 0 29.88 37.5' xml:space='preserve'
+              class="scale-55 text-sky-500! hover:text-#0f83d0"
+            )
+              path(
+                fill="#0EA5E9FF"
+                d='M3.91,16.88H0.12H0v9.38l2.78-2.55C5.5,27.51,9.96,30,15,30c7.65,0,13.96-5.73,14.88-13.12h-3.79  C25.2,22.2,20.57,26.25,15,26.25c-3.95,0-7.42-2.04-9.43-5.12l4.63-4.26L3.91,16.88L3.91,16.88z'
+              )
+              path(
+                fill="#0EA5E9FF"
+                d='M14.88,0C7.23,0,0.92,5.73,0,13.12h3.79C4.68,7.8,9.31,3.75,14.88,3.75c4.07,0,7.63,2.16,9.61,5.39l-3.98,3.98h3.75h1.72  h3.79h0.12V3.75L27.2,6.43C24.49,2.54,19.98,0,14.88,0z'
+              )
+      .text-center(
+        class="mx5px w100%"
+        v-if="maxNumberOfFiles == 1"
       )
+        div(class="text-neutral") {{ onlyImages ? 'Изображение' : 'Файл' }}
+      div(class="mx5px" v-else)
         span(v-if="onlyImages") Всего изображений:&nbsp;
         span(v-else) Всего файлов:&nbsp;
         b {{ totalFiles }}
-        |  | Общий размер:&nbsp;
+        span  | Общий размер:&nbsp;
         b {{ totalSize }}
       div(class="ml-auto flex items-center justify-center")
         div(
@@ -156,7 +206,7 @@
             path(d='M11 7v-2h-1')
             path(d='M18 19v-1')
             path(d='M15.5 5h2a.5 .5 0 0 1 .5 .5v4a.5 .5 0 0 1 -.5 .5h-2a.5 .5 0 0 1 -.5 -.5v-4a.5 .5 0 0 1 .5 -.5')
-            path(d='M10.5 14h2a.5 .5 0 0 1 .5 .5v4a.5 .5 0 0 1 -.5 .5h-2a.5 .5 0 0 1 -.5 -.5v-4a.5 .5 0 0 1 .5 -.5')
+            path(d='M10.5 14h2a.5 .5 0 0 1 .5 .5v4a.5 .5 0 0 1 -.5 .5-h-2a.5 .5 0 0 1 -.5 -.5v-4a.5 .5 0 0 1 .5 -.5')
             path(d='M6 10v.01')
             path(d='M6 19v.01')
             path(d='M3 3l18 18')
@@ -225,7 +275,8 @@
         @input="uploadFiles"
       )
     div(
-      class="absolute w100% h100% top-0 left-0 bg-amber-100/70 z3 rounded-13px flex flex-col items-center justify-center"
+      class=`absolute w100% px20px h100% top-0 left-0 bg-amber-100/70 z3 rounded-13px flex flex-col items-center
+       justify-center`
       v-if="editFileIndex"
     )
       h2(class="m0 mb-2px bg-white/80 px20px rounded-xl pb4px fs-1.5rem") Переименование файла
@@ -260,7 +311,7 @@
 
 
 <script lang="ts">
-import {Prop, VST, Watch} from '../../../core'
+import {Prop, Component, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import FileItem, {FileFieldItemInterface} from './Components/FileItem.vue'
 import ViewerFilesField from './Components/ViewerFilesField.vue'
@@ -270,14 +321,15 @@ import {md5} from 'js-md5'
 import IFilesField from './IFilesField'
 import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
-@VST export default class FilesArea extends FieldComponent {
+@Component
+export default class FilesArea extends FieldComponent {
   readonly components: object = {FileItem, ViewerFilesField, VSTButton, VSTStringField}
   declare $refs: {
     editFileInput: typeof VSTStringField,
     viewer: ViewerFilesField,
     filesInput: HTMLInputElement,
   }
-  emits = ['viewerOpened', 'viewerClosed', 'change']
+  emits = ['viewerOpened', 'viewerClosed', 'change', 'uploaded']
   /** Максимальный размер загружаемого файла */
   @Prop(String, Number) readonly maxSize: number = 30
 
@@ -295,24 +347,27 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   @Prop(String) readonly zipFileName: string = ''
 
   @Prop(String) readonly uploadPath: string = ''
-  @Prop(Object, Function, null) readonly uploadHeaders: {[k: string]: string}|(() => {[k: string]: string})|null = null
+  @Prop(Object, Function, null) readonly uploadHeaders: { [k: string]: string } | (() => {
+    [k: string]: string
+  }) | null = null
 
   /** Разрешено только изображения */
   @Prop(Boolean) readonly onlyImages: boolean = false
-  @Prop(Boolean, null) readonly saveOriginal: boolean|null = null
-  @Prop(Object, null) readonly options: {[k:string]: any}|null = null
-  @Prop(Array, null) readonly imagesThumbnails: {[k:string]: any}[]|null = null
-  @Prop(Function) readonly errorHandler: ((error: any, type?: 'error'|'warning') => any)|null = null
+  @Prop(Boolean, null) readonly saveOriginal: boolean | null = null
+  @Prop(Object, null) readonly options: { [k: string]: any } | null = null
+  @Prop(Array, null) readonly imagesThumbnails: { [k: string]: any }[] | null = null
+  @Prop(Function) readonly errorHandler: ((error: any, type?: 'error' | 'warning') => any) | null = null
 
-  @Prop(String, null) readonly docViewComponent: string|null = ''
-  @Prop(String, null) readonly excelViewComponent: string|null = ''
-  @Prop(String, null) readonly videoViewComponent: string|null = ''
+  @Prop(String, null) readonly docViewComponent: string | null = ''
+  @Prop(String, null) readonly excelViewComponent: string | null = ''
+  @Prop(String, null) readonly videoViewComponent: string | null = ''
 
   totalSize = 0
   totalFiles = 0
   dropZoneDroppable: boolean = false
   isUploadStarted: boolean = false
   onUploadInProcess: boolean = false
+  isDragStarted: boolean = false
 
   isValid: boolean = true
 
@@ -322,25 +377,29 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   deleteFileTimeouts: any[] = []
 
   randomKey: string = ''
-  editFileIndex: null|number = null
+  editFileIndex: null | number = null
   editFileExt: string = ''
   editFileName: string = ''
 
   created() {
     this.registerReactiveEvent('tap', '.dropzone-active', this.fileUpload)
     this.registerReactiveEvent('tap', '.dropzone-empty-files', this.fileUpload)
+    this.randomKey = this.VST.generateRandomKey()
   }
 
   mounted() {
     this.deleteFileTimeouts = []
-    this.randomKey = this.VST.generateRandomKey()
     this.setSizeAll()
   }
 
-  get canRenameFile(): string|boolean {
-    if (this.editFileIndex === null || this.editFileIndex === undefined) return false
+  get canRenameFile(): string | boolean {
+    if (this.editFileIndex === null || this.editFileIndex === undefined) {
+      return false
+    }
     let newName = this.editFileName
-    if (!newName) return 'Название должно быть заполнено'
+    if (!newName) {
+      return 'Название должно быть заполнено'
+    }
     newName += '.' + this.files[this.editFileIndex].name?.split?.('.').slice?.(-1)?.[0]?.trim()
     const hasDuplicate = this.files.some((f, index) => {
       return index !== this.editFileIndex && f.name === newName
@@ -350,22 +409,26 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   setValue(value: FileFieldItemInterface[]): any {
     const files = []
-    for(let f of (Array.isArray(value) ? value : [])) {
-      if(this.onlyImages) {
-        if(f.data?.isImage) {
-          files.push({...f, ...{
-              sizeNamed : this.fileGetSize(f.size),
+    for (let f of (Array.isArray(value) ? value : [])) {
+      if (this.onlyImages) {
+        if (f.data?.isImage || f?.mime.startsWith('image/')) {
+          files.push({
+            ...f, ...{
+              sizeNamed: this.fileGetSize(f.size),
               found: true,
-              loaded: 100
-            }})
+              loaded: 100,
+            },
+          })
         }
       }
       else {
-        files.push({...f, ...{
-            sizeNamed : this.fileGetSize(f.size),
+        files.push({
+          ...f, ...{
+            sizeNamed: this.fileGetSize(f.size),
             found: true,
-            loaded: 100
-          }})
+            loaded: 100,
+          },
+        })
       }
     }
     this.files = files
@@ -373,23 +436,23 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   getValue(): IFilesFormField[] {
     let out: IFilesFormField[] = []
-    for(let f of this.files) {
-      if(!f?.deleted && f.found) {
+    for (let f of this.files) {
+      if (!f?.deleted && f.found) {
         out.push({
-          ext : f.ext,
-          name : f.name,
-          hash : f.hash,
-          size : f.size,
-          mime : f.mime,
-          uri : f.uri,
-          deleted : f?.deleted,
-          encoding : f.encoding, // @ts-ignore
-          data : {
+          ext: f.ext,
+          name: f.name,
+          hash: f.hash,
+          size: f.size,
+          mime: f.mime,
+          uri: f.uri,
+          deleted: f?.deleted,
+          encoding: f.encoding, // @ts-ignore
+          data: {
             ...{encoding: f.encoding},
-            ...f.data
+            ...f.data,
           },
-          lastModified : f.lastModifiedStamp,
-          sizeNamed : this.fileGetSize(f.size),
+          lastModified: f.lastModifiedStamp,
+          sizeNamed: this.fileGetSize(f.size),
         })
       }
     }
@@ -398,28 +461,28 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   setSizeAll() {
     let ts = 0, tf = 0
-    for(let f of this.files) {
-      if(!f?.deleted && f?.found && f?.size) {
+    for (let f of this.files) {
+      if (!f?.deleted && f?.found && f?.size) {
         ts += f.size
         f.sizeNamed = this.fileGetSize(f.size)
-        tf++;
+        tf++
       }
     }
     this.totalSize = this.fileGetSize(ts)
     this.totalFiles = tf
   }
 
-  fileGetSize(count: any = 0, decimal=2, level=0): any {
-    let unitList: string[] = ['Бт','Кб','Мб','Гб','Тб', 'Пб'];
-    if(count >= 1024.0 && (level+1 < unitList.length)) {
-      return this.fileGetSize(count/1024, decimal, ++level)
+  fileGetSize(count: any = 0, decimal = 2, level = 0): any {
+    let unitList: string[] = ['Бт', 'Кб', 'Мб', 'Гб', 'Тб', 'Пб']
+    if (count >= 1024.0 && (level + 1 < unitList.length)) {
+      return this.fileGetSize(count / 1024, decimal, ++level)
     }
 
     return `${decimal ? (count).toFixed(decimal) : Math.round(count)} ${unitList[level]}`
   }
 
   fileUpload() {
-    if(this.canChange) {
+    if (this.canChange) {
       this.$refs?.filesInput?.click?.()
     }
   }
@@ -444,34 +507,34 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
     this.files[key].spin = true
 
     fetch(this.files[key].uri)
-        .then(response => response.blob())
-        .then(blob => {
-          const blobUrl = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = blobUrl
-          a.download = this.files[key].name
-          a.style.display = 'none'
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(blobUrl)
-          this.files[key].spin = false
-        })
+      .then(response => response.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = blobUrl
+        a.download = this.files[key].name
+        a.style.display = 'none'
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(blobUrl)
+        this.files[key].spin = false
+      })
   }
 
   fileDownloadAll() {
     const zip = new JSZip()
     const promises: any[] = []
     this.onZipDownloadInProcess = true
-    this.files.forEach(({ name, uri }) => {
+    this.files.forEach(({name, uri}) => {
       promises.push(
         fetch(uri.startsWith('http') ? uri : `${location.protocol}//${location.host}${uri}`)
           .then(response => response.blob())
-          .then(blob => zip.file(name, blob))
+          .then(blob => zip.file(name, blob)),
       )
     })
 
     Promise.all(promises).then(() => {
-      zip.generateAsync({ type: 'blob' }).then((content: any) => {
+      zip.generateAsync({type: 'blob'}).then((content: any) => {
         const url = URL.createObjectURL(content)
         const a = document.createElement('a')
         a.href = url
@@ -501,8 +564,11 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
       this.$refs.editFileInput?.focus?.(0, this.$refs.editFileInput?.value?.length ?? 0)
     })
   }
+
   renameFile() {
-    if (this.canRenameFile !== true) return
+    if (this.canRenameFile !== true) {
+      return
+    }
     this.files[this.editFileIndex!].name = this.$refs.editFileInput.getValue()
       + '.' + this.files[this.editFileIndex!].name.split('.').slice(-1)[0]
     this.editFileIndex = null
@@ -510,25 +576,25 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   fileSortDrop(from: any, to: any) {
     let fromIndex = 0, toIndex = 0
-    for(let file of this.files) {
-      if(file.name == from.name && file?.hash == from.hash) {
+    for (let file of this.files) {
+      if (file.name == from.name && file?.hash == from.hash) {
         break
       }
-      ++fromIndex;
+      ++fromIndex
     }
-    for(let file of this.files) {
-      if(file.name == to.name && file?.hash == to.hash) {
+    for (let file of this.files) {
+      if (file.name == to.name && file?.hash == to.hash) {
         break
       }
-      ++toIndex;
+      ++toIndex
     }
     let element = this.files[fromIndex],
-        // Удаляем перемещаемый элемент
-        f = [...this.files].slice(0,fromIndex).concat([...this.files].slice(fromIndex+1)),
-        fa = f.slice(toIndex)
+      // Удаляем перемещаемый элемент
+      f = [...this.files].slice(0, fromIndex).concat([...this.files].slice(fromIndex + 1)),
+      fa = f.slice(toIndex)
     // Вставляем перемещаемый элемент на место drop zone
     fa.unshift(element)
-    const files = f.slice(0,toIndex).concat(fa)
+    const files = f.slice(0, toIndex).concat(fa)
     this.files = []
     this.nextTick(() => this.files = files)
   }
@@ -540,18 +606,18 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   }
 
   fileGetName(name: string): any {
-    for(let v of this.files) {
-      if(v.name == name) {
-        if(/\([0-9]+\)\.[a-z0-9A-Z]+$/.test(name)) { // @ts-ignore
-          name = name.replace(/(.*)\(([0-9]+)\)\.([a-z0-9A-Z])+$/g, function(match, name, int, ext) {
+    for (let v of this.files) {
+      if (v.name == name) {
+        if (/\([0-9]+\)\.[a-z0-9A-Z]+$/.test(name)) { // @ts-ignore
+          name = name.replace(/(.*)\(([0-9]+)\)\.([a-z0-9A-Z])+$/g, function (match, name, int, ext) {
             ext = match.split('.').slice(-1)[0]
-            return `${name}(${parseInt(int)+1}).${ext}`
+            return `${name}(${parseInt(int) + 1}).${ext}`
           })
           return this.fileGetName(name)
         }
         else {
           let split = name.split('.'),
-              ext = split[split.length-1]
+            ext = split[split.length - 1]
           split.splice(-1)
           name = `${split.join('.')} (1).${ext}`
         }
@@ -566,11 +632,10 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   dragEnter(e: any) {
     e.preventDefault()
-    if(
-        this.canChange
-        // && e?.fromElement && !e?.fromElement?.closest('.dz-content')
-        && e?.dataTransfer.effectAllowed != 'move' // Исключаем активацию при внутренних перемещениях
-        && Array.from(e.dataTransfer.types).includes('Files') // Разрешаем только файлы
+    if (
+      this.canChange
+      && Array.from(e.dataTransfer.types).includes('Files')
+      && e?.dataTransfer?.effectAllowed !== 'move'
     ) {
       this.dropZoneDroppable = true
     }
@@ -578,26 +643,29 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
   dragLeave(e: any) {
     e.preventDefault()
-    if(e.target.classList.contains("dz-droppable") || e.target.classList.contains("dropzone-active")) {
+    if (
+      e.target.classList.contains('dz-droppable')
+      || e.target.classList.contains('dropzone')
+      || e.target.classList.contains('dropzone-active')
+    ) {
       this.dropZoneDroppable = false
     }
   }
 
   onDrop(e: any) {
     e.preventDefault()
-    if (!this.canChange) return
-    this.dropZoneDroppable = false
-    if(!this.canChange) {
-      return false
+    if (!this.canChange || e?.dataTransfer?.getData?.('itemId')) {
+      return
     }
-    if(e.dataTransfer.files.length) {
+    this.dropZoneDroppable = false
+    if (e.dataTransfer.files.length) {
       this.uploadFiles(e.dataTransfer.files).then()
     }
   }
 
   async uploadFiles(e: any) {
     let fls = e.target?.files ?? ((e instanceof FileList) ? e : [])
-    if(!fls.length) {
+    if (!fls.length) {
       return
     }
     this.dropZoneDroppable = false
@@ -605,22 +673,22 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
     const formData = new FormData()
     let loadedKeys: string[] = []
-    let sendKeys: {[key: string]: string} = {}
+    let sendKeys: { [key: string]: string } = {}
     let sendFiles: any[] = []
     let lastFileName: string = ''
     const notImages: string[] = []
     const extraFiles: string[] = []
     const filesWithExtraSize: string[] = []
     for (let i = 0; i < fls.length; i++) {
-      if(this.onlyImages && !this.isImage(fls[i].type)) {
+      if (this.onlyImages && !this.isImage(fls[i].type)) {
         notImages.push(fls[i].name)
       }
       // Если файлов больше чем разрешено
-      else if(this.maxNumberOfFiles > 1 && this.files.length >= this.maxNumberOfFiles) {
+      else if (this.maxNumberOfFiles > 1 && this.files.length >= this.maxNumberOfFiles) {
         extraFiles.push(fls[i].name)
       }
       // Если файл больше максимально установленного размера
-      else if(fls[i].size > (this.maxSize * 1024 * 1024)) {
+      else if (fls[i].size > (this.maxSize * 1024 * 1024)) {
         filesWithExtraSize.push(fls[i].name)
       }
       else {
@@ -637,24 +705,26 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
           deleted: false,
           hash: await this.calculateMD5(fls[i]),
           found: true,
-          file: fls[i]
+          file: fls[i],
         }
         // Если включено только изображения и это не изображение
-        if(this.maxNumberOfFiles == 1) {
-          // extraFiles.push(fls[i].name)
+        if (this.maxNumberOfFiles == 1) {
+          formData.append('files[]', file.file)
+          sendFiles = [file]
+          this.files = [file]
+          this.onUploadInProcess = false
         }
         else {
           try {
             const hash = await this.calculateMD5(fls[i])
             const issetFile = this.files.find(item => item.hash === hash)
 
-            if(!issetFile) {
+            if (!issetFile) {
               formData.append('files[]', file.file)
               sendFiles.push(file)
               this.files.push(file as any)
             }
-          }
-          catch (e: any) {
+          } catch (e: any) {
             this.onUploadInProcess = false
             this.errorHandler?.({
               title: 'Произошла ошибка при вычислении MD5 хэша файла',
@@ -666,7 +736,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
         loadedKeys.push(loadedKey)
       }
     }
-    if(notImages.length) {
+    if (notImages.length) {
       this.errorHandler?.({
         title: 'Внимание!',
         width: '450px',
@@ -676,7 +746,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
           <b>.jpeg .jpg .png .svg .svgz .gif .bmp .webp .avif .apng .webp .jfif, .pgp</b></div>`,
       }, 'warning')
     }
-    if(extraFiles.length) {
+    if (extraFiles.length) {
       this.errorHandler?.({
         title: 'Внимание!',
         width: '450px',
@@ -686,7 +756,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
           </div>`,
       }, 'warning')
     }
-    if(filesWithExtraSize.length) {
+    if (filesWithExtraSize.length) {
       this.errorHandler?.({
         title: 'Внимание!',
         width: '450px',
@@ -697,7 +767,12 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
     }
 
     if (!formData.has('files[]')) {
-      this.errorHandler?.({ title: 'Ошибка', message: 'Такие файлы уже есть' })
+      const len = Object.keys(sendKeys).length
+      if (len) {
+        this.errorHandler?.({
+          title: 'Ошибка', message: `Так${len == 1 ? 'ой' : 'ие'} файл${len == 1 ? '' : 'ы'} уже есть`
+        })
+      }
       this.onUploadInProcess = false
       return
     }
@@ -707,7 +782,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
     xhr.open('POST', url, true)
 
-    let headers: {[k: string]: string} = {}
+    let headers: { [k: string]: string } = {}
     if (this.uploadHeaders) {
       if (typeof this.uploadHeaders == 'function') {
         headers = this.uploadHeaders()
@@ -736,65 +811,81 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
     // Обработка завершения запроса
     xhr.onload = () => {
-      // if (xhr.status === 401) {
-      //   this.errorHandler?.('Время авторизации истекло, страница будет обновлена.')
-      //   location.reload()
-      //   return;
-      // }
-
       let responseData
       try {
         responseData = JSON.parse(xhr.responseText)
       } catch (e) {
-        this.errorHandler?.({ title: 'Ошибка', message: 'Некорректный ответ сервера' })
+        this.errorHandler?.({title: 'Ошибка', message: 'Некорректный ответ сервера'})
         this.onUploadInProcess = false
         return
       }
 
       if (!responseData.success) {
-        this.errorHandler?.({ title: 'Ошибка', message: responseData.error })
-        return;
+        this.errorHandler?.({title: 'Ошибка', message: responseData.message})
+        return
       }
 
-      // Обработка успешного ответа (аналогично axios-версии)
-      for (let file of responseData.files) {
-        const f = this.files.find(f => f.hash === file.hash)
-        if (!f) continue
-        f.loaded = 100
-        f.size = file.size
-        f.mime = file.mime
-        f.ext = file.ext
-        f.id = file.id
-        f.hash = file.hash
-        f.uri = file.uri
-        f.lastModified = file.lastModified;
-        f.data = {
-          ...{ encoding: f.encoding },
-          ...file.data
-        };
-        f.found = true
-
-        this.deleteFileTimeouts.push(setTimeout(() => {
-          this.files = this.files.filter(fl => fl.hash === f.hash)
-        }, 604800000))
+      if (this.maxNumberOfFiles == 1) {
+        this.files = []
+        this.nextTick(() => this.files = [
+          {
+            loaded: 100,
+            size: responseData.files[0].size,
+            mime: responseData.files[0].mime,
+            name: responseData.files[0].name+'.'+responseData.files[0].ext,
+            ext: responseData.files[0].ext,
+            id: responseData.files[0].id,
+            hash: responseData.files[0].hash,
+            uri: responseData.files[0].uri,
+            lastModified: responseData.files[0].lastModified,
+            data: {
+              ...responseData.files[0]?.data ?? {},
+            },
+            found: true
+          }
+        ])
       }
+      else {
+        // Обработка успешного ответа (аналогично axios-версии)
+        for (let file of responseData.files) {
+          const f = this.files.find(f => f.hash === file.hash)
+          if (!f) {
+            continue
+          }
+          f.loaded = 100
+          f.size = file.size
+          f.mime = file.mime
+          f.name = file.name+'.'+file.ext
+          f.ext = file.ext
+          f.id = file.id
+          f.hash = file.hash
+          f.uri = file.uri
+          f.lastModified = file.lastModified
+          f.data = {
+            ...{encoding: f.encoding},
+            ...file.data,
+          }
+          f.found = true
+        }
 
-      let files = this.files
-      this.files = []
-      this.$nextTick(() => this.files = files)
+        let files = this.files
+        this.files = []
+        this.nextTick(() => this.files = files)
+      }
+      this.$emit('uploaded', responseData.files)
       this.setSizeAll()
       this.onUploadInProcess = false
     }
 
     xhr.onerror = () => {
-      this.errorHandler?.({ title: 'Ошибка', message: 'Сетевая ошибка' })
+      this.errorHandler?.({title: 'Ошибка', message: 'Сетевая ошибка'})
 
       let oldFiles = this.files.filter(f => !f.loadedKey || !sendFiles.some(item => item.loadedKey === f.loadedKey))
       this.files = []
       this.$nextTick(() => {
         this.files = oldFiles
         this.setSizeAll()
-      });
+      })
     }
 
     xhr.onloadstart = () => {
@@ -808,22 +899,20 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
     xhr.send(formData)
   }
 
-
   cancelUpload() {
-    // TODO через prompt и signal
     this.errorHandler?.('Отмена загрузки пока не реализована')
   }
 
 
   calculateMD5(file: FileList) {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new FileReader()
 
       reader.onload = (event: any) => {
         // js-md5 принимает ArrayBuffer напрямую.
         // Это в десятки раз быстрее и потребляет в разы меньше памяти.
         const hash = md5(event.target.result)
-        resolve(hash);
+        resolve(hash)
       }
 
       reader.onerror = (error) => {
@@ -855,7 +944,7 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
   }
 
   beforeUnmount() {
-    for(const timer of this.deleteFileTimeouts) {
+    for (const timer of this.deleteFileTimeouts) {
       clearTimeout(timer)
     }
   }
@@ -863,13 +952,13 @@ import {Button as VSTButton, StringField as VSTStringField} from '../../../kit'
 
 type FilesAreaResponseType = {
   // Axios type
-  data: {[k:string]: any}|string
+  data: { [k: string]: any } | string
   status: number
   statusText: string
-  headers: {[k:string]: any}
-  config: {[k:string]: any}
-  request: {[k:string]: any}
-}|Response
+  headers: { [k: string]: any }
+  config: { [k: string]: any }
+  request: { [k: string]: any }
+} | Response
 
 </script>
 
@@ -891,7 +980,7 @@ input
 
 .dropzone .dropzone-active
   text-align: center
-  font-size: 2em
+  font-size: 1.5em
   display: none
   width: 100%
   min-height: 100px
@@ -899,11 +988,11 @@ input
   justify-content: center
 
 .dropzone-empty-files
+  @apply text-lime-500 fw-500
   cursor: pointer
-  font-size: 2em
+  font-size: 1.35em
   width: 100%
   text-align: center
-  height: 176px
   display: flex
   align-items: center
   justify-content: center
@@ -913,23 +1002,24 @@ input
 
 .dz-droppable
   cursor: pointer
-  height: 223px
+  // height: 120px
   background: #daffb2
-  border: 2px dashed #76c70c
+  border: 2px dashed #76c70c !important
   display: flex
   align-items: center
   justify-content: center
+
   &.only-images
-    height: 205px !important
+    @apply rd-xl py22px
 
 .dropzone
   &.only-images
     .dropzone-empty-files
-      height: 160px !important
+      height: 120px !important
 
 
 .dz-droppable .dropzone-active
-  display: flex
+  @apply flex absolute w100% h100% z3 bg-slate-100/90 text-zinc-500 fw-500 text-shadow rd-2xl
 
 
 .dz-droppable .dz-content, .dz-droppable .dz-footer

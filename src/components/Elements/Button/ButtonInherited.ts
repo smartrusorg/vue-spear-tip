@@ -234,6 +234,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     }
     this.currentBg = this.bg ?? (this.currentBg ?? bg)
     this.currentColor = this.color ?? (this.currentColor ?? color)
+    this.currentColorHover = this.colorHover ?? (this.currentColorHover ?? color)
     this.currentBorderColor = this.borderColor ?? (this.currentBorderColor ?? borderColor)
     this.currentBgActive = this.bgActive ?? (this.currentBgActive ?? bgActive)
     this.currentBorderColorActive = this.borderColorActive ?? (this.currentBorderColorActive ?? borderColorActive)
@@ -319,6 +320,9 @@ export default abstract class ButtonInherited extends BaseComponent {
     if (title){
       this.nextTick(() => this.innerTitle = title)
     }
+  }
+  @Watch watchColor(color: string) {
+    this.currentColor = color
   }
   
   

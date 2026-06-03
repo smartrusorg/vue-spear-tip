@@ -288,7 +288,9 @@ window.addEventListener('keydown', (e: KeyboardEvent) => {
   if (keyName) {
     const key = `${keyName}_${isCtrlOrCmdPressed ? 1 : 0}_${e.altKey ? 1 : 0}_${e.shiftKey ? 1 : 0}`
     if (VSTLib.__REGISTERED_HOTKEYS[key]) {
-      e.preventDefault()
+      if (VSTLib.__REGISTERED_HOTKEYS[key]?.prevent) {
+        e.preventDefault()
+      }
       VSTLib.__REGISTERED_HOTKEYS[key].callback(e)
     }
   }

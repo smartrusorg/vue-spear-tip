@@ -203,7 +203,7 @@
 
 
 <script lang="ts">
-import {Prop, VST} from '../../../core'
+import {Prop, Component} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import { ClipboardDocumentListIcon, CheckBadgeIcon } from "@heroicons/vue/24/solid"
 import { NoSymbolIcon } from "@heroicons/vue/20/solid" // @ts-ignore
@@ -215,7 +215,7 @@ import IMask from 'imask'
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class StringField extends FieldComponent {
+@Component export default class StringField extends FieldComponent {
   @Prop(String) readonly maskPreset: 'email'|'date'|'datetime'|'datetimeSec'|null = null
   @Prop(Boolean) readonly force12hours: boolean = false
   @Prop(Boolean) readonly alwaysCopyIcon: boolean = false
@@ -582,14 +582,6 @@ import IMask from 'imask'
     }
     else if (val) this.preResetValue = ''
     if (['string', 'number'].includes(typeof (val))){
-
-
-      //
-      // if (typeof this.asNumber == 'number') this.value = InputMask.unmask('numeric', val, this._inputMaskOptions)
-      // // TODO 2 просто возвращать обычный unmask без numeric ^ проверки.
-      // //  Просто при цифрах обрезать лишние символы и возвращать float при необходимости
-      //
-      // else
       let emitVal: string|number = ''
       if (this.mask || !this.asNumber && this.maskInner) {
         emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
@@ -839,7 +831,15 @@ import IMask from 'imask'
 
   onValueChange(value: any) {
     if (this.$refs.selectInput) {
-      this.$refs.selectInput.value = this.value
+      if (this.asNumber && isNaN(this.value)) {
+        this.$refs.selectInput.value = 0
+      }
+      else {
+        if (typeof this.asNumber == 'number') {
+          this.value = this.value.toString().replace('.', this.radix)
+        }
+        this.$refs.selectInput.value = this.value
+      }
     }
   }
 
