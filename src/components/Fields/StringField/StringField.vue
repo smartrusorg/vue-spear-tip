@@ -220,6 +220,7 @@ import IMask from 'imask'
   @Prop(Boolean) readonly force12hours: boolean = false
   @Prop(Boolean) readonly alwaysCopyIcon: boolean = false
   @Prop(Boolean) readonly disabled: boolean = false
+  @Prop(Boolean) readonly maskAsRegExp: boolean = false
   /** Возвращать результат как число, если передать номер, то число с номером цифр после точки */
   @Prop(Boolean, Number) readonly asNumber: boolean|number = false
   @Prop(String) readonly radix: string = ','
@@ -482,7 +483,7 @@ import IMask from 'imask'
         // необходима конвертация для InputMask. В виде строки срабатывает корректно.
         this.value = this.value.toString().replace('.', this.radix)
       }
-      new InputMask(this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
+      new InputMask(this.mask && this.maskAsRegExp ? {regex: this.mask} : this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
         ...this.inputMaskOptionsPrepare,
       }))).mask(el)
     }
