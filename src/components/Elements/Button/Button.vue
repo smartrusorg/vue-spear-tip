@@ -55,13 +55,13 @@
         color: badgeColor ?? '#ffffff',
       }`
       ) {{ badge }}
-      span.left-icon-animate(v-if="icon" :class="$slots.default && $refs?.button?.innerText?.trim?.()?.length ?  'left-icon' : ''")
+      span.left-icon-animate(v-if="icon" :class="$slots?.default && $slots?.default?.()?.[0]?.children?.length && $refs?.button?.innerText?.trim?.()?.length ?  'left-icon' : ''")
         div(v-if="icon?.startsWith('<')" v-html="icon")
         i.fa(v-else :class="icon")
       slot
       span.right-icon-animate(
         v-if="iconRight"
-        :class="$slots.default && $refs?.button?.innerText?.trim?.()?.length ?  'right-icon' : ''"
+        :class="$slots?.default && $slots?.default?.()?.[0]?.children?.length && $refs?.button?.innerText?.trim?.()?.length ?  'right-icon' : ''"
       )
         div(v-if="iconRight?.startsWith('<')" v-html="iconRight")
         i.fa(v-else :class="iconRight")

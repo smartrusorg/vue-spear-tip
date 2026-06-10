@@ -7,14 +7,15 @@
       'min-w64px': type != 'checkbox',
       '44px!' : size == 'lg',
       'h25px!' : size == 'md',
+      'h20px! w25px!' : size == 'sm',
     }`
   )
-    | &nbsp;
     .switch(
       v-if="type == 'switcher'"
       :class=`{
-        'min-h25px! scale-80' : size == 'md',
-        'disabled' :disabled,
+        'min-h25px! scale-80': size == 'md',
+        'min-h18px! scale-50': size == 'sm',
+        'disabled': disabled,
       }`
     )
       .switch_box
@@ -38,18 +39,21 @@
         disabled,
       }`
     )
-      span(class="")
+      span(class="flex items-center justify-center")
         input(type="checkbox" :id="'checkbox-'+randomId" v-model="value" :disabled="disabled")
         label(
           :for="'checkbox-'+randomId"
-          class="check pb3px! w20px! p0!"
+          class="check py3px! w20px! p0!"
           :class=`{
             'bg-white': value,
             'mt3px!': !value,
+            'h10px!': size == 'sm',
           }`
         )
           svg(
-            width="20px" height="20px" viewBox="0 0 18 18"
+            width="20px"
+            :height="size == 'sm' ? '13px' : (size == 'md' ? '18px' : null)"
+            viewBox="0 0 18 18"
             class="w20px"
             :class=`{
               'svg-unchecked bg-white': !value,
@@ -63,7 +67,7 @@
             )
             polyline(points="1 9 7 14 15 4")
       span(
-        v-if="$slots.default"
+        v-if="$slots?.default && $slots?.default?.()?.[0]?.children?.length"
         @click="!disabled ? (value = !value) : null"
         class="cursor-pointer fs-1rem mx15px my2px whitespace-nowrap"
         :class=`{
@@ -94,6 +98,15 @@
       #checkbox-{{ randomId }} + label {
         box-sizing: content-box !important;
       }
+    component(is="style" v-if="type == 'checkbox' && size == 'sm'").
+      [for="checkbox-{{ randomId }}"]:before {
+        height: 20px !important;
+        width: 20px !important;
+      }
+      #checkbox-{{ randomId }} + label {
+        height: 15px !important;
+        width: 15px !important;
+      }
     component(is="style").
       [for="switch-{{ randomId }}"]::before {
         background: {{ bg }};
@@ -117,7 +130,7 @@
 
 <script lang="ts">
 
-import {Prop, VST, Watch} from '../../../core'
+import {Prop, Component, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 /**
@@ -125,7 +138,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class SwitchField extends FieldComponent {
+@Component export default class SwitchField extends FieldComponent {
   @Prop(Boolean) readonly disabled: boolean = false
   @Prop(String) readonly bg: string = 'linear-gradient(330deg, #0aa86d 0%, #4eb18d 50%, #0ca86e 100%)'
   @Prop(String) readonly bgInactive: string = '#a1a1a1'
@@ -175,7 +188,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 <style lang="sass">
 .container-switch
-  @apply h100% p-0 m-0 text-center z-10! flex! user-select-none
+  @apply h100% p-0 m-0 text-center z-10! flex! user-select-none flex justify-center items-center
 .switch
   @apply z-10! rounded-15px relative!
   input
@@ -318,7 +331,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
 .typical-checkbox
-  @apply flex px10px items-center mx-auto
+  @apply flex px10px items-center mx-auto justify-center
   label.check
     @apply rounded-3px flex! items-center justify-center
     display: inline-block
