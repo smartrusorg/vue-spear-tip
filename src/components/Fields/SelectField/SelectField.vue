@@ -389,9 +389,28 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   reset(tag: HTMLElement) {
     if (this.mode == 'select') {
       this.tagify?.removeAllTags?.()
+      this.reactiveValue = null
+    }
+    else {
+      const keyToDelete = tag?.parentElement?.getAttribute?.('key')
+      if (keyToDelete) {
+        const tagToRemove = this.tagify.value.find((tag: any) => tag.key == keyToDelete)
+        if (tagToRemove) {
+            this.tagify?.removeTags(tagToRemove.value)
+        }
+        this.nextTick(() => {
+          if (this.tagify?.value?.length) {
+            const newValues = []
+            for (const v of this.tagify.value) {
+              newValues.push({key: v.key, value: v.value})
+            }
+            this.reactiveValue = JSON.stringify(newValues)
+          }
+        })
+      }
     } // @ts-expect-error
     this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
-    this.nextTick(() => this.$emit('update:modelValue', this.reactiveValue = null), 4)
+    this.nextTick(() => this.$emit('update:modelValue', ), 4)
   }
 
   onViewPortResize() {
@@ -420,8 +439,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         const val = (defaultValue ?? (this.inputValue || this.modelValue))
         if (Array.isArray(val)) {
           this.isFirstValueSet = true
-          this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v: any) => val.includes(v?.key))
-          this.tagify?.addTags(this.value ?? '')
+          const values = JSON.parse(JSON.stringify(this.itemsInner))?.filter((v) => val.includes(v?.key))
+          this.value = values?.map(v => v?.key ?? v)
+          this.nextTick(() => this.tagify?.addTags(values ?? []))
         }
       }
       else if (this.mode == 'tags'){
