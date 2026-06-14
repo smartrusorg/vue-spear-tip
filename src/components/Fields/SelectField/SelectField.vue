@@ -69,6 +69,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   emits = [
     'input',
     'change',
+    'reset',
   ]
   declare $refs: {
     selectInput: HTMLInputElement
@@ -411,6 +412,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     } // @ts-expect-error
     this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
     this.nextTick(() => this.$emit('update:modelValue', ), 4)
+    this.$emit('reset')
   }
 
   onViewPortResize() {
