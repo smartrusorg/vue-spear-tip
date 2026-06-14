@@ -187,7 +187,7 @@
         }`
       )
         div(class="flex items-center" v-if="endIcon")
-          i(:class="endtIcon")
+          i(:class="{[endtIcon]:true}")
         div(class="flex items-center whitespace-nowrap px7px" v-if="endText")
           span(v-html="endText")
         div(class="flex items-center" v-if="$slots.end")
@@ -483,7 +483,9 @@ import IMask from 'imask'
         // необходима конвертация для InputMask. В виде строки срабатывает корректно.
         this.value = this.value.toString().replace('.', this.radix)
       }
-      new InputMask(this.mask && this.maskAsRegExp ? {regex: this.mask} : this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
+      new InputMask(this.mask && this.maskAsRegExp ? {
+        regex: this.mask,
+      } : this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
         ...this.inputMaskOptionsPrepare,
       }))).mask(el)
     }
@@ -596,7 +598,11 @@ import IMask from 'imask'
         }
       }
 
-      if ((this.asNumber && this.mask) || this.mask?.includes('\\')) {
+      if (
+        !this.maskAsRegExp && (
+          (this.asNumber && this.mask) || this.mask?.includes('\\')
+        )
+      ) {
         // Извлекаем цифры на позициях, где в маске стоит '9' (пользовательский ввод)
         let userDigits = '';
         // Извлекаем статические цифры из маски (не '9')
