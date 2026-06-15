@@ -149,7 +149,7 @@
           )
 
         //- Кнопка сброса и восстановления содержимого
-        div(
+        .vst-string-field-reset-revert-box(
           class="w25px h25px text-stone absolute r-12px z4 cursor-pointer hover:scale-130"
           v-if="!disabled && (value || preResetValue) && !(asNumber && value == '0')"
           :class=`{
