@@ -135,7 +135,7 @@
 
 
         //- Кнопка копирования содержимого поля
-        div(
+        .vst-string-field-copy-icon-box(
           class="w22px h22px text-stone absolute t-11px l-12px z4 cursor-pointer hover:scale-130"
           v-if="(disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
         )
