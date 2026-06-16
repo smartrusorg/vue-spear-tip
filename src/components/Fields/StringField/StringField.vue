@@ -75,7 +75,7 @@
 
           //- Кнопки увеличения/уменьшения количества в цифровом поле
           template(
-            v-if="asNumber === true && !mask"
+            v-if="asNumber && !mask"
           )
             div(
               class="absolute! z3 user-select-none top-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
@@ -400,7 +400,7 @@ import IMask from 'imask'
         this.$refs.selectInput.value = this.value
         this.$refs.selectInput.addEventListener('focus', this.onFocus)
         this.$refs.selectInput.addEventListener('blur', this.onBlur)
-        if (this.wheelNumber && typeof this.asNumber == 'boolean' && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
+        if (this.wheelNumber && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
           const self = this
           this.$refs.selectInput.addEventListener(
             'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
@@ -584,7 +584,7 @@ import IMask from 'imask'
       return
     }
     else if (val) this.preResetValue = ''
-    if (['string', 'number'].includes(typeof (val))){
+    if (['string', 'number'].includes(typeof (val))) {
       let emitVal: string|number = ''
       if (this.mask || !this.asNumber && this.maskInner) {
         emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
@@ -632,10 +632,9 @@ import IMask from 'imask'
         // Сохраняем оба значения
         emitVal = userDigits
       }
-      else if (!emitVal) {
+      else if (!emitVal && emitVal !== 0) {
         emitVal = val
       }
-      // this.value = emitVal
 
       this.$emit('input', emitVal, reset)
       this.$emit('change', emitVal, reset)
@@ -839,7 +838,7 @@ import IMask from 'imask'
   onValueChange(value: any) {
     if (this.$refs.selectInput) {
       if (this.asNumber && isNaN(this.value)) {
-        this.$refs.selectInput.value = 0
+        this.$refs.selectInput.value = '0'
       }
       else {
         if (typeof this.asNumber == 'number') {
