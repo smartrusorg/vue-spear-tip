@@ -33,7 +33,7 @@
 
 
 <script lang="ts">
-import {BaseComponent, Computed, Prop, VST, Watch} from '../../../core'
+import {BaseComponent, Component, Prop, Watch} from '../../../core'
 
 interface TabSlot {
   props?: {
@@ -46,7 +46,7 @@ interface TabSlot {
  * @author CHORNY (created 02.03.2024 4:32)
  * @copyright https://smartrus.org
  */
-@VST export default class Tabs extends BaseComponent {
+@Component export default class Tabs extends BaseComponent {
 
   currentTab = 'default'
   CommentT: typeof Comment = Comment

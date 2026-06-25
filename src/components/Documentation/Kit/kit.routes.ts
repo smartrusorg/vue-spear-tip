@@ -9,6 +9,7 @@ import TabsKit from '../../Elements/Tabs/TabsKit.vue'
 import TextKitField from './Fields/TextKitField.vue'
 import SwitchKitField from './Fields/SwitchKitField.vue'
 import ScrollbarKit from '../../Elements/Scrollbar/ScrollbarKit.vue'
+import ModalsKit from '../../Elements/Modals/ModalsKit.vue'
 import FilesAreaKit from '../../Fields/FilesArea/FilesAreaKit.vue'
 import FilesAreaKitField from './Fields/FilesAreaKitField.vue'
 
@@ -49,6 +50,11 @@ export default [
     path: '/elements/scrollbar',
     name: 'Scrollbar',
     component: ScrollbarKit
+  },
+  {
+    path: '/elements/modals',
+    name: 'Modals',
+    component: ModalsKit
   },
   // {
   //   path: '/elements/qr',
