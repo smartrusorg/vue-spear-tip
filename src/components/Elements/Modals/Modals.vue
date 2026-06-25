@@ -50,7 +50,7 @@
             :borderColor="m?.confirmButtonBorderColor"
             :icon="m?.icon"
             :bg="m?.titleBgColor"
-            fontSize="1.5rem"
+            fontSize="1rem"
             @click="closeModal(m?.id, 'confirm')"
           )
             span(v-html="m?.confirmText ?? 'Подтвердить'")
@@ -62,7 +62,7 @@
             :shine="m?.denyShine"
             :color="m?.denyColor ?? m?.color"
             :bg="m?.denyBgColor ?? m?.titleBgColor"
-            fontSize="1.5rem"
+            fontSize="1rem"
             @click="closeModal(m?.id, 'deny')"
           )
             span(v-html="m?.denyText ?? 'Отказаться'")
@@ -71,7 +71,7 @@
             ref="cancelBtn"
             :disabled="!buttonsEnable"
             :icon="m?.icon"
-            fontSize="1.5rem"
+            fontSize="1rem"
             @click="closeModal(m?.id, 'cancel')"
           )
             span(v-html="m?.cancelText ?? 'Отмена'")
@@ -99,7 +99,6 @@ import {default as VSTButton} from '../Button'
   
   mounted() {
     this.display.bind(this)
-    console.log(this.modals)
   }
   
   buttonsEnable: boolean = true
@@ -119,7 +118,7 @@ import {default as VSTButton} from '../Button'
     let data: ModalConfig = {content: undefined},
       tempId : number = Date.now() + Math.ceil(Math.random() * 100000)
     if(typeof content == 'string' || typeof content == 'number') {
-      data.content = `<div class="text-center">${content}</div>`
+      data.content = `<div  style="text-align: center">${content}</div>`
       data.onConfirm = onConfirm
       data.onCancel  = onCancel
     }
@@ -231,42 +230,43 @@ import {default as VSTButton} from '../Button'
           setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 1000)
           let m  = [...this.modals]
           
-          Engine.vueMount(`#modal-content-${tempId}`, {
-            template : `<template class="d-block">${data?.content ?? ''}</template>`,
-            mounted: function() {
-              // let globalVariables = (data?.content ?? '').match(/global-variable="[^"]*"/g)
-              //     ?.map(v => v.substring(17).slice(0, -1)) ?? [],
-              let foundGlobalVariables : any = {}
-              
-              // for(let v of globalVariables) {
-              //   if(Engine.vueGlobal[v]) {
-              //     foundGlobalVariables[v] = Engine.vueGlobal[v]
-              //   }
-              // }
-              
-              const modal: any = {
-                close() {
-                  self.closeModal(tempId)
-                }
-              }
-              
-              if(typeof data?.onMount == 'function') {
-                data.onMount(modal, foundGlobalVariables, tempId)
-              }
-              if(typeof data?.onOpen == 'function') {
-                data.onOpen(modal, foundGlobalVariables, tempId)
-              }
-              for(let i = 0; i < m.length; i++) {
-                if (m[i].id == tempId) {
-                  m[i].vue = this
-                  break
-                }
-              }
-              setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 100)
-              setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 400)
-              setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 1000)
-            }
-          })
+          // FIXME РЕАЛИЗОВАТЬ КОМПОНЕНТЫ И ПОДКЛЮЧЕНИЕ К ГЛОБАЛЬНЫМ (возможно через $parent?)
+          // Engine.vueMount(`#modal-content-${tempId}`, {
+          //   template : `<template class="d-block">${data?.content ?? ''}</template>`,
+          //   mounted: function() {
+          //     // let globalVariables = (data?.content ?? '').match(/global-variable="[^"]*"/g)
+          //     //     ?.map(v => v.substring(17).slice(0, -1)) ?? [],
+          //     let foundGlobalVariables : any = {}
+          //
+          //     // for(let v of globalVariables) {
+          //     //   if(Engine.vueGlobal[v]) {
+          //     //     foundGlobalVariables[v] = Engine.vueGlobal[v]
+          //     //   }
+          //     // }
+          //
+          //     const modal: any = {
+          //       close() {
+          //         self.closeModal(tempId)
+          //       }
+          //     }
+          //
+          //     if(typeof data?.onMount == 'function') {
+          //       data.onMount(modal, foundGlobalVariables, tempId)
+          //     }
+          //     if(typeof data?.onOpen == 'function') {
+          //       data.onOpen(modal, foundGlobalVariables, tempId)
+          //     }
+          //     for(let i = 0; i < m.length; i++) {
+          //       if (m[i].id == tempId) {
+          //         m[i].vue = this
+          //         break
+          //       }
+          //     }
+          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 100)
+          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 400)
+          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 1000)
+          //   }
+          // })
         })
       })
     })
