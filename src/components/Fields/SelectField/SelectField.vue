@@ -3,9 +3,9 @@
     class="d-inline-block mx2px my1px w100%"
     :class=`{
       'vst-select-multi': mode == 'multi' || mode == 'tags',
-      'h45px' : size == 'lg',
-      'h24px': size == 'sm',
-      'h35px': size == 'md',
+      'min-h45px' : size == 'lg',
+      'min-h24px': size == 'sm',
+      'min-h35px': size == 'md',
       ['vst-select-'+randKey]: true,
     }`
   )
@@ -590,7 +590,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     padding: 2px 0 0 15px !important
 
   .tagify__tag
-    @apply fs-1rem!
+    @apply fs-1rem! bg-#e5e5e5
 
   .tagify--focus
     @apply outline-stone-400! outline-2px outline-color-#c1c7cf! border-color-#c1c7cf border-solid border-1px!
