@@ -216,23 +216,37 @@ import IMask from 'imask'
  * @copyright https://smartrus.org
  */
 @Component export default class StringField extends FieldComponent {
+  declare $refs: {
+    selectInput: HTMLInputElement & {maskRef: any}
+  }
+  public emitsParent = [
+    'input', 'change', 'focus', 'blur', 'update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset',
+  ]
+  public componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
+  
+  /** Возвращать результат как число, если передать номер, то число с номером цифр после точки */
+  @Prop(Boolean, Number) readonly asNumber: boolean|number = false
+  
+  /**
+   * Включить ли увеличение/уменьшение цифрового значения в поле при прокрутке колесом внутри поля
+   * @experimental Не стабильно работает пока
+   */
+  @Prop(Boolean) readonly wheelNumber: boolean = true
+  
+  @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
   @Prop(String) readonly maskPreset: 'email'|'date'|'datetime'|'datetimeSec'|null = null
   @Prop(Boolean) readonly force12hours: boolean = false
   @Prop(Boolean) readonly alwaysCopyIcon: boolean = false
   @Prop(Boolean) readonly disabled: boolean = false
   @Prop(Boolean) readonly maskAsRegExp: boolean = false
-  /** Возвращать результат как число, если передать номер, то число с номером цифр после точки */
-  @Prop(Boolean, Number) readonly asNumber: boolean|number = false
   @Prop(String) readonly radix: string = ','
   @Prop(String) readonly mask: string|null = null
   @Prop(Array) readonly mapToRadix: string[] = ['.', ';', '/']
   @Prop(String) readonly dtPresetLocale: string = ''
   @Prop(String) readonly thousandsSeparator: string = ' '
-
   @Prop(Number) readonly step: number = 1
   @Prop(Number) readonly min: number = 0
   @Prop(Number) readonly max: number = Infinity
-
   @Prop(String) readonly startBg: string = 'white'
   @Prop(String) readonly startColor: string = '#a8a29e'
   @Prop(String) readonly startText: string|null = null
@@ -242,28 +256,27 @@ import IMask from 'imask'
   @Prop(String) readonly endColor: string = '#a8a29e'
   @Prop(String) readonly endIcon: string|null = null
 
-
-  /**
-   * Включить ли увеличение/уменьшение цифрового значения в поле при прокрутке колесом внутри поля
-   * @experimental Не стабильно работает пока
-   */
-  @Prop(Boolean) readonly wheelNumber: boolean = true
-
-  emitsParent = [
-    'input', 'change', 'focus', 'blur', 'update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset',
-  ]
-  componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
-  declare $refs: {
-    selectInput: HTMLInputElement & {maskRef: any}
+  public maskInner: string|null = null
+  public maskBlocks = {}
+  public utc: string = 'UTC'
+  public is12hours: boolean = false
+  public randKey: string = ''
+  
+  get canIncrement(): boolean {
+    if (!this.disabled) return false
+    const value = parseFloat(this.value as string)
+    return !this.max || value < this.max
   }
-  maskInner: string|null = null
-  maskBlocks = {}
-  utc: string = 'UTC'
-
-  @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
-
-  is12hours: boolean = false
-  randKey: string = ''
+  get canDecrement(): boolean {
+    if (!this.disabled) return false
+    const value = parseFloat(this.value as string)
+    return !this.min || value > this.min
+  }
+  
+  /** Является ли маска датой или датой со временем */
+  get isDateTime(): boolean {
+    return ['date', 'datetime', 'datetimeSec'].includes(this.maskPreset ?? '')
+  }
 
   createdParent() {
     super.createdParent()
@@ -641,14 +654,14 @@ import IMask from 'imask'
       this.$emit('update:modelValue', this.value = emitVal)
     }
   }
-  private onFocus() {
+  onFocus() {
     this.$emit('focus')
   }
-  private onBlur() {
+  onBlur() {
     this.nextTick(() => this.$emit('blur', this.$refs.selectInput?.value))
     // this.value = this.$refs.selectInput.value
   }
-  private onWheel = (event: WheelEvent, field: StringField) => {
+  onWheel = (event: WheelEvent, field: StringField) => {
     if (field.disabled || !field.asNumber) return
     event?.preventDefault?.()
     let currentValue = parseFloat(
@@ -690,7 +703,7 @@ import IMask from 'imask'
       field.preResetValue = ''
     }
   }
-  private onKeydown(event: any) {
+  onKeydown(event: any) {
     const isCtrlOrCmd = event?.ctrlKey || event?.metaKey
     // Восстановление при нажатии ctrl + z после нажатия сброса
     if (this.preResetValue && isCtrlOrCmd && event.key === 'z') {
@@ -698,7 +711,7 @@ import IMask from 'imask'
     }
   }
 
-  private extractDateOnly(dateString:string): string|null {
+  extractDateOnly(dateString:string): string|null {
     const regex = /([\d\w]{2,4}[./_-][\d\w]{2,4}[./_-][\d\w]{2,4})/
 
     // Метод match() возвращает массив совпадений или null.
@@ -730,14 +743,16 @@ import IMask from 'imask'
   }
 
   isInnerSetValue: boolean = false
-  setValue(value: any) {
+  setValue(value: string|number|null) {
     if (this.asNumber && typeof value == 'string') {
-      value = typeof this.asNumber == 'number' ? parseFloat(value) : parseInt(value)
+      value = typeof this.asNumber == 'number'
+        ? parseFloat(value.toString().replace(this.radix, '.'))
+        : parseInt(value)
     }
     if (this.isDateTime && this.iMaskedInst) {
       this.nextTick(() => {
         if (this.$refs.selectInput) {
-          this.$refs.selectInput.value = this.value = value?.toString()
+          this.$refs.selectInput.value = (this.value = value?.toString())?.toString().replace(this.radix, '.') ?? ''
         }
       }, 2)
       return this.nextTick(() => {
@@ -758,16 +773,18 @@ import IMask from 'imask'
     if (this.isDateTime) {
       return this.iMaskedInst?._unmaskedValue || ''
     }
-    return typeof this.asNumber == 'number'
-      ? parseFloat((this.value || '0')
+    if (typeof this.asNumber == 'number') {
+      return parseFloat((this.value?.toString().replace('.', this.radix) || '0')
+        .replaceAll(this.thousandsSeparator, '').replaceAll(this.radix, '.')
+      )
+    }
+    if (this.asNumber) {
+      return parseInt(
+        (this.value || '0')
           .replaceAll(this.thousandsSeparator, '').replaceAll(this.radix, '.')
-        )
-      : this.asNumber
-        ? parseInt(
-            (this.value || '0')
-              .replaceAll(this.thousandsSeparator, '').replaceAll(this.radix, '.')
-          )
-        : this.value?.trim?.() || ''
+      )
+    }
+    return this.value?.trim?.() || ''
   }
 
   replaceInMask(rule: string, mask: string, value: string, type = 'MM') {
@@ -816,23 +833,11 @@ import IMask from 'imask'
     return true
   }
 
-  private isOnlyValueCopied = false
-  private copyValueToClipboard() {
+  isOnlyValueCopied = false
+  copyValueToClipboard() {
     if (this.value) $VST.copyToClipboard(this.getValue())
     this.isOnlyValueCopied = true
     setTimeout(() => this.isOnlyValueCopied = false, 500)
-  }
-
-  get canIncrement(): boolean {
-    if (!this.disabled) return false
-    const value = parseFloat(this.value as string)
-    return !this.max || value < this.max
-  }
-
-  get canDecrement(): boolean {
-    if (!this.disabled) return false
-    const value = parseFloat(this.value as string)
-    return !this.min || value > this.min
   }
 
   onValueChange(value: any) {
@@ -847,11 +852,6 @@ import IMask from 'imask'
         this.$refs.selectInput.value = this.value
       }
     }
-  }
-
-  /** Является ли маска датой или датой со временем */
-  get isDateTime(): boolean {
-    return ['date', 'datetime', 'datetimeSec'].includes(this.maskPreset ?? '')
   }
 }
 </script>
