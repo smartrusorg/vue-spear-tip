@@ -746,7 +746,7 @@ import IMask from 'imask'
   setValue(value: string|number|null) {
     if (this.asNumber && typeof value == 'string') {
       value = typeof this.asNumber == 'number'
-        ? parseFloat(value.toString().replace(this.radix, '.'))
+        ? parseFloat(value?.toString?.().replace(this.radix, '.'))
         : parseInt(value)
     }
     if (this.isDateTime && this.iMaskedInst) {
@@ -790,7 +790,7 @@ import IMask from 'imask'
   replaceInMask(rule: string, mask: string, value: string, type = 'MM') {
     const typeIndex = rule.indexOf(type)
     if (typeIndex === -1) return mask
-    const normalizedValue = value.toString().padStart(2, '0')
+    const normalizedValue = value?.toString?.().padStart(2, '0')
     return mask.slice(0, typeIndex) + normalizedValue + mask.slice(typeIndex + type.length)
   }
 
@@ -847,7 +847,7 @@ import IMask from 'imask'
       }
       else {
         if (typeof this.asNumber == 'number') {
-          this.value = this.value.toString().replace('.', this.radix)
+          this.value = this.value?.toString?.().replace('.', this.radix) ?? 0
         }
         this.$refs.selectInput.value = this.value
       }
