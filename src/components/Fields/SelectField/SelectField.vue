@@ -186,7 +186,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
             this.$emit('change',  this.value = null)
           }
           else if (this.mode == 'tags') {
-            const reactiveValue = JSON.parse(this.reactiveValue)?.filter((v: any) => v.key != e.detail?.data?.key)
+            const reactiveValue = JSON.parse(this.reactiveValue)
+              ?.filter((v: any) => (v.key !== undefined ? v.key : v.value) != e.detail?.data?.key)
             if (!reactiveValue?.length && this.reactiveValue != '[]') {
               this.tagify.removeAllTags()
               this.$emit('change', this.value = [])
@@ -392,7 +393,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.tagify?.removeAllTags?.()
       this.reactiveValue = null
     }
-    else {
+    else if(this.mode == 'multi') {
       const keyToDelete = tag?.parentElement?.getAttribute?.('key')
       if (keyToDelete) {
         const tagToRemove = this.tagify.value.find((tag: any) => tag.key == keyToDelete)
@@ -409,9 +410,16 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           }
         })
       }
-    } // @ts-expect-error
-    this.nextTick(() => this.$el?.querySelector?.(`.tagify__input`).focus?.(), 3)
-    this.nextTick(() => this.$emit('update:modelValue', ), 4)
+    }
+    else if (this.mode == 'tags' && Array.isArray(this.value) && this.value.length == 1) {
+      this.nextTick(() => this.tagify?.removeAllTags?.(), 15)
+      this.value = []
+    }
+    this.nextTick(() => (this.$el?.querySelector?.(`.tagify__input`) as HTMLDivElement).focus?.(), 3)
+    this.nextTick(() => {
+      this.$emit('update:modelValue', this.value)
+      this.$emit('change', this.value)
+    }, 4)
     this.$emit('reset')
   }
 
@@ -420,12 +428,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
 
   setTags(defaultValue?: any) {
-    // console.log('set tags', this)
     this.beforeUpdate()
     this.nextTick(() => {
       this.tagify?.removeAllTags?.()
       if (this.mode == 'select'){
-        // console.log('select tags', this)
         const value = (
             this.itemsInner.find(v => (
                 v?.key === 0 ? v?.key : (v?.key || v?.value)

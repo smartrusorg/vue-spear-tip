@@ -219,10 +219,10 @@ import IMask from 'imask'
   declare $refs: {
     selectInput: HTMLInputElement & {maskRef: any}
   }
-  public emitsParent = [
+  emitsParent = [
     'input', 'change', 'focus', 'blur', 'update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset',
   ]
-  public componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
+  componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
   
   /** Возвращать результат как число, если передать номер, то число с номером цифр после точки */
   @Prop(Boolean, Number) readonly asNumber: boolean|number = false
@@ -256,11 +256,13 @@ import IMask from 'imask'
   @Prop(String) readonly endColor: string = '#a8a29e'
   @Prop(String) readonly endIcon: string|null = null
 
-  public maskInner: string|null = null
-  public maskBlocks = {}
-  public utc: string = 'UTC'
-  public is12hours: boolean = false
-  public randKey: string = ''
+  maskInner: string|null = null
+  maskBlocks = {}
+  utc: string = 'UTC'
+  is12hours: boolean = false
+  randKey: string = ''
+  preResetValue: string = ''
+  isOnlyValueCopied = false
   
   get canIncrement(): boolean {
     if (!this.disabled) return false
@@ -478,6 +480,7 @@ import IMask from 'imask'
 
       if (this.max) inputMaskOptionsPrepare.max = this.max
       if (this.min) inputMaskOptionsPrepare.min = this.min
+      inputMaskOptionsPrepare.allowMinus = (this.min ?? 0) < 0
 
       this.maskInner = 'numeric'
       if (!this.mask) {
@@ -568,7 +571,6 @@ import IMask from 'imask'
     }
   }
 
-  preResetValue: string = ''
   onReset() {
     this.preResetValue = this.iMaskedInst
       ? (this.$refs.selectInput.value || this.value)
@@ -833,7 +835,6 @@ import IMask from 'imask'
     return true
   }
 
-  isOnlyValueCopied = false
   copyValueToClipboard() {
     if (this.value) $VST.copyToClipboard(this.getValue())
     this.isOnlyValueCopied = true
