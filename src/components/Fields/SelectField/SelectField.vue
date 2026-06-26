@@ -41,14 +41,14 @@
         margin: 0 !important;
         height: 20px !important;
       }
+    component(is="style" v-if="mode == 'multi'").
+      .vst-select-{{randKey}} .tagify__tag {
+        background: #e5e5e5;
+      }
     component(is="style").
       .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
         max-width: {{ maxPlaceholderWidth ? maxPlaceholderWidth+'px' : 'auto' }};
       }
-    //svg(
-    //  data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-    //)
-    //  path(stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636")
 </template>
 
 
@@ -56,7 +56,7 @@
 import Tagify from '@yaireo/tagify' // @ts-ignore
 import TagifyEsm from './tagify.esm.js'
 
-import {Prop, VST, Watch} from '../../../core'
+import {Prop, Component, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
 
@@ -65,7 +65,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class SelectField extends FieldComponent {
+@Component export default class SelectField extends FieldComponent {
   emits = [
     'input',
     'change',
@@ -590,7 +590,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     padding: 2px 0 0 15px !important
 
   .tagify__tag
-    @apply fs-1rem! bg-#e5e5e5
+    @apply fs-1rem!
 
   .tagify--focus
     @apply outline-stone-400! outline-2px outline-color-#c1c7cf! border-color-#c1c7cf border-solid border-1px!
