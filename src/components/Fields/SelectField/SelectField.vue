@@ -10,9 +10,9 @@
     }`
   )
     input(ref="selectInput" :id="`vst-s-${randKey}`" :value="reactiveValue" :autofocus)
-    component(is="style" v-if="(size == 'md' || size == 'sm') && mode == 'select'").
+    component(is="style" v-if="(size == 'md' || size == 'sm')").
       .vst-select-field.vst-select-{{randKey}} .tagify {
-        height: 35px !important;
+        {{ mode != 'select' && value && value?.toString?.()?.trim?.()?.length ? 'min-' : '' }}height: 35px !important;
         min-height: auto !important;
         padding-left: 12px !important;
         padding-top: 2px !important;
@@ -432,15 +432,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.nextTick(() => {
       this.tagify?.removeAllTags?.()
       if (this.mode == 'select'){
-        const value = (
-            this.itemsInner.find(v => (
-                v?.key === 0 ? v?.key : (v?.key || v?.value)
-            ) === (defaultValue ?? (this.inputValue || this.modelValue)))?.value ?? null
-        )
-        if (value || value === 0) {
+        const item = this.itemsInner.find(v => (
+          v?.key === 0 ? v?.key : (v?.key || v?.value)
+        ) === (defaultValue ?? (this.inputValue || this.modelValue)))
+        if (item?.key || item?.key === 0) {
           this.isFirstValueSet = true
-          this.value = value
-          this.tagify?.addTags(this.value ?? '')
+          this.value = item.key ?? item.value ?? null
+          this.tagify?.addTags?.((item.value ?? item.key ?? '').toString())
         }
       }
       else if (this.mode == 'multi'){
@@ -458,8 +456,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           this.isFirstValueSet = true
           this.value = JSON.parse(JSON.stringify(this.itemsInner))?.filter(
               (v: any) => val?.some(vl => (vl?.key || vl?.value) == (v?.key || v?.value))
-          )
-          this.tagify?.addTags(this.value ?? '')
+          ).map(v => {return {value: v.value}})
+          this.nextTick(() => this.tagify?.addTags(this.value ?? []))
         }
       }
     })
