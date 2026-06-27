@@ -45,6 +45,14 @@
       .vst-select-{{randKey}} .tagify__tag {
         background: #e5e5e5;
       }
+    component(is="style" v-if="mode == 'select'").
+      .vst-select-{{randKey}} .tagify__tag-text {
+        white-space: nowrap;
+        position: absolute;
+        top: 5px;
+        left: 3px;
+        width: 75% !important;
+      }
     component(is="style").
       .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
         max-width: {{ maxPlaceholderWidth ? maxPlaceholderWidth+'px' : 'auto' }};
