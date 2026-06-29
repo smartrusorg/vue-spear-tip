@@ -41,6 +41,17 @@
         margin: 0 !important;
         height: 20px !important;
       }
+    component(is="style" v-if="size == 'lg' && mode == 'select'").
+      .vst-select-{{randKey}} .tagify tag {
+        height: 37px !important;
+        margin-top: 8px;
+        margin-left: 10px;
+      }
+      .vst-select-{{randKey}} .tagify tag x {
+        height: 35px !important;
+        margin-top: 4px;
+        margin-left: 10px;
+      }
     component(is="style" v-if="mode == 'multi'").
       .vst-select-{{randKey}} .tagify__tag {
         background: #e5e5e5;
