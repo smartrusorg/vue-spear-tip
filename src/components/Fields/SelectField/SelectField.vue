@@ -44,7 +44,7 @@
     component(is="style" v-if="size == 'lg' && mode == 'select'").
       .vst-select-{{randKey}} .tagify tag {
         height: 37px !important;
-        margin-top: 8px;
+        margin-top: 6px;
         margin-left: 10px;
       }
       .vst-select-{{randKey}} .tagify tag x {
