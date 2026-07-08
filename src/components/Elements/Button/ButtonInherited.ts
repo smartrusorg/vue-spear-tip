@@ -225,7 +225,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     else if (this.theme == 'empty'){
       this.currentBg = 'transparent'
       this.currentColor = '#1e1f22'
-      this.currentColorHover = 'transparent'
+      this.currentColorHover = '#1e1f22'
       this.currentBorderColor = 'transparent'
       this.currentBgActive = 'transparent'
       this.currentBorderColorActive = 'transparent'

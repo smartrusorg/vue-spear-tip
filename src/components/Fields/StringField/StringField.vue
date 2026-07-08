@@ -75,7 +75,7 @@
 
           //- Кнопки увеличения/уменьшения количества в цифровом поле
           template(
-            v-if="asNumber && !mask"
+            v-if="asNumber && !mask && !disabled"
           )
             div(
               class="absolute! z3 user-select-none top-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
@@ -95,6 +95,7 @@
               )
                 path(stroke="none" d="M0 0h24v24H0z" fill="none")
                 path(d="M4 13l8 -3l8 3")
+
             div(
               class="absolute! user-select-none bottom-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
               @click="keyDown"
@@ -113,13 +114,6 @@
               )
                 path(stroke="none" d="M0 0h24v24H0z" fill="none")
                 path(d="M4 11l8 3l8 -3")
-            //svg(
-            //  xmlns="http://www.w3.org/2000/svg" width="32" height="38" viewBox="0 0 32 30" fill="none"
-            //  stroke="#8b8683" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            //  class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-up"
-            //)
-            //  path(stroke="none" d="M0 0h24v24H0z" fill="none")
-            //  path(d="M4 13l8 -3l8 3")
 
           //- Идентификатор часового пояса, при выборе маски даты со временем
           div(
@@ -862,9 +856,9 @@ input
   @apply w100% border-0 border-stone-400/60 border-solid border-y-1px!
   @apply outline-stone-400 outline-1px focus:bg-white bg-white
   &[disabled]
-    @apply bg-stone-200 text-stone-500!
+    @apply bg-stone-200/50 text-stone-500!
   &::placeholder
     @apply fs-1rem text-#c1c7cf!
   &[disabled]::placeholder
-    @apply bg-stone-200 text-stone-400! op-80
+    @apply bg-stone-200/50 text-stone-400! op-80
 </style>

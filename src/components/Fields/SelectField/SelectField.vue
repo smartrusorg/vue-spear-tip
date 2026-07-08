@@ -68,6 +68,10 @@
       .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
         max-width: {{ maxPlaceholderWidth ? maxPlaceholderWidth+'px' : 'auto' }};
       }
+    component(is="style" v-if="disabled").
+      .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
+        color: #3a3535 !important;
+      }
 </template>
 
 
