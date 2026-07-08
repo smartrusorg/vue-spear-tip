@@ -230,7 +230,7 @@ export default abstract class ButtonInherited extends BaseComponent {
       this.currentBgActive = 'transparent'
       this.currentBorderColorActive = 'transparent'
       this.currentBoxShadowColor = 'transparent'
-      this.currentColorActive = 'transparent'
+      this.currentColorActive = '#1e1f22'
     }
     this.currentBg = this.bg ?? (this.currentBg ?? bg)
     this.currentColor = this.color ?? (this.currentColor ?? color)
