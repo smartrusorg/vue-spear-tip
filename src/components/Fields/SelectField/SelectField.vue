@@ -52,8 +52,8 @@
         margin-top: 4px;
         margin-left: 10px;
       }
-      .vst-select-{{randKey}} .tagify--empty span.tagify__input {
-        height: 20px !important;
+      .vst-select-{{randKey}} .tagify span.tagify__input {
+        height: 10px !important;
       }
     component(is="style" v-if="mode == 'multi'").
       .vst-select-{{randKey}} .tagify__tag {
