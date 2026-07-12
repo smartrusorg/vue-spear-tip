@@ -25,6 +25,10 @@
         height: 20px !important;
         padding: 0 !important;
       }
+      .vst-select-field.vst-select-{{randKey}} .tagify--loading .tagify__input {
+        margin: 0 !important;
+        padding: 4px 7px !important;
+      }
       .vst-select-field.vst-select-{{randKey}} .tagify__tag-text {
         padding: 0 0 0 0 !important;
       }
