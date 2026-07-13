@@ -507,7 +507,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   }
   @Watch({deep: true}) watchValue(value: any) {
     if (this.isFirstValueSet) return this.isFirstValueSet = false
-    this.$emit('update:modelValue', value)
+    if (['string', 'number'].includes(typeof value) || value === null || Array.isArray(value)) {
+      this.$emit('update:modelValue', value)
+    }
   }
   @Watch('modelValue', true) modelValueWatch(modelValue: any) {
     if (this.isIgnoreSetTags) return this.isIgnoreSetTags = false
