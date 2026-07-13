@@ -123,7 +123,13 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     this.value = this.inputValue || this.modelValue || null
     this.randKey = 'vst-select-'+this.VST.generateRandomKey()
   }
-
+  
+  setValue(value: any): any {
+    if (['string', 'number'].includes(typeof value) || value === null || Array.isArray(value)) {
+      super.setValue(value)
+    }
+  }
+  
   beforeMountParent() {
     this.isFirstValueSet = false
     this.isIgnoreSetTags = false
