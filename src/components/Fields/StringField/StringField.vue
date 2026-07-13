@@ -756,12 +756,14 @@ import IMask from 'imask'
       })
     }
 
-    this.value = value
-    if (this.isInnerSetValue) {
-      this.isInnerSetValue = false
-      this.$emit('input', value)
-      this.$emit('change', value)
-      this.$emit('update:modelValue', value)
+    if (value === null || ['string', 'number'].includes(typeof value)) {
+      this.value = value
+      if (this.isInnerSetValue) {
+        this.isInnerSetValue = false
+        this.$emit('input', value)
+        this.$emit('change', value)
+        this.$emit('update:modelValue', value)
+      }
     }
   }
 
@@ -844,7 +846,9 @@ import IMask from 'imask'
         if (typeof this.asNumber == 'number') {
           this.value = this.value?.toString?.().replace('.', this.radix) ?? 0
         }
-        this.$refs.selectInput.value = this.value
+        if (this.$refs.selectInput && ['string', 'number'].includes(typeof this.value)) {
+          this.$refs.selectInput.value = this.value
+        }
       }
     }
   }
