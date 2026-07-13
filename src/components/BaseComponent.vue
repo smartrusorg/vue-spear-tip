@@ -50,7 +50,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
               : ((windowWidth.value < 1280)
                 ? 'tablet'
                 : (
-                  (windowWidth.value < 1366)
+                  (windowWidth.value <= 1366)
                     ? 'notebook'
                     : 'desktop'
                 )),
