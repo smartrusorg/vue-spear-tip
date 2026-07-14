@@ -5,9 +5,10 @@
     data-offset="[-15, 15]"
     :class=`{
       'min-w64px': type != 'checkbox',
-      '44px!' : size == 'lg',
-      'h25px!' : size == 'md',
-      'h20px! w25px!' : size == 'sm',
+      '44px!': size == 'lg',
+      'h25px!': size == 'md',
+      'h20px! w25px!': size == 'sm' && type != 'checkbox',
+      'h20px!': size == 'sm' && type == 'checkbox',
     }`
   )
     .switch(
