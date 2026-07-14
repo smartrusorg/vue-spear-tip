@@ -18,7 +18,7 @@
       div(
         v-if="startText || startIcon || $slots.start"
         class=`rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid
-          border-width-[1px_0_1px_1px]! user-select-none h100%`
+          border-width-[1px_0_1px_1px]! user-select-none`
         :style=`{
           background: startBg,
           color: startColor,
