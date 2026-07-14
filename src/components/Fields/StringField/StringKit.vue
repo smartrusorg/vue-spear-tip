@@ -111,6 +111,32 @@
           Button(
             size="sm"
           ) Small size
+        .col-4
+          StringField(
+            startText="Start"
+            :asNumber="3"
+            endText="Text end"
+            placeholder="Some field"
+            :resetButton="false"
+            size="sm"
+          )
+        .col-4
+          StringField(
+            startText="Start"
+            endText="Text end"
+            endBg="#b41e1e"
+            endColor="#fff"
+            placeholder="Some field"
+            size="md"
+          )
+        .col-4
+          StringField(
+            endText="Text end"
+            endBg="#b41e1e"
+            endColor="#fff"
+            placeholder="Some field"
+            size="md"
+          )
 </template>
 
 

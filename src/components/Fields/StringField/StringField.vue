@@ -1,12 +1,14 @@
 <template lang="pug">
   div(
-    class="d-inline-block my2px w100% relative"
+    class="d-inline-block w100% relative"
     :class=`{
       ['sf'+randKey]: true,
+      'my2px': size != 'sm',
+      'my3px': size == 'sm',
     }`
   )
     div(
-      class="flex h100% w100% relative"
+      class="flex h100% w100% relative items-start"
       :class=`{
         'h45px' : size == 'lg',
         'h24px': size == 'sm',
@@ -15,10 +17,17 @@
     )
       div(
         v-if="startText || startIcon || $slots.start"
-        class="rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid border-width-[1px_0_1px_1px]!"
+        class=`rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid
+          border-width-[1px_0_1px_1px]! user-select-none h100%`
         :style=`{
           background: startBg,
           color: startColor,
+        }`
+        :class=`{
+          'fs-0.83rem': size == 'sm',
+          'h43px': size == 'lg',
+          'h33px': size == 'md',
+          'h26px': size == 'sm',
         }`
       )
         div(class="flex items-center" v-if="startIcon")
@@ -35,7 +44,7 @@
           '  ': size == 'md',
         }`
       )
-        div(class="relative h100% w100%")
+        div(class="relative h100% w100% vst-select-field-input-box")
           //- type="number"
           //:type="asNumber ? 'number' : 'text'"
           input(
@@ -55,7 +64,7 @@
               // 'rounded-l-none!' : !startText && !startIcon && !$slots.start,
 
               'min-h45px fs-1rem' : size == 'lg',
-              'h24px': size == 'sm',
+              'min-h26px! pt6px pb5px': size == 'sm',
               'h35px fs-0.9rem pt4px': size == 'md',
             }`
             :disabled
@@ -75,14 +84,16 @@
 
           //- Кнопки увеличения/уменьшения количества в цифровом поле
           template(
-            v-if="asNumber && !mask && !disabled"
+            v-if="asNumber && !mask && !disabled && numberArrows"
           )
             div(
-              class="absolute! z3 user-select-none top-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
+              class="absolute! z3 user-select-none fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
               @click="keyUp"
               :class=`{
-                'r-40px!': (asNumber ? (value != '0' && value)  : value) || preResetValue,
-                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !preResetValue),
+                'r-40px!': ((asNumber ? (value != '0' && value)  : value) || preResetValue) && resetButton,
+                'r-16px!': (asNumber ? (value == '0' || !value) : (!value && !preResetValue)) || !resetButton,
+                'top-2px': size != 'sm',
+                'top--2px': size == 'sm',
               }`
               :style=`{
                 pointerEvents: disabled ? 'none !important' : undefined,
@@ -97,11 +108,13 @@
                 path(d="M4 13l8 -3l8 3")
 
             div(
-              class="absolute! user-select-none bottom-2px fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
+              class="absolute! user-select-none fs-0.7rem text-stone-500! hover:scale-150 hover:fw-bold cursor-pointer"
               @click="keyDown"
               :class=`{
-                'r-40px!': (asNumber ? (value != '0' && value)  : value) || preResetValue,
-                'r-16px!': asNumber ? (value == '0' || !value) : (!value && !preResetValue),
+                'r-40px!': ((asNumber ? (value != '0' && value)  : value) || preResetValue) && resetButton,
+                'r-16px!': (asNumber ? (value == '0' || !value) : (!value && !preResetValue)) || !resetButton,
+                'bottom-2px': size != 'sm',
+                'bottom--5px': size == 'sm',
               }`
               :style=`{
                 pointerEvents: disabled ? 'none !important' : undefined,
@@ -131,7 +144,7 @@
         //- Кнопка копирования содержимого поля
         .vst-string-field-copy-icon-box(
           class="w22px h22px text-stone absolute t-11px l-12px z4 cursor-pointer hover:scale-130"
-          v-if="(disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
+          v-if="copyIcon && (disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
         )
           ClipboardDocumentListIcon(
             @click="copyValueToClipboard()"
@@ -145,7 +158,7 @@
         //- Кнопка сброса и восстановления содержимого
         .vst-string-field-reset-revert-box(
           class="w25px h25px text-stone absolute r-12px z4 cursor-pointer hover:scale-130"
-          v-if="!disabled && (value || preResetValue) && !(asNumber && value == '0')"
+          v-if="!disabled && (value || preResetValue) && !(asNumber && value == '0') && resetButton"
           :class=`{
              't-15px': maskPreset == 'datetime' || maskPreset == 'datetimeSec' && size == 'lg',
              't-9px': maskPreset != 'datetime' && maskPreset != 'datetimeSec' && size == 'lg',
@@ -174,10 +187,17 @@
 
       div(
         v-if="endText || endIcon || $slots.end"
-        class="rounded-r-3xl flex items-center pr9px pl5px border-color-#c1c7cf border-solid border-width-[1px_0_1px_1px]!"
+        class=`rounded-r-3xl flex items-center pr9px pl5px border-color-#c1c7cf border-solid
+          border-width-[1px_1px_1px_0]! user-select-none`
         :style=`{
           background: endBg,
           color: endColor,
+        }`
+        :class=`{
+          'fs-0.83rem': size == 'sm',
+          'h43px': size == 'lg',
+          'h33px': size == 'md',
+          'h26px': size == 'sm',
         }`
       )
         div(class="flex items-center" v-if="endIcon")
@@ -188,7 +208,7 @@
           slot(name="end")
     component(
       is="style"
-      v-if="(disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
+      v-if="copyIcon && (disabled || alwaysCopyIcon) && value?.toString?.()?.trim?.() && !(asNumber && value == '0')"
     ).
       .sf{{ randKey }}[{{ $options.__scopeId }}] input {
         padding-left: 40px !important;
@@ -230,7 +250,6 @@ import IMask from 'imask'
   @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
   @Prop(String) readonly maskPreset: 'email'|'date'|'datetime'|'datetimeSec'|null = null
   @Prop(Boolean) readonly force12hours: boolean = false
-  @Prop(Boolean) readonly alwaysCopyIcon: boolean = false
   @Prop(Boolean) readonly disabled: boolean = false
   @Prop(Boolean) readonly maskAsRegExp: boolean = false
   @Prop(String) readonly radix: string = ','
@@ -249,7 +268,16 @@ import IMask from 'imask'
   @Prop(String) readonly endBg: string = 'white'
   @Prop(String) readonly endColor: string = '#a8a29e'
   @Prop(String) readonly endIcon: string|null = null
-
+  
+  /** Включена ли кнопка сброса/восстановления значения */
+  @Prop(Boolean) readonly resetButton: boolean = true
+  /** Включена ли иконка копирования */
+  @Prop(Boolean) readonly copyIcon: boolean = true
+  /** Всегда отображать иконку копирования (должна быть включена copyIcon) */
+  @Prop(Boolean) readonly alwaysCopyIcon: boolean = false
+  /** Включены ли иконки стрелочек увеличения/уменьшения значения когда строка как цифра */
+  @Prop(Boolean) readonly numberArrows: boolean = true
+  
   maskInner: string|null = null
   maskBlocks = {}
   utc: string = 'UTC'
