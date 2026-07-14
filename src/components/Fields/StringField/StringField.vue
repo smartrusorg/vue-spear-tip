@@ -8,7 +8,7 @@
     }`
   )
     div(
-      class="flex h100% w100% relative items-start"
+      class="flex w100% relative items-start"
       :class=`{
         'h45px' : size == 'lg',
         'h24px': size == 'sm',
