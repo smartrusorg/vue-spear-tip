@@ -15,7 +15,7 @@
         'h35px': size == 'md',
       }`
     )
-      div(
+      .vst-string-field-start-block(
         v-if="startText || startIcon || $slots.start"
         class=`rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid
           border-width-[1px_0_1px_1px]! user-select-none`
@@ -26,7 +26,7 @@
         :class=`{
           'fs-0.83rem': size == 'sm',
           'h43px': size == 'lg',
-          'h33px': size == 'md',
+          'h30px pt3px': size == 'md',
           'h26px': size == 'sm',
         }`
       )
@@ -38,11 +38,6 @@
           slot(name="start")
       div(
         class="flex h100% w100% relative"
-        :class=`{
-          ' ' : size == 'lg',
-          '': size == 'sm',
-          '  ': size == 'md',
-        }`
       )
         div(class="relative h100% w100% vst-select-field-input-box")
           //- type="number"
@@ -63,9 +58,9 @@
               'w100%! pr40px!': (isDateTime && (startText || startIcon || $slots.start || disabled)) && size == 'md',
               // 'rounded-l-none!' : !startText && !startIcon && !$slots.start,
 
-              'min-h45px fs-1rem' : size == 'lg',
+              'min-h45px fs-1rem pt6px' : size == 'lg',
+              'h35px fs-0.9rem pt5px': size == 'md',
               'min-h26px! pt6px pb5px': size == 'sm',
-              'h35px fs-0.9rem pt4px': size == 'md',
             }`
             :disabled
             :placeholder
@@ -185,7 +180,7 @@
             }`
           )
 
-      div(
+      .vst-string-field-end-block(
         v-if="endText || endIcon || $slots.end"
         class=`rounded-r-3xl flex items-center pr9px pl5px border-color-#c1c7cf border-solid
           border-width-[1px_1px_1px_0]! user-select-none`
