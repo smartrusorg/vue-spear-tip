@@ -1,6 +1,6 @@
 {
   "name": "vue-spear-tip",
-  "version": "0.6.38",
+  "version": "0.6.39",
   "type": "module",
   "scripts": {
     "build": "vite build --mode examples-build",
@@ -19,7 +19,7 @@
         "module": "./dist/vue-spear-tip.d.ts"
       }
     },
-    "./interfaces/IModalObject": "./dist/Interfaces/IModalObject.d.ts",
+    "./I/IModalObject": "./dist/Interfaces/IModalObject.d.ts",
     "./style": "./dist/vue-spear-tip.css",
     "./grid": "./dist/grid-style.css"
   },
