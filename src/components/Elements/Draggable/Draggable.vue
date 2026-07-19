@@ -1,7 +1,6 @@
 <template lang="pug">
   .draggable(
     @pointerdown.prevent="onPointerDown"
-    :style="{ opacity: isDragging ? 0.4 : 1, touchAction: 'none' }"
   )
     slot
 </template>
@@ -18,7 +17,7 @@ import BaseComponent from '../../BaseComponent.vue'
 @Component export default class Draggable extends BaseComponent {
   emits = ['start', 'stop']
   @Prop(String) readonly group: string = 'GLOBAL'
-  @Prop({ default: null }) readonly data: any = null
+  @Prop(String, Number, Array, Boolean, Object, Date, null) readonly data: any = null
   @Prop(Boolean) readonly disabled: boolean = false
   @Prop(String) readonly ignoreTopSelector: string = ''
 
@@ -35,10 +34,11 @@ import BaseComponent from '../../BaseComponent.vue'
   }
 
   onPointerDown(e: PointerEvent) {
+    const targetNode = ((e?.target as HTMLElement) ?? e?.srcElement) as HTMLElement
     if (this.disabled || this.isDragging || (
       this.ignoreTopSelector && (
-        !!e?.srcElement?.classlist?.includes?.(this.ignoreTopSelector)
-        || !!e.srcElement.closest?.(this.ignoreTopSelector)
+        !! targetNode.classList.contains?.(this.ignoreTopSelector)
+        || !!targetNode.closest?.(this.ignoreTopSelector)
       )
     )) return
     const el = this.$el as HTMLElement

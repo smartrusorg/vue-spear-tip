@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Ref } from '../../../core'
+import { Component, Prop, Watch } from '../../../core'
 import BaseComponent from '../../BaseComponent.vue'
 
 /**
@@ -17,7 +17,7 @@ import BaseComponent from '../../BaseComponent.vue'
  * @copyright https://smartrus.org
  */
 @Component export default class Droppable extends BaseComponent {
-  emits = ['drop']
+  emits = ['drop', 'over', 'moveStart', 'moveStop']
   declare $refs: {zone: HTMLElement}
   @Prop(String) readonly group: string = 'GLOBAL'
   @Prop(Boolean) readonly disabled: boolean = false
@@ -74,13 +74,36 @@ import BaseComponent from '../../BaseComponent.vue'
     this.status = 'default'
     this.isDragActive = false
   }
+  
+  @Watch watchStatus() {
+    if (this.status == 'over') {
+      const el = this.$root!['___SM_DAD_EL']
+      if (el) {
+        this.$emit('over', el.data)
+      }
+    }
+    else {
+      this.$emit('over', false)
+    }
+  }
+  @Watch watchIsDragActive(isDragActive: boolean) {
+    if (isDragActive) {
+      const el = this.$root!['___SM_DAD_EL']
+      if (el) {
+        this.$emit('moveStart', el.data)
+      }
+    }
+    else {
+      this.$emit('moveStop')
+    }
+  }
 }
 </script>
 
 <style lang="sass" scoped>
 // .dropzone
 //   min-height: 50px
-//   &.drag-over
-//     // background: rgba(0,120,255,0.2)
-//     outline: 2px dashed #08f
+// &.drag-over
+//   background: rgba(0,120,255,0.2)
+//   outline: 2px dashed #08f
 </style>

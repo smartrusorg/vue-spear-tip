@@ -386,8 +386,7 @@ export interface ModalConfig {
    */
   title?: string
   /**
-   * Класс FontAwesome иконки отображаемый в заголовке без приставки fa
-   * (например, чтоб получить 'fa fa-question-circle' нужно указать только 'question-circle')
+   * Класс иконки отображаемый в заголовке
    * По умолчанию отображаются иконки согласно типу окна
    */
   icon?: string
@@ -397,21 +396,21 @@ export interface ModalConfig {
    * @param {object} vueComponents объявленные vue компоненты в глобальной переменной
    * @param {number} id Идентификатор окна
    */
-  onMount?(modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number): any
+  onMount?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
   /**
    * @alias onMount
    */
-  onOpen?(modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number): any
+  onOpen?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
   /**
    * Функция срабатывающая при подтверждении
    * @param {IModalComponent} vueComponent Vue из контента модального окна
    * @param {object} vueComponentParams Props
    */
-  onConfirm?(modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number): any
+  onConfirm?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
   /**
    * @alias onCancel так же срабатывает ак onConfirm при открытом окне с одной кнопкой
    */
-  onOk?(modal: $I.Frontend.Components.Modal, vueComponentParams?: {[key: string]: any}): any
+  onOk?(/*modal: $I.Frontend.Components.Modal, vueComponentParams?: {[key: string]: any}*/): any
   /**
    * Включена ли кнопка подтверждения, если указан onConfirm и confirmEnable не указан явно,
    * то включена, иначе false
@@ -431,7 +430,7 @@ export interface ModalConfig {
    * @param {object} vueComponentParams Props
    * @return Если вернуть false то окно закрыто не будет
    */
-  onCancel?(vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}): false|void
+  onCancel?(/*vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}*/): false|void
   /**
    * Текст на кнопке подтверждения, по умолчанию "Отмена" если кнопка одна то "Ок"
    */
@@ -441,7 +440,7 @@ export interface ModalConfig {
    * @param {vueComponent} vueComponent Vue из контента модального окна
    * @param {object} vueComponentParams объявленные vue компоненты в глобальной переменной
    */
-  onDeny?(vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}): any
+  onDeny?(/*vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}*/): any
   /**
    * Включена ли средняя подтверждения, если указан onDeny и onDeny не указан явно, то включена, иначе false
    */
@@ -511,5 +510,5 @@ export interface ModalPromptConfig extends ModalConfig {
    * @param {object} modal Vue из контента модального окна
    * @param {string} vueOrPromptValue возвращаемое значение из prompt
    */
-  onConfirm?(modal?: {[key: string]: any}, vueOrPromptValue?: {[key: string]: any}|string|IModalComponent): any
+  onConfirm?(modal?: {[key: string]: any}, vueOrPromptValue?: {[key: string]: any}|string/*|IModalComponent*/): any
 }
