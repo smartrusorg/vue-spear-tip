@@ -618,12 +618,14 @@ import IMask from 'imask'
     else if (val) this.preResetValue = ''
     if (['string', 'number'].includes(typeof (val))) {
       let emitVal: string|number = ''
-      if (this.mask || !this.asNumber && this.maskInner) {
+      if ((this.mask || (!this.asNumber && this.maskInner)) && !this.maskAsRegExp) {
         emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
       }
       else {
         if (this.asNumber) {
           emitVal = parseFloat(val?.replaceAll?.(this.thousandsSeparator, '').replaceAll(this.radix, '.'))
+          const selStart = event?.target?.selectionStart
+          this.nextTick(() => event?.target?.setSelectionRange?.(selStart, selStart), 5)
         }
         else {
           emitVal = val
