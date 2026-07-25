@@ -97,7 +97,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
 
   mountedParent() {
     if (this.$el instanceof HTMLElement) {
-      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
+      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el, {domEvents: true})
       this.VSTBaseComponent.clickTapHammer.on('tap', this.VSTBaseComponent.clickTapComponentCallback)
     }
     this.updatedParent()
@@ -107,14 +107,14 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
     if (this.VSTBaseComponent.clickTapHammer) {
       this.VSTBaseComponent.clickTapHammer.off('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
       this.VSTBaseComponent.clickTapHammer.destroy()
-      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el)
+      this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el, {domEvents: true})
       this.VSTBaseComponent.clickTapHammer.on('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
     }
     for (const h of this.VSTBaseComponent?.hammer ?? []) {
       h.instance?.destroy?.();
       const el = this.$el?.querySelector?.(h.selector);
       if (el instanceof HTMLElement || el instanceof SVGElement) {
-        h.instance = new this.VST.Hammer(el) as any;
+        h.instance = new this.VST.Hammer(el, {domEvents: true}) as any;
         h.instance!.on(h.event, h.callback as any);
       }
     }
