@@ -98,6 +98,10 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
   mountedParent() {
     if (this.$el instanceof HTMLElement) {
       this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el, {domEvents: true})
+      const defaultTap = this.VSTBaseComponent.clickTapHammer.get('tap')
+      if (defaultTap) {
+        defaultTap.set({ time: 1500 })
+      }
       this.VSTBaseComponent.clickTapHammer.on('tap', this.VSTBaseComponent.clickTapComponentCallback)
     }
     this.updatedParent()
@@ -108,14 +112,22 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
       this.VSTBaseComponent.clickTapHammer.off('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
       this.VSTBaseComponent.clickTapHammer.destroy()
       this.VSTBaseComponent.clickTapHammer = new this.VST.Hammer(this.$el, {domEvents: true})
+      const defaultTap = this.VSTBaseComponent.clickTapHammer.get('tap')
+      if (defaultTap) {
+        defaultTap.set({ time: 1500 })
+      }
       this.VSTBaseComponent.clickTapHammer.on('tap', () => this.VSTBaseComponent.clickTapComponentCallback)
     }
     for (const h of this.VSTBaseComponent?.hammer ?? []) {
       h.instance?.destroy?.();
       const el = this.$el?.querySelector?.(h.selector);
       if (el instanceof HTMLElement || el instanceof SVGElement) {
-        h.instance = new this.VST.Hammer(el, {domEvents: true}) as any;
-        h.instance!.on(h.event, h.callback as any);
+        h.instance = new this.VST.Hammer(el, {domEvents: true}) as any // @ts-expect-error
+        const defaultTap = h.instance.get('tap')
+        if (defaultTap) {
+          defaultTap.set({ time: 1500 })
+        }
+        h.instance!.on(h.event, h.callback as any)
       }
     }
   }
@@ -167,7 +179,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
       alt,
       shift,
       prevent
-    }
+    } as any
   }
 }
 
