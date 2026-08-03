@@ -115,27 +115,31 @@ VSTLib.onVariableCreated = (globalVariableString: string, onCreateCallback: () =
   if(typeof globalVariableString != 'function' && !VARIABLE_REGEXP.test(globalVariableString)) {
     throw 'Только переменные могут быть отслежены методом Engine.onVariableCreated'
   }
-  let timer = setInterval(() => {
+  const resolveVariable = (path: string): boolean => {
+    const parts = path.split('.')
+    // Первая часть должна быть 'window' (или другой глобальный объект, но по контракту это window)
+    let current: any = window; // или globalThis
+    for (let i = 1; i < parts.length; i++) {
+      if (current === null || current === undefined) return false
+      if (!(parts[i] in Object(current))) return false
+      current = current[parts[i]]
+    }
+    return true; // весь путь успешно пройден
+  };
+  
+  const timer = setInterval(() => {
     try {
-      if(typeof globalVariableString == 'function') {
-        try {
-          let val = globalVariableString()
-          if((onlyTrue && val) || (!onlyTrue && typeof val != 'undefined')) {
-            clearInterval(timer)
-            if(typeof onCreateCallback == 'function') {
-              onCreateCallback()
-            }
-          }
-        } catch (e) {}
-      }
-      else if(typeof eval(globalVariableString) != 'undefined') {
-        clearInterval(timer)
-        if(typeof onCreateCallback == 'function') {
-          onCreateCallback()
+      if (resolveVariable(globalVariableString)) {
+        clearInterval(timer);
+        if (typeof onCreateCallback === 'function') {
+          onCreateCallback();
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      // возможные ошибки доступа игнорируются
+    }
   }, 50)
+  
   setTimeout(() => clearInterval(timer), timeoutInSeconds * 1000)
 }
 

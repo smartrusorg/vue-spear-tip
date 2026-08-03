@@ -1,8 +1,8 @@
 import {Temporal} from 'temporal-polyfill'
 import IDeviceInfo from './IDeviceInfo'
 import IHammer from './IHammer'
-import {IModalObject} from '../components/Elements/Modals/IModalObject'
 import Modals from '../components/Elements/Modals'
+import IModalObject from './IModalObject'
 
 export interface IGlobalVST {
   /** Параметры, которые будут отработаны реактивно внутри шаблонов */
@@ -85,27 +85,18 @@ export interface IGlobalVST {
   
   /**
    * Отслеживание создания переменной
-   * @param {String} globalVariableStringOrCallback Строка переменной вида {window.name_ov_variable}
-   * (Квадратные скобки не поддерживаются).
-   * <br>
-   * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Либо функция типа `() => variableOrClassParam`,
-   * в таком случае onCreateCallback сработает, когда исполнение функции будет произведено без ошибок
-   * @param {Function} onCreateCallback Функция, которая будет исполнена после обнаружения переменной
-   * @param {boolean} onlyTrue Возвращённое значение должно ассоциироваться с true
-   * @param {number} timeoutInSeconds Время отслеживания создания переменной в секундах. По умолчанию 30
+   * @param globalVariableString Строка переменной вида {window.name_of_variable}. Квадратные скобки не поддерживаются
+   * @param onCreateCallback Замыкание, которое выполнится при создании переменной
+   * @param timeoutInSeconds Таймаут ожидания создания переменной
    */
-  onVariableCreated(
-    globalVariableStringOrCallback: string | (() => any),
-    onCreateCallback: () => any,
-    onlyTrue?: boolean,
-    timeoutInSeconds?: number
-  ): void
+  onVariableCreated(globalVariableString: string, onCreateCallback: () => any, timeoutInSeconds?: number): void
+
   
   /** Default time zone on $VST.DT() method (like Europe/Moscow). As default use browser tz */
   DT_TZ?: string
   
   modal?: IModalObject
-  vueModalComponent?: Modals
+  vueModalComponent?: typeof Modals
   
   /** Класс для обработки событий на базе Hammer.js */
   readonly Hammer: IHammer
