@@ -120,14 +120,16 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
     }
     for (const h of this.VSTBaseComponent?.hammer ?? []) {
       h.instance?.destroy?.();
-      const el = this.$el?.querySelector?.(h.selector);
-      if (el instanceof HTMLElement || el instanceof SVGElement) {
-        h.instance = new this.VST.Hammer(el, {domEvents: true}) as any // @ts-expect-error
-        const defaultTap = h.instance.get('tap')
-        if (defaultTap) {
-          defaultTap.set({ time: 1500 })
+      if (!/^\.[0-9]]/.test(h?.selector ?? '')) {
+        const el = this.$el?.querySelector?.(h.selector);
+        if (el && (el instanceof HTMLElement || el instanceof SVGElement)) {
+          h.instance = new this.VST.Hammer(el, {domEvents: true}) as any // @ts-expect-error
+          const defaultTap = h.instance.get('tap')
+          if (defaultTap) {
+            defaultTap.set({ time: 1500 })
+          }
+          h.instance!.on(h.event, h.callback as any)
         }
-        h.instance!.on(h.event, h.callback as any)
       }
     }
   }
@@ -145,12 +147,14 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
   }
 
   registerReactiveEvent(event: BaseComponentEvents, componentSelector: string, callback: (e: BaseComponentEventInput) => any) {
+    // fixme есть проблемы в полях
     this.VSTBaseComponent.hammer.push({
       event,
       callback,
       instance: undefined, // будет создан позже
       selector: componentSelector,
     });
+    this.updatedParent()
   }
 
   onViewPortResize() {

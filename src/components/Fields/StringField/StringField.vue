@@ -28,13 +28,16 @@
           'h43px': size == 'lg',
           'h30px pt3px': size == 'md',
           'h26px': size == 'sm',
+          [randKey + '-start-click-tap']: true,
         }`
+        @touchstart="VST.$reactive.isIphone ? clickTap($event) : null"
+        @mousedown="!VST.$reactive.isIphone ? clickTap($event) : null"
       )
         div(class="flex items-center" v-if="startIcon")
-          i(:class="startIcon")
-        div(class="flex items-center whitespace-nowrap px7px" v-if="startText")
+          i(:class="[startIcon, 'pointer-events-none']")
+        div(class="flex items-center whitespace-nowrap px7px pointer-events-none" v-if="startText")
           span(v-html="startText")
-        div(class="flex items-center" v-if="$slots.start")
+        div(class="flex items-center pointer-events-none" v-if="$slots.start")
           slot(name="start")
       div(
         class="flex h100% w100% relative"
@@ -63,6 +66,7 @@
               'min-h26px! pt6px pb5px': size == 'sm',
             }`
             :disabled
+            :type="asPassword ? 'password' : undefined"
             :placeholder
             @keypress.enter="$emit('keypress.enter')"
             @keyup.esc="$emit('keyup.esc')"
@@ -193,10 +197,13 @@
           'h43px': size == 'lg',
           'h33px': size == 'md',
           'h26px': size == 'sm',
+          [randKey + '-end-click-tap']: true,
         }`
+        @touchstart="VST.$reactive.isIphone ? clickTap($event, true) : null"
+        @mousedown="!VST.$reactive.isIphone ? clickTap($event, true) : null"
       )
         div(class="flex items-center" v-if="endIcon")
-          i(:class="{[endtIcon]:true}")
+          i(:class="[endIcon, 'pointer-events-none']")
         div(class="flex items-center whitespace-nowrap px7px" v-if="endText")
           span(v-html="endText")
         div(class="flex items-center" v-if="$slots.end")
@@ -212,7 +219,7 @@
 
 
 <script lang="ts">
-import {Prop, Component} from '../../../core'
+import {Prop, Component, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import { ClipboardDocumentListIcon, CheckBadgeIcon } from "@heroicons/vue/24/solid"
 import { NoSymbolIcon } from "@heroicons/vue/20/solid" // @ts-ignore
@@ -230,6 +237,7 @@ import IMask from 'imask'
   }
   emitsParent = [
     'input', 'change', 'focus', 'blur', 'update:modelValue', 'dateMaskChange', 'keypress.enter', 'reset',
+    'startClickTap', 'endClickTap',
   ]
   componentsParent = {ClipboardDocumentListIcon, CheckBadgeIcon, NoSymbolIcon }
   
@@ -263,6 +271,7 @@ import IMask from 'imask'
   @Prop(String) readonly endBg: string = 'white'
   @Prop(String) readonly endColor: string = '#a8a29e'
   @Prop(String) readonly endIcon: string|null = null
+  @Prop(Boolean) readonly asPassword: boolean = false
   
   /** Включена ли кнопка сброса/восстановления значения */
   @Prop(Boolean) readonly resetButton: boolean = true
@@ -298,9 +307,19 @@ import IMask from 'imask'
   }
 
   createdParent() {
+    this.randKey = `rnd${$VST.generateRandomKey()}`
+    // this.registerReactiveEvent(
+    //   'tap',
+    //   `.${this.randKey}-start-click-tap`,
+    //   e => this.clickTap(e.srcEvent)
+    // )
+    // this.registerReactiveEvent(
+    //   'tap',
+    //   `.${this.randKey}-end-click-tap`,
+    //   e => this.clickTap(e.srcEvent, true)
+    // )
     super.createdParent()
     this.inputMaskOptionsPrepare = {}
-    this.randKey = $VST.generateRandomKey()
     if (!this.is12hours && this.isDateTime) {
       try {
         const options = new Intl.DateTimeFormat(
@@ -313,6 +332,19 @@ import IMask from 'imask'
     }
     else if (this.force12hours) {
       this.is12hours = true
+    }
+  }
+  
+  clickTap(e: Event, isEnd: boolean = false) {
+    if (!isEnd) {
+      if (this.startText || this.startIcon || this.$slots.start) {
+        this.$emit('startClickTap', e, this)
+      }
+    }
+    else {
+      if (this.endText || this.endIcon || this.$slots.end) {
+        this.$emit('endClickTap', e, this)
+      }
     }
   }
 
@@ -624,12 +656,12 @@ import IMask from 'imask'
       else {
         if (this.asNumber) {
           emitVal = parseFloat(val?.replaceAll?.(this.thousandsSeparator, '').replaceAll(this.radix, '.'))
-          const selStart = event?.target?.selectionStart
-          this.nextTick(() => event?.target?.setSelectionRange?.(selStart, selStart), 5)
         }
         else {
           emitVal = val
         }
+        const selStart = event?.target?.selectionStart
+        this.nextTick(() => event?.target?.setSelectionRange?.(selStart, selStart), 5)
       }
 
       if (
@@ -876,6 +908,10 @@ import IMask from 'imask'
         }
       }
     }
+  }
+  
+  @Watch watchAsPassword() {
+    this.initInputMask(this.$refs.selectInput)
   }
 }
 </script>

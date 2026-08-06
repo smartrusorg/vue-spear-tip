@@ -31,7 +31,7 @@
 
 
 <script lang="ts">
-import {BaseComponent, Prop, VST, Watch} from '../../../core'
+import {Component, BaseComponent, Prop, VST, Watch} from '../../../core'
 import SimpleBar from 'simplebar'
 
 // fixme посмотреть для следующей версии https://kingsora.github.io/OverlayScrollbars/
@@ -42,7 +42,7 @@ import SimpleBar from 'simplebar'
  * @author CHORNY (created 11.01.2026 19:22)
  * @copyright https://smartrus.org
  */
-@VST export default class Scrollbar extends BaseComponent {
+@Component export default class Scrollbar extends BaseComponent {
   @Prop(Boolean) readonly autoHide: boolean = false
   @Prop(String) readonly color: string = '#494747'
   @Prop(String) readonly margin: string = 'auto'

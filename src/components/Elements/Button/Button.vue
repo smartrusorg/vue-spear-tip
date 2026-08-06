@@ -57,14 +57,18 @@
       ) {{ badge }}
       span.left-icon-animate(v-if="icon" :class="$slots?.default && $slots?.default?.()?.[0]?.children?.length && $refs?.button?.innerText?.trim?.()?.length ?  'left-icon' : ''")
         div(v-if="icon?.startsWith('<')" v-html="icon")
-        i.fa(v-else :class="icon")
-      slot
+        i.fa(v-else :class="[icon, 'pointer-events-none']")
+      span(
+        :class="['pointer-events-none']"
+        v-show="$slots?.default && $slots?.default?.()?.[0]?.children?.length"
+      )
+        slot
       span.right-icon-animate(
         v-if="iconRight"
         :class="$slots?.default && $slots?.default?.()?.[0]?.children?.length && $refs?.button?.innerText?.trim?.()?.length ?  'right-icon' : ''"
       )
         div(v-if="iconRight?.startsWith('<')" v-html="iconRight")
-        i.fa(v-else :class="iconRight")
+        i.fa(v-else :class="[iconRight, 'pointer-events-none']")
       component(is="style")
         | .{{ randomClass }} {
         |   background: {{ style?.bacground ?? (currentBg + '!important') }};

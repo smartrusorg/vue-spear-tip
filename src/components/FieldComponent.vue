@@ -1,6 +1,7 @@
 <script lang="ts">
-import {BaseComponent, Prop, Watch} from '../core'
+import {Prop, Watch} from '../core'
 import {IFieldComponent} from '../Interfaces/IFieldComponent'
+import BaseComponent from './BaseComponent.vue'
 
 /** Базовый компонент поля */
 export default abstract class FieldComponent extends BaseComponent implements IFieldComponent {
