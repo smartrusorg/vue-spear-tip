@@ -59,7 +59,7 @@
                 :alwaysCopyIcon="true"
               )
             .col-6
-              b.text-center Disabled
+              b.text-center size="md"
               DateField(
                 size="md"
                 :withTime="true"
@@ -67,10 +67,47 @@
               )
             .col-6
               span.text-center
-                b InputMask StringField
-                span  to check compatibility
+                b size="md"
               StringField(
                 size="md"
+                mask="+7 (999) 999-99-99"
+                :alwaysCopyIcon="true"
+              )
+            .col-6
+              b.text-center size="sm"
+              DateField(
+                :disabled="true"
+                size="sm"
+                :withTime="true"
+                inputValue="2012-12-12 00:01:22"
+              )
+            .col-6
+              span.text-center
+                b size="sm"
+              StringField(
+                size="sm"
+                mask="+7 (999) 999-99-99"
+                :alwaysCopyIcon="true"
+              )
+            .col-4
+              b.text-center size="sm"
+              DateField(
+                size="sm"
+                :withTime="true"
+                inputValue="2012-12-12 00:01:22"
+              )
+            .col-4
+              span.text-center
+                b size="sm"
+              DateField(
+                size="sm"
+                :withTime="true"
+              )
+            .col-4
+              span.text-center
+                b size="sm"
+              StringField(
+                size="sm"
                 mask="+7 (999) 999-99-99"
                 :alwaysCopyIcon="true"
               )
@@ -100,7 +137,7 @@
 
 
 <script lang="ts">
-import {VST, Prop, BaseComponent} from '../../../core'
+import {Component, Prop, BaseComponent} from '../../../core'
 import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
 import IDateField from './IDateField'
 import ElementDocBlock, {IElementDocBlockData} from '../../Documentation/ElementDocBlock.vue'
@@ -110,7 +147,7 @@ import ElementDocBlock, {IElementDocBlockData} from '../../Documentation/Element
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class DateKit extends BaseComponent {
+@Component export default class DateKit extends BaseComponent {
   declare $refs: {
     rus: IDateField
   }

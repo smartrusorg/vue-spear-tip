@@ -27,6 +27,7 @@
         cursor: grab !important;
         width: {{ width }} !important;
       }
+      {{ hasHorizontalScrollbar ? `.${randomClass} {padding-bottom: 14px}` : '' }}
 </template>
 
 
@@ -53,17 +54,36 @@ import SimpleBar from 'simplebar'
 
   randomClass: string = ''
   simpleBar: SimpleBar|null = null
+  hasHorizontalScrollbar: boolean = false
+  hasVerticalScrollbar: boolean = false
 
   mounted() {
     this.randomClass = 'scrollbar-c' + this.VST.generateRandomKey()
     this.simpleBar = new SimpleBar(this.$refs.scrollContainer, {
-      autoHide: this.autoHide, // @ts-expect-error
+      autoHide: this.autoHide,
       direction: this.direction,
-    })
+    }) as any
+    this.nextTick(() => {
+      // 2. Начинаем отслеживать элемент контента
+      const contentEl = this.simpleBar?.el?.querySelector?.('.simplebar-content') as HTMLDivElement
+      if (contentEl) {
+        //  Создаем ResizeObserver
+        const resizeObserver = new ResizeObserver(() => {
+          // Проверка на горизонтальный скролл
+          this.hasHorizontalScrollbar = contentEl.scrollWidth > contentEl.clientWidth
+          
+          // Проверка на вертикальный скролл
+          this.hasVerticalScrollbar = contentEl.scrollHeight > contentEl.clientHeight
+          
+        })
+        this.hookWhenComponentDestroy(() => resizeObserver?.disconnect?.())
+        resizeObserver.observe(contentEl)
+      }
+    }, 10)
   }
 
   beforeMount() {
-    SimpleBar.removeObserver()
+    SimpleBar?.removeObserver?.()
   }
 }
 </script>

@@ -1,8 +1,5 @@
 <template lang="pug">
-  template(
-    v-if="modals?.length"
-    v-for="m in modals"
-  )
+  template(v-for="m in modals" v-if="modals?.length")
     .sm-modal(
       :class="{'d-none':!modals.length}"
       :id="`modal-${m?.id}`"
@@ -36,7 +33,7 @@
           class="d-inline-block"
         )
         template(v-if="m?.component")
-          component(:is="m?.component" ref="component" v-bind="m?.componentParams ?? {}")
+          component(:is="m.component" ref="component" v-bind="m?.componentParams ?? {}")
         .sm-modal-footer(
           :class=`{
             'sm-modal-footer-not-one-but': m?.confirmEnable || m?.denyEnable,
@@ -53,7 +50,9 @@
             fontSize="1rem"
             @click="closeModal(m?.id, 'confirm')"
           )
-            span(v-html="m?.confirmText ?? 'Подтвердить'")
+            span &nbsp;
+            span(v-html="m?.confirmText || 'Подтвердить'")
+            span &nbsp;
           VSTButton(
             :disabled="!buttonsEnable"
             size="md"
@@ -65,7 +64,9 @@
             fontSize="1rem"
             @click="closeModal(m?.id, 'deny')"
           )
-            span(v-html="m?.denyText ?? 'Отказаться'")
+            span &nbsp;
+            span(v-html="m?.denyText || 'Отказаться'")
+            span &nbsp;
           VSTButton(
             size="md"
             ref="cancelBtn"
@@ -74,7 +75,9 @@
             fontSize="1rem"
             @click="closeModal(m?.id, 'cancel')"
           )
-            span(v-html="m?.cancelText ?? 'Отмена'")
+            span &nbsp;
+            span(v-html="m?.cancelText || m?.confirmText || 'Отмена'")
+            span &nbsp;
       .sm-modal-base(:id="`modal-base-${m?.id}`") &nbsp;
 </template>
 
@@ -82,6 +85,8 @@
 <script lang="ts">
 import {BaseComponent, Prop, Component, Watch} from '../../../core'
 import {default as VSTButton} from '../Button'
+import {ModalManipulator, ModalStyles} from '../../../Interfaces/IModalObject'
+import ModalComponent from './ModalComponent.vue'
 
 /**
  * Модальные окна
@@ -89,7 +94,7 @@ import {default as VSTButton} from '../Button'
  * @copyright https://smartrus.org
  */
 @Component export default class Modals extends BaseComponent {
-  declare $refs: {component: BaseComponent, cancelBtn: VSTButton}
+  declare $refs: {component: ModalComponent[], cancelBtn: VSTButton}
   components = {VSTButton}
   modals: ModalConfig[] = []
   
@@ -115,10 +120,10 @@ import {default as VSTButton} from '../Button'
     onConfirm: ModalOnConfirm | undefined = undefined,
     onCancel: ModalOnCancel| undefined = undefined
   ) : number {
-    let data: ModalConfig = {content: undefined},
+    let data: ModalConfig = {content: undefined, message: undefined},
       tempId : number = Date.now() + Math.ceil(Math.random() * 100000)
     if(typeof content == 'string' || typeof content == 'number') {
-      data.content = `<div  style="text-align: center">${content}</div>`
+      data.message = data.content = `<div  style="text-align: center">${content}</div>`
       data.onConfirm = onConfirm
       data.onCancel  = onCancel
     }
@@ -192,12 +197,11 @@ import {default as VSTButton} from '../Button'
       styles[n] = (data?.styles?.[n as any] || styles[n])
     }
     
-    
     m.push({...{
-        data : `<span id="modal-content-${tempId}">${data?.content?.toString() ?? ''}</div></span>`,
+        data : `<span id="modal-content-${tempId}">${(data?.message || data?.content)?.toString?.() ?? ''}</div></span>`,
         title : data?.title,
         confirmEnable : data?.confirmEnable !== undefined ? data.confirmEnable : !!data?.onConfirm,
-        confirmText : data?.confirmText,
+        confirmText : data?.confirmText ?? (data?.confirmEnable !== undefined ? 'Подтвердить' : 'Ок'),
         confirmCloseDisable : data?.confirmCloseDisable ?? false,
         denyCloseDisable : data?.denyCloseDisable ?? false,
         denyEnable : data?.denyEnable !== undefined ? data.denyEnable : !!data?.onDeny,
@@ -207,72 +211,42 @@ import {default as VSTButton} from '../Button'
         style : data?.style,
         component : data?.component,
         componentParams : data?.componentParams,
+        escapeExit : data?.escapeExit ?? false,
         styleModal : data?.styleModal,
         onConfirm : data?.onConfirm ?? onConfirm,
         onCancel : data?.onCancel ?? onCancel,
+        onMount : data?.onMount ?? null,
+        onOpen : data?.onOpen ?? null,
         onOk : data?.onOk ?? (() => {}),
         onDeny : data?.onDeny,
         type : type,
         id : data?.id ?? tempId,
         content : '',
+        message : '',
         confirmButtonBorderColor
       }, ...styles})
     
+    const currentIndex = m.length - 1
+    
     $VST.vueModalComponent = this
-    this.$nextTick(() => {
+    this.nextTick(() => {
       this.modals = m
       // Подключаем глобальные vue компоненты в открытое окно
       const self = this
-      this.VST.onVariableCreated(() => document.querySelector(`#modal-content-${tempId}`), () => {
-        this.$nextTick(() => { // @ts-ignore
-          setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 100) // @ts-ignore
-          setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 400) // @ts-ignore
+      this.$watch(() => document.querySelector(`#modal-content-${tempId}`), () => {
+        this.$nextTick(() => {
+          setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 100)
+          setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 400)
           setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 1000)
-          let m  = [...this.modals]
-          
-          // FIXME РЕАЛИЗОВАТЬ КОМПОНЕНТЫ И ПОДКЛЮЧЕНИЕ К ГЛОБАЛЬНЫМ (возможно через $parent?)
-          // Engine.vueMount(`#modal-content-${tempId}`, {
-          //   template : `<template class="d-block">${data?.content ?? ''}</template>`,
-          //   mounted: function() {
-          //     // let globalVariables = (data?.content ?? '').match(/global-variable="[^"]*"/g)
-          //     //     ?.map(v => v.substring(17).slice(0, -1)) ?? [],
-          //     let foundGlobalVariables : any = {}
-          //
-          //     // for(let v of globalVariables) {
-          //     //   if(Engine.vueGlobal[v]) {
-          //     //     foundGlobalVariables[v] = Engine.vueGlobal[v]
-          //     //   }
-          //     // }
-          //
-          //     const modal: any = {
-          //       close() {
-          //         self.closeModal(tempId)
-          //       }
-          //     }
-          //
-          //     if(typeof data?.onMount == 'function') {
-          //       data.onMount(modal, foundGlobalVariables, tempId)
-          //     }
-          //     if(typeof data?.onOpen == 'function') {
-          //       data.onOpen(modal, foundGlobalVariables, tempId)
-          //     }
-          //     for(let i = 0; i < m.length; i++) {
-          //       if (m[i].id == tempId) {
-          //         m[i].vue = this
-          //         break
-          //       }
-          //     }
-          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 100)
-          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 400)
-          //     setTimeout(() => self.$refs?.cancelBtn?.[0]?.focus?.(), 1000)
-          //   }
-          // })
         })
       })
-    })
+      
+      data?.onOpen?.(data?.componentParams)
+      data?.onMount?.(data?.componentParams)
+    }, 20)
     
     // Добавляем анимацию появления фона
-    const basEl = this.$el?.nextElementSibling?.querySelector?.(`#modal-base-${tempId}`)
+    const basEl = this.$el?.nextElementSibling!?.querySelector?.(`#modal-base-${tempId}`)
     if (basEl) {
       basEl.classList.add('modalBackFadeIn')
     }
@@ -295,36 +269,77 @@ import {default as VSTButton} from '../Button'
     return tempId
   }
   
-  closeModal(id : number, type : string = '') {
+  closeModal(id?: number, type : string = '') {
     let m = [...this.modals]
     for(let i = 0; i < m.length; i++) {
       if(m[i].id == id) {
+        let toClose = type != 'confirm'
+        let fullClose = false
+        const errors = []
+        const params = [
+          {
+            component: this.$refs.component?.[i],
+            value: this.$refs.component?.[i]?.getValue?.() ?? null,
+            error(newError: string) {
+              if (newError) {
+                errors.push(newError)
+              }
+            },
+            close() {
+              toClose = true
+            },
+            breakCancel() {
+              toClose = false
+            },
+            closeAllModals() {
+              fullClose = true
+            },
+          },
+          m[i]?.componentParams
+          // Костыль для получения значения из prompt окна
+          ?? document.getElementById?.('sm-modal-prompt-input')?.value ?? {}
+        ]
         if(type == 'cancel' && (typeof m[i]?.onCancel == 'function' || typeof m[i]?.onOk == 'function')) {
           if(typeof m[i]?.onOk == 'function') {
-            m[i]?.onOk(m[i].component ? this.$refs.component?.[i] : m[i].vue, m[i].componentParams)
+            m[i]?.onOk?.apply?.(m[i], params)
           }
           if(typeof m[i]?.onCancel == 'function') {
-            const stop = m[i]?.onCancel(m[i].component ? this.$refs.component?.[i] : m[i].vue, m[i].componentParams)
-            if (stop === false) {
-              return
-            }
+            m[i]?.onCancel(params.value as any, m[i]?.componentParams ?? {})
           }
+          if (fullClose) {
+            this.nextTick(() => this.closeAllModals())
+            break
+          }
+          if (!toClose) continue
         }
         else if(type == 'confirm' && typeof m[i]?.onConfirm == 'function') {
-          const conf = m[i]?.onConfirm(
-            m[i].component ? this.$refs.component[i] : m[i].vue,
-            m[i]?.componentParams
-            // Костыль для получения значения из prompt окна
-            ?? document.getElementById('sm-modal-prompt-input')?.value ?? {}
-          )
-          if (conf === false) continue
-          if (typeof conf == 'string') {
-            $VST.modal!.error(conf)
+          m[i]?.onConfirm.apply(m[i], params)
+          m[i]?.onOk?.apply?.(m[i], params)
+          if (fullClose) {
+            this.nextTick(() => this.closeAllModals())
+            break
+          }
+          if (!toClose) continue
+          if (errors.length) {
+            $VST.modal!.error(' &#8226; ' + errors.join('<br> &#8226; '))
             continue
           }
         }
         else if(type == 'deny' && typeof m[i]?.onDeny  == 'function') {
-          m[i]?.onDeny(m[i].component ? this.$refs.component[i] : m[i].vue, m[i].componentParams)
+          m[i]?.onDeny.apply(m[i], params)
+          if (fullClose) {
+            this.nextTick(() => this.closeAllModals())
+            break
+          }
+          if (!toClose) continue
+          if (errors.length) {
+            $VST.modal!.error(' &#8226; ' + errors.join('<br> &#8226; '))
+            continue
+          }
+        }
+        if (fullClose) {
+          this.nextTick(() => this.closeAllModals)
+          break
         }
         if(
           (type == 'confirm' && m[i]?.confirmCloseDisable)
@@ -340,22 +355,22 @@ import {default as VSTButton} from '../Button'
   }
   
   closeAllModals() {
-    let m = [...this.modals]
-    m.splice(0, -1)
-    this.modals = m
+    this.modals = []
   }
 }
-type ModalOnConfirm = () => any
-type ModalOnCancel = () => any
+type ModalOnConfirm = (manipulator: ModalManipulator, componentParams?: {}) => void
+type ModalOnOpen = (componentParams?: {}) => void
+type ModalOnCancel = (returnedValue: any, componentParams?: {}) => void
 
 interface ModalConfig extends ModalStyles {
   content: string | undefined
+  message: string | undefined
   onConfirm?: ModalOnConfirm
   onCancel?: ModalOnCancel
-  onOk?: ModalOnCancel
-  onDeny?: () => any
-  onMount?: (modal?: {[key:string]: any}, vueGlobals?: {[key:string]: any}, id?: number) => any
-  onOpen?: (modal?: {[key:string]: any}, vueGlobals?: {[key:string]: any}, id?: number) => any
+  onOk?: ModalOnConfirm
+  onDeny?: ModalOnConfirm
+  onMount?: ModalOnOpen
+  onOpen?: ModalOnOpen
   title?: string
   type?: 'info' | 'success' | 'warning' | 'danger' | 'question'
   confirmEnable? : boolean
@@ -368,8 +383,7 @@ interface ModalConfig extends ModalStyles {
   component?: string
   componentParams?: {[key:string]: any}
   
-  // TODO Добавить четвёртую кнопку и выходить на escape
-  forButtonEnabled?: boolean
+  escapeExit?: boolean
   
   width?: string
   style?: string

@@ -1,79 +1,99 @@
-export default function Modal() {
-  const modal = $VST._modal.display
-  delete $VST._modal
-  $VST.modal = {}
-  window['alert'] = $VST.modal.info = (content, onOk = undefined) => {
+export default function Modal() { // @ts-expect-error
+  const iModal = $VST._modal
+  const modal = iModal.display // @ts-expect-error
+  delete $VST._modal // @ts-expect-error
+  $VST.modal = {} // @ts-expect-error
+  window['alert'] = $VST.modal.info = (content:any, onOk = undefined) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onOk: content?.onOk ?? onOk,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'info',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.warning = (content, onOk = undefined) => {
+  } // @ts-expect-error
+  $VST.modal.warning = (content:any, onOk = undefined) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onOk: content?.onOk ?? onOk,
         type: 'warning',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.danger = $VST.modal.error = (content, onOk = undefined) => {
+  } // @ts-expect-error
+  $VST.modal.error = $VST.modal.danger = $VST.modal.error = (content:any, onOk = undefined) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onOk: content?.onOk ?? onOk,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'danger',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.success = (content, onOk = undefined) => {
+  } // @ts-expect-error
+  $VST.modal.success = (content:any, onOk = undefined) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onOk: content?.onOk ?? onOk,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'success',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.question = (content, onOk = undefined) => {
+  } // @ts-expect-error
+  $VST.modal.question = (content:any, onOk = undefined) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onOk: content?.onOk ?? onOk,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'question',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.confirmInfo = (content, onConfirm = () => {}, onCancel = {}) => {
+  } // @ts-expect-error
+  $VST.modal.confirmInfo = (content:any, onConfirm = () => {}, onCancel = {}) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'info',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.confirmWarning = (content, onConfirm = () => {}, onCancel = {}) => {
+  } // @ts-expect-error
+  $VST.modal.confirmWarning = (content:any, onConfirm = () => {}, onCancel = {}) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' 
+          ? `<div style="text-align: center">${content}</div>` : '',
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'warning',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
+  } // @ts-expect-error
   $VST.modal.confirmError = $VST.modal.confirmDanger = (
     content: any,
     onConfirm = () => {},
@@ -81,32 +101,37 @@ export default function Modal() {
   ) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'danger',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  $VST.modal.confirmSuccess = (content, onConfirm = () => {}, onCancel = {}) => {
+  } // @ts-expect-error
+  $VST.modal.confirmSuccess = (content:any, onConfirm = () => {}, onCancel = {}) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'success',
       },
       ...(typeof content == 'object' ? content : {}),
     })
-  }
-  
-  $VST.modal.confirmQuestion = (content, onConfirm = () => {}, onCancel = {}) => {
+  } // @ts-expect-error
+  $VST.modal.confirmQuestion = (content:any, onConfirm = () => {}, onCancel = {}) => {
     modal({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
+        onOpen: content?.onOpen,
+        onMount: content?.onMount,
         type: 'question',
       },
       ...(typeof content == 'object' ? content : {}),
@@ -156,7 +181,7 @@ export default function Modal() {
                 }
               }
               $VST.vueModalComponent!.closeModal(tempId)
-            }
+            } // @ts-expect-error
             
             confirmButton = document.getElementById(`modal-${tempId}`) as HTMLDivElement
             if (confirmButton) {
@@ -246,66 +271,69 @@ export default function Modal() {
       },
     }
     modal(obj)
-  }
-  
-  $VST.modal.promptInfo = (content, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
+  } // @ts-expect-error
+  $VST.modal.promptInfo = (content:any, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
     prompt({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         validateError: content?.validateError ?? validateError,
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
         type: 'info',
       },
       ...(typeof content == 'object' ? content : {}),
-    })
-  $VST.modal.promptWarning = (content, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
+    }) // @ts-expect-error
+  $VST.modal.promptWarning = (content:any, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
     prompt({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         validateError: content?.onConfirm ?? onConfirm,
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
         type: 'warning',
       },
       ...(typeof content == 'object' ? content : {}),
-    })
+    }) // @ts-expect-error
+  
   $VST.modal.promptError = $VST.modal.promptDanger = (
-    content,
+    content: any,
     validateError: any = undefined,
     onConfirm = () => {},
     onCancel = {}
   ) =>
     prompt({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         validateError: content?.validateError ?? validateError,
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
         type: 'danger',
       },
       ...(typeof content == 'object' ? content : {}),
-    })
-  $VST.modal.promptSuccess = (content, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
+    }) // @ts-expect-error
+  $VST.modal.promptSuccess = (content:any, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
     prompt({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         validateError: content?.validateError ?? validateError,
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
         type: 'success',
       },
       ...(typeof content == 'object' ? content : {}),
-    })
-  $VST.modal.promptQuestion = (content, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
+    }) // @ts-expect-error
+  $VST.modal.promptQuestion = (content:any, validateError = undefined, onConfirm = () => {}, onCancel = {}) =>
     prompt({
       ...{
-        content: content?.content ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
+        content: (content?.message || content?.content) ?? typeof content == 'string' ? `<div style="text-align: center">${content}</div>` : '',
         validateError: content?.validateError ?? validateError,
         onConfirm: content?.onConfirm ?? onConfirm,
         onCancel: content?.onCancel ?? onCancel,
         type: 'question',
       },
       ...(typeof content == 'object' ? content : {}),
-    })
+    }) // @ts-expect-error
+  
+  $VST.modal.closeAllModals = () => iModal.closeAllModals()
+  
 }

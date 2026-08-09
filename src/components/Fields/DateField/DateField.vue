@@ -2,47 +2,72 @@
   .vst-date-field(
     class="d-inline-block my1px w100% flex items-center relative"
     :class=`{
-      // 'vst-select-multi': mode == 'multi' || mode == 'tags',
+      'min-h42px': size == 'lg',
+      'min-h32px': size == 'md',
+      'min-h26px h26px': size == 'sm',
     }`
   )
     //@click="!$root.APP.hasTouchpad ? addDate() : null"
     //@touchstart="$root.APP.hasTouchpad ? addDate() : null"
+    //div {{ typeof value }} {{ value }}
     div(
       class=`flex items-center h100% bg-white rounded-3xl justify-center text-stone w100%`
       v-show="!value"
       :class=`{
+        'min-h26px! h26px!' : size == 'sm',
        // 'h20px' : true,
       }`
     )
-      div(
-        class=`h[calc(100%-2px)]! text-stone border-y-solid border-l-solid rounded-l-3xl
-          cursor-pointer px10px border-1px! flex items-center border-#D0CCC9FF`
+      .vst-date-field-start-block(
+        class=`h[calc(100%-4px)]! text-stone border-y-solid border-l-solid rounded-l-3xl
+           px10px border-1px! flex items-center border-#D0CCC9FF`
         :class=`{
-          'h44px!' : size == 'lg',
-          'h35px! pt4px' : size == 'md',
+          'min-h40x': size == 'lg',
+          'min-h32px': size == 'md',
+          'min-h26px' : size == 'sm',
+          'cursor-pointer': !disabled,
+          'cursor-no-drop bg-stone-200/70!': disabled,
         }`
       )
         div
           .vst-date-field-calendar-icon(
-            class="w24px h24px text-stone hover:scale-130 mx2px"
+            class="text-stone mx2px"
+            :class=`{
+              'hover:scale-130': !disabled,
+              'w24px h24px': size != 'sm',
+              'w20px h20px scale-70': size == 'sm',
+            }`
           )
             CalendarDaysIcon(
-              @click="value ? inputFocus() : addDate()"
+              @touchstart="!disabled ? (value ? inputFocus() : addDate()) : null"
+              @mousedown="!disabled ? (value ? inputFocus() : addDate()) : null"
             )
-      div(
+      .vst-date-field-icon-block(
         tabindex="-1"
         @focusin="!disabled ? addDate() : null"
         @click="!disabled ? addDate() : null"
-        class=`flex items-center bg-white rounded-r-3xl justify-center text-#c1c7cf
+        class=`flex items-center rounded-r-3xl justify-center text-#c1c7cf
             border-solid border-solid border-1px w100% z2 fs-1rem text-#c1c7cf!
             mx-auto cursor-text my1px`
         :class=`{
-          'hover:border-stone hover:text-stone border-#c1c7cf' : !disabled,
-          'border-#D0CCC9FF cursor-no-drop' : disabled,
-          'min-h44px!' : size == 'lg',
-          'min-h35px!' : size == 'md',
+          'hover:border-stone hover:text-stone border-#c1c7cf overflow-x-hidden! whitespace-nowrap!' : !disabled,
+          'border-#D0CCC9FF cursor-no-drop bg-stone-200/70!' : disabled,
+          'min-h40px' : size == 'lg',
+          'min-h33px!' : size == 'md',
+          'min-h28px!' : size == 'sm',
         }`
       ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
+    .vst-date-field-input-block(class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value")
+      input(
+        :class=`{
+          'bg-stone-200/70!': disabled,
+        }`
+        class="max-w100%"
+        ref="picker"
+        type="text"
+        readonly
+        @mousedown.prevent
+      )
     VSTStringField(
       v-if="value"
       :maskPreset
@@ -52,7 +77,7 @@
         // 'width': '170px !important',
       }`
       :class=`{
-        'h33px!': size == 'md',
+        // 'h33px!': size == 'md',
       }`
       @focus="inputFocus()"
       @change="(v, reset) => changeInput(v, reset)"
@@ -64,29 +89,22 @@
       @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
       @reset="onReset"
       ref="VSTStringField"
-      @blur="v => onBlur(v)"
+      @blur="v => onBlur()"
       :size
     )
-      template(#start v-if="!disabled")
+      template(v-if="!disabled" v-slot:start)
         .vst-date-field-calendar-icon(
           class="w24px h24px text-stone cursor-pointer hover:scale-130 w100% mx5px"
           v-if="!disabled"
           :class=`{
-            'pt2px' : size == 'md',
+            'scale-70' : size == 'sm',
           }`
         )
           CalendarDaysIcon(
             @click="value ? inputFocus() : addDate()"
           )
-    div(class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value" )
-      input(
-        ref="picker"
-        type="text"
-        readonly
-        @mousedown.prevent
-      )
     component(is="style" v-if="!showCalendar") .flatpickr-calendar {display: none !important}
-    component(is="style" v-if="size == 'md'") .vst-date-field input {height: 100% !important}
+    //component(is="style" v-if="size == 'md'") .vst-date-field input {height: 100%}
     component(is="style") .flatpickr-calendar {box-shadow: 0px 2px 13px var(--un-shadow-color, rgb(193 193 193)) !important}
     //div {{ value }}
 </template>
@@ -95,7 +113,7 @@
 <script lang="ts">
 
 import {Temporal} from 'temporal-polyfill'
-import {Prop, VST, Watch} from '../../../core'
+import {Component, Prop, Watch} from '../../../core'
 import FieldComponent from '../../../replaceable/FieldComponent.vue'
 import FPLocales from 'flatpickr/dist/l10n'
 import flatpickr from 'flatpickr'
@@ -111,7 +129,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class DateField extends FieldComponent implements IDateField {
+@Component export default class DateField extends FieldComponent implements IDateField {
   components = {VSTStringField, CalendarDaysIcon}
   emits = ['change']
   declare $refs: {
@@ -309,7 +327,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }
     let change // @ts-ignore
     const locale = (localeShort ? FPLocales?.[localeShort] : FPLocales?.default) || FPLocales?.default || {} // @ts-ignore
-    if (this.firstDayOfWeek != 'auto') locale.firstDayOfWeek = (parseInt(this.firstDayOfWeek) || 1)-1 // @ts-ignore
+    if (this.firstDayOfWeek != 'auto') locale.firstDayOfWeek = (parseInt(this.firstDayOfWeek?.toString?.() ?? '1') || 1)-1 // @ts-ignore
     this.fp = (flatpickr as any)(this.$refs.picker as HTMLElement, {
       enableTime: this.withTime,
       time_24hr: !pmHours,
@@ -390,11 +408,11 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       if (this.$refs.VSTStringField?.$el) {
         this.nextTick(() => {
           if (this.value) {
-            this.setInputMaskValueByDTStamp(
+            this.setInputMaskValueByDTStamp((
               this.value instanceof Temporal.ZonedDateTime
                 ? this.value.epochMilliseconds
                 : this.value
-            )
+            ) as string)
           }
           clearInterval(this.pickerInterval)
         })
@@ -551,7 +569,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     this.$refs.VSTStringField?.setValue?.(val)
   }
 
-  @Watch('DT', true, true) watchDT(DT: Temporal.ZonedDateTime|null) {
+  @Watch({deep: true, immediate: true}) watchDT(DT: Temporal.ZonedDateTime|null) {
     if (this.initTemporalUpdateOut) return this.initTemporalUpdateOut = false
     this.initTemporalUpdateOut = true
     if (DT) {
@@ -574,7 +592,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   @apply w-full relative select-none!
 
   .flatpickr-input
-    @apply select-none! hover:text-stone-500 hover:underline hover:border-#d6ff63 min-w230px min-h52px! w100%
+    @apply select-none! hover:text-stone-500 hover:underline hover:border-#d6ff63 min-w230px w100%
     div
       @apply select-none!
     &.active

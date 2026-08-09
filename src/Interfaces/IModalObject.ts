@@ -1,4 +1,6 @@
-export default interface IModalObject {
+import {IModalManipulator} from './IModalManipulator'
+
+interface IModalObject {
   /**
    * Всплывающее блокирующее окно с уведомлением (Информация)
    *
@@ -370,16 +372,20 @@ export default interface IModalObject {
     onConfirm?: undefined | (() => any),
     onCancel?: undefined | (() => any),
   ): void
+  
+  closeAllModals(): void
 }
 
 
 /**
  * Конфигурация модального окна
  */
-export interface ModalConfig {
+interface ModalConfig {
   /**
    * Содержание модального окна, можно использовать глобальные vue компоненты
    */
+  message?: string
+  /** Message alias */
   content?: string
   /**
    * Заголовок окна
@@ -390,31 +396,6 @@ export interface ModalConfig {
    * По умолчанию отображаются иконки согласно типу окна
    */
   icon?: string
-  /**
-   * Функция срабатывающая после открытия окна и монтирования vue элементов
-   * @param {object} modal Vue из контента модального окна
-   * @param {object} vueComponents объявленные vue компоненты в глобальной переменной
-   * @param {number} id Идентификатор окна
-   */
-  onMount?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
-  /**
-   * @alias onMount
-   */
-  onOpen?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
-  /**
-   * Функция срабатывающая при подтверждении
-   * @param {IModalComponent} vueComponent Vue из контента модального окна
-   * @param {object} vueComponentParams Props
-   */
-  onConfirm?(/*modal: $I.Frontend.Components.Modal, vueComponents?: IModalComponent, id?: number*/): any
-  /**
-   * @alias onCancel так же срабатывает ак onConfirm при открытом окне с одной кнопкой
-   */
-  onOk?(/*modal: $I.Frontend.Components.Modal, vueComponentParams?: {[key: string]: any}*/): any
-  /**
-   * Включена ли кнопка подтверждения, если указан onConfirm и confirmEnable не указан явно,
-   * то включена, иначе false
-   */
   confirmEnable?: boolean
   /**
    * Закрывать ли модальное окно по клику на confirm, по умолчанию false
@@ -425,22 +406,9 @@ export interface ModalConfig {
    */
   confirmText?: string
   /**
-   * Функция срабатывающая при отмене действия
-   * @param {IModalComponent} vueComponent Vue из контента модального окна
-   * @param {object} vueComponentParams Props
-   * @return Если вернуть false то окно закрыто не будет
-   */
-  onCancel?(/*vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}*/): false|void
-  /**
    * Текст на кнопке подтверждения, по умолчанию "Отмена" если кнопка одна то "Ок"
    */
   cancelText?: string
-  /**
-   * Функция срабатывающая при нажатии на среднюю кнопку
-   * @param {vueComponent} vueComponent Vue из контента модального окна
-   * @param {object} vueComponentParams объявленные vue компоненты в глобальной переменной
-   */
-  onDeny?(/*vueComponent?: IModalComponent, vueComponentParams?: {[key: string]: any}*/): any
   /**
    * Включена ли средняя подтверждения, если указан onDeny и onDeny не указан явно, то включена, иначе false
    */
@@ -476,9 +444,51 @@ export interface ModalConfig {
   
   /** Выход по нажатию клавиши ESC. По умолчанию выключен. Применять для одиночных окон. */
   escapeExit?: true,
+  
+  /**
+   * Функция срабатывающая после открытия окна и монтирования vue элементов
+   * @param componentParams
+   */
+  onMount(componentParams?: {}): void
+  
+  /**
+   * @alias onMount
+   */
+  onOpen(componentParams?: {}): void
+  
+  /**
+   * Функция срабатывающая при подтверждении
+   * @param manipulator
+   * @param componentParams
+   */
+  onConfirm(manipulator: IModalManipulator, componentParams?: {}): void
+  
+  /**
+   * @alias onCancel так же срабатывает ак onConfirm при открытом окне с одной кнопкой
+   */
+  onOk(manipulator: IModalManipulator, componentParams?: {}): void
+  /**
+   * Включена ли кнопка подтверждения, если указан onConfirm и confirmEnable не указан явно,
+   * то включена, иначе false
+   */
+  
+  /**
+   * Функция срабатывающая при отмене действия
+   * @param returnedValue
+   * @param componentParams
+   */
+  onCancel(returnedValue: any, componentParams?: {}): void
+  
+  /**
+   * Функция срабатывающая при нажатии на среднюю кнопку
+   * @param manipulator
+   * @param componentParams
+   */
+  onDeny(manipulator: IModalManipulator, componentParams?: {}): void
 }
 
-export interface ModalStyles {
+
+interface ModalStyles {
   icon?: string
   color?: string
   titleBgColor?: string
@@ -489,7 +499,7 @@ export interface ModalStyles {
   confirmButtonBorderColor?: string
 }
 
-export interface ModalPromptConfig extends ModalConfig {
+interface ModalPromptConfig extends ModalConfig {
   /**
    * Валидация данных из поля prompt перед подтверждением.
    * Если вернуть строку, она будет отображена как ошибка.
@@ -505,10 +515,8 @@ export interface ModalPromptConfig extends ModalConfig {
   defaultValue?: string
   /** Сделать форму ввода не input, а textarea */
   asTextarea?: boolean
-  /**
-   * Функция срабатывающая при подтверждении
-   * @param {object} modal Vue из контента модального окна
-   * @param {string} vueOrPromptValue возвращаемое значение из prompt
-   */
-  onConfirm?(modal?: {[key: string]: any}, vueOrPromptValue?: {[key: string]: any}|string/*|IModalComponent*/): any
 }
+
+export default IModalObject
+export {ModalStyles, ModalPromptConfig, ModalConfig}
+

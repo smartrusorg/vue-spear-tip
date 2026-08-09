@@ -3,20 +3,21 @@
     class="d-inline-block w100% relative"
     :class=`{
       ['sf'+randKey]: true,
-      'my2px': size != 'sm',
-      'my3px': size == 'sm',
+      'my2px': size != 'sm' && !isDateTime,
+      'my3px': size == 'sm' && !isDateTime,
     }`
   )
     div(
       class="flex w100% relative items-start"
       :class=`{
-        'h45px' : size == 'lg',
-        'h24px': size == 'sm',
-        'h35px': size == 'md',
+        'h45px' : size == 'lg' && !isDateTime,
+        'h40px!' : size == 'lg' && isDateTime,
+        'h26px': size == 'sm' && !isDateTime,
+        'h35px': size == 'md' && !isDateTime,
       }`
     )
       .vst-string-field-start-block(
-        v-if="startText || startIcon || $slots.start"
+        v-if="(startText || startIcon || hasStartBlock) && !disabled && !(isDateTime && value)"
         class=`rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid
           border-width-[1px_0_1px_1px]! user-select-none`
         :style=`{
@@ -25,9 +26,10 @@
         }`
         :class=`{
           'fs-0.83rem': size == 'sm',
-          'h43px': size == 'lg',
-          'h30px pt3px': size == 'md',
-          'h26px': size == 'sm',
+          'h40px!' : size == 'lg' && isDateTime,
+          'h43px': size == 'lg' && !isDateTime,
+          'h32px pt1px': size == 'md',
+          'h24px': size == 'sm',
           [randKey + '-start-click-tap']: true,
         }`
         @touchstart="VST.$reactive.isIphone ? clickTap($event) : null"
@@ -37,33 +39,34 @@
           i(:class="[startIcon, 'pointer-events-none']")
         div(class="flex items-center whitespace-nowrap px7px pointer-events-none" v-if="startText")
           span(v-html="startText")
-        div(class="flex items-center pointer-events-none" v-if="$slots.start")
+        div(class="flex items-center pointer-events-none" v-show="hasStartBlock")
           slot(name="start")
       div(
         class="flex h100% w100% relative"
       )
         div(class="relative h100% w100% vst-select-field-input-box")
-          //- type="number"
-          //:type="asNumber ? 'number' : 'text'"
           input(
             :value
             :id='`vst-string-field-${randKey}`'
             class="w100%"
             :class=`{
-              'hover:bg-white' : !disabled,
+              'hover:bg-white!' : !disabled,
               'user-select-none!' : disabled,
-              'rounded-l-3xl border-l-1px! pl25px' : !startText && !startIcon && !$slots.start,
-              'border-l-0! pl12px': startText || startIcon || $slots.start,
-              'rounded-r-3xl border-r-1px! pr35px' : !endText && !endIcon && !$slots.end,
-              'border-r-0!': endText || endIcon || $slots.end,
+              'rounded-l-3xl border-l-1px! pl25px' : (!startText && !startIcon && !hasStartBlock) || (isDateTime && value),
+              'border-l-0! pl12px': startText || startIcon || hasStartBlock,
+              'rounded-r-3xl border-r-1px! border-r-slate! pr35px' : !endText && !endIcon && !hasEndBlock,
+              'border-r-0!': endText || endIcon || hasEndBlock,
               // fixme костыль при вставленном блоке даты, переделать когда будет какая-то общая концепция по размерам блоков
-              'w100%! pr40px! pt4px!': (isDateTime && (startText || startIcon || $slots.start || disabled)) && size != 'md',
-              'w100%! pr40px!': (isDateTime && (startText || startIcon || $slots.start || disabled)) && size == 'md',
-              // 'rounded-l-none!' : !startText && !startIcon && !$slots.start,
+              'w100%! pr40px! pt4px!': (isDateTime && (startText || startIcon || hasStartBlock || disabled)) && size != 'md',
+              'w100%! pr40px!': (isDateTime && (startText || startIcon || hasStartBlock || disabled)) && size == 'md',
+              // 'rounded-l-none!' : !startText && !startIcon && !hasStartBlock,
 
-              'min-h45px fs-1rem pt6px' : size == 'lg',
-              'h35px fs-0.9rem pt5px': size == 'md',
-              'min-h26px! pt6px pb5px': size == 'sm',
+              // 'min-h45px fs-1rem pt6px' : size == 'lg',
+              'fs-1rem pt6px': size == 'lg',
+              'min-h35px h35px fs-0.9rem pt5px': size == 'md',
+              'min-h26px! pt6px pb5px fs-0.83rem': size == 'sm',
+              'min-h40px! h40px!' : size == 'lg' && isDateTime,
+              'h43px': size == 'lg' && !isDateTime,
             }`
             :disabled
             :type="asPassword ? 'password' : undefined"
@@ -185,7 +188,7 @@
           )
 
       .vst-string-field-end-block(
-        v-if="endText || endIcon || $slots.end"
+        v-if="endText || endIcon || hasEndBlock"
         class=`rounded-r-3xl flex items-center pr9px pl5px border-color-#c1c7cf border-solid
           border-width-[1px_1px_1px_0]! user-select-none`
         :style=`{
@@ -194,7 +197,8 @@
         }`
         :class=`{
           'fs-0.83rem': size == 'sm',
-          'h43px': size == 'lg',
+          'h40px!' : size == 'lg' && isDateTime,
+          'h43px': size == 'lg' && !isDateTime,
           'h33px': size == 'md',
           'h26px': size == 'sm',
           [randKey + '-end-click-tap']: true,
@@ -206,7 +210,7 @@
           i(:class="[endIcon, 'pointer-events-none']")
         div(class="flex items-center whitespace-nowrap px7px" v-if="endText")
           span(v-html="endText")
-        div(class="flex items-center" v-if="$slots.end")
+        div(class="flex items-center" v-if="hasEndBlock")
           slot(name="end")
     component(
       is="style"
@@ -301,6 +305,14 @@ import IMask from 'imask'
     return !this.min || value > this.min
   }
   
+  get hasStartBlock(): boolean {
+    return (this.$slots?.start && !!this.$slots?.start?.()?.[0]?.['children']?.length) || false
+  }
+  
+  get hasEndBlock(): boolean {
+    return (this.$slots?.end && !!this.$slots?.end?.()?.[0]?.['children']?.length) || false
+  }
+  
   /** Является ли маска датой или датой со временем */
   get isDateTime(): boolean {
     return ['date', 'datetime', 'datetimeSec'].includes(this.maskPreset ?? '')
@@ -337,12 +349,12 @@ import IMask from 'imask'
   
   clickTap(e: Event, isEnd: boolean = false) {
     if (!isEnd) {
-      if (this.startText || this.startIcon || this.$slots.start) {
+      if (this.startText || this.startIcon || this.hasStartBlock) {
         this.$emit('startClickTap', e, this)
       }
     }
     else {
-      if (this.endText || this.endIcon || this.$slots.end) {
+      if (this.endText || this.endIcon || this.hasEndBlock) {
         this.$emit('endClickTap', e, this)
       }
     }
@@ -361,8 +373,6 @@ import IMask from 'imask'
         second: (this.maskPreset == 'datetimeSec' ? '2-digit' : undefined),
         timeZoneName: 'longOffset',
       })).formatToParts(new Date($VST.DT().epochMilliseconds))
-
-      // todo 3 переделать по правилам inputmask
 
       this.maskInner = parts
           .map(part => {
@@ -390,13 +400,11 @@ import IMask from 'imask'
           })
           .join('')
 
-
-
       if (this.is12hours && this.maskPreset !== 'date') {
         this.maskInner += '!'
       }
       else if (this.maskPreset === 'date') {
-        const dateMask = this.extractDateOnly(this.maskInner)
+        const dateMask = this.extractDateOnly(this.maskInner!)
         if (dateMask) {
           this.maskInner = dateMask
         }
@@ -591,7 +599,8 @@ import IMask from 'imask'
       month, year, day, hour, minute, seconds, AmPm
     })
   }
-
+  
+  prevUnmaskedLength = 0
 
   focus(rangeStart = 0, rangeEnd = 0) {
     const el = this.$el.querySelector('input.inputMask') as HTMLInputElement
@@ -633,6 +642,21 @@ import IMask from 'imask'
     // }
     this.nextTick(() => this.$refs?.selectInput?.focus?.())
   }
+  
+  countEditableChars(mask: string, value: string, upToIndex: number): number {
+    let count = 0
+    const placeholder = '_' // или пробел, если используется другой символ
+    const limit = Math.min(upToIndex, mask.length, value.length)
+    for (let i = 0; i < limit; i++) {
+      const mc = mask[i]
+      if (mc === '9' || mc === 'A' || mc === 'a') {
+        if (value[i] !== placeholder) count++
+      }
+      // фиксированные символы маски (пробелы, скобки, !, -) просто пропускаются,
+      // они не влияют на количество введённых символов
+    }
+    return count
+  }
   onInput(event: any, reset: boolean = false) {
     event?.preventDefault?.()
     const val = event?.target?.value || event
@@ -651,7 +675,54 @@ import IMask from 'imask'
     if (['string', 'number'].includes(typeof (val))) {
       let emitVal: string|number = ''
       if ((this.mask || (!this.asNumber && this.maskInner)) && !this.maskAsRegExp) {
+        const input = event?.target
+        const oldValue = input?.value
+        const totalOld = this.countEditableChars(this.maskInner!, oldValue, oldValue?.length)
+        
+        const selStart = input?.selectionStart
+        const rawBefore = selStart > 0
+          ? this.countEditableChars(this.maskInner!, oldValue, selStart - 1)
+          : 0
+        
         emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
+        
+        this.nextTick(() => {
+          const el = event?.target
+          const newValue = el.value
+          const totalNew = this.countEditableChars(this.maskInner!, newValue, newValue.length)
+          
+          let newPos = newValue.length
+          
+          // ищем позицию для rawBefore + 1
+          for (let i = 1; i <= newValue.length; i++) {
+            if (this.countEditableChars(this.maskInner!, newValue, i) === rawBefore + 1) {
+              newPos = i
+              break
+            }
+          }
+          
+          // fallback при удалении или отсутствии нового символа
+          if (newPos === newValue.length) {
+            const totalSignificant = this.countEditableChars(this.maskInner!, newValue, newValue.length)
+            if (rawBefore + 1 > totalSignificant) {
+              const lenDiff = newValue.length - oldValue.length
+              newPos = Math.min(Math.max(selStart + lenDiff, 0), newValue.length)
+            }
+          }
+          
+          // Коррекция: не даём курсору застрять на нередактируемом символе
+          while (newPos < this.maskInner!.length && !this.isEditableByMask(this.maskInner!, newPos)) {
+            if (totalNew >= totalOld) {
+              newPos++   // добавление или заполнение группы → вперёд
+            } else {
+              if (newPos > 0) newPos--   // удаление → назад
+              else break
+            }
+          }
+          if (newPos > newValue.length) newPos = newValue.length
+          
+          el?.setSelectionRange?.(newPos, newPos)
+        }, 5)
       }
       else {
         if (this.asNumber) {
@@ -682,14 +753,14 @@ import IMask from 'imask'
             escaped++
             continue
           }
-          if (this.mask[i+escaped] === '9' && this.mask?.[i+escaped-1] !== '\\' && /[0-9]/.test(val[i])) {
+          if (this.mask![i+escaped] === '9' && this.mask?.[i+escaped-1] !== '\\' && /[0-9]/.test(val[i])) {
             userDigits += val[i]
             staticDigits += val[i]
             staticUnderDigits += val[i]
           }
-          else if (/[0-9]/.test(this.mask[i]) && this.mask?.[i-1] !== '\\') {
+          else if (/[0-9]/.test(this.mask?.[i] ?? '') && this.mask?.[i-1] !== '\\') {
             // Если в маске на этой позиции цифра (но не '9'), добавляем в статические
-            staticDigits += this.mask[i]
+            staticDigits += this.mask!?.[i] ?? ''
             staticUnderDigits += '_'
           }
 
@@ -706,6 +777,11 @@ import IMask from 'imask'
       this.$emit('change', emitVal, reset)
       this.$emit('update:modelValue', this.value = emitVal)
     }
+  }
+  isEditableByMask(mask: string, pos: number): boolean {
+    if (pos >= mask.length) return false
+    const mc = mask[pos]
+    return mc === '9' || mc === 'A' || mc === 'a'
   }
   onFocus() {
     this.$emit('focus')
@@ -745,7 +821,7 @@ import IMask from 'imask'
 
     // Округление до указанного количества знаков после запятой
     if (typeof field.asNumber == 'number') {
-      currentValue = parseFloat(currentValue?.toFixed?.(field.asNumber))
+      currentValue = parseFloat(currentValue?.toFixed?.(field.asNumber) ?? '0')
     }
     field.$emit('input', currentValue)
     field.$emit('change' ,currentValue)
@@ -799,16 +875,16 @@ import IMask from 'imask'
   setValue(value: string|number|null) {
     if (this.asNumber && typeof value == 'string') {
       value = typeof this.asNumber == 'number'
-        ? parseFloat(value?.toString?.().replace(this.radix, '.'))
+        ? parseFloat(value?.toString?.().replace(this.radix, '.') ?? '0')
         : parseInt(value)
     }
     if (this.isDateTime && this.iMaskedInst) {
       this.nextTick(() => {
-        if (this.$refs.selectInput) {
-          this.$refs.selectInput.value = (this.value = value?.toString())?.toString().replace(this.radix, '.') ?? ''
+        if (this.$refs.selectInput) { // @ts-expect-error
+          this.$refs.selectInput.value = (this.value = value?.toString?.() ?? '')?.toString().replace(this.radix, '.') ?? ''
         }
       }, 2)
-      return this.nextTick(() => {
+      return this.nextTick(() => { // @ts-expect-error
         this.iMaskedInst.unmaskedValue = value?.toString()
       })
     }
@@ -918,7 +994,7 @@ import IMask from 'imask'
 
 <style scoped lang="sass">
 input
-  @apply w100% border-0 border-stone-400/60 border-solid border-y-1px!
+  @apply w100% border-0 border-stone-400/60 border-solid border-1px
   @apply outline-stone-400 outline-1px focus:bg-white bg-white
   &[disabled]
     @apply bg-stone-200/50 text-stone-500!

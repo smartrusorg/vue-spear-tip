@@ -9,6 +9,7 @@ export * from '../Interfaces/IVueClass'
 export * from '../Interfaces/IBaseVueComponent'
 
 export * from '../Interfaces/IFieldComponent'
+export * from '../Interfaces/IModalManipulator'
 export * from '../Interfaces/IVSTContext'
 
 export * from './VueClassComponent'
