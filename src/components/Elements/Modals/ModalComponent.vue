@@ -1,7 +1,6 @@
 <script lang="ts">
-import {BaseComponent, Prop, Component, Watch} from '../../../core'
+import {BaseComponent, Prop, Component, Watch, IModalManipulator} from '../../../core'
 import Modals from './Modals.vue'
-import {ModalManipulator} from '../../../Interfaces/IModalObject'
 
 /** Компонент из модального окна */
 export default abstract class ModalComponent extends BaseComponent implements IModalComponent {
@@ -9,7 +8,7 @@ export default abstract class ModalComponent extends BaseComponent implements IM
   // Могут быть проброшены и свои параметры
   [key: string]: any
   
-  @Prop(Function) manipulator: ModalManipulator & {component: undefined} = {} as ModalComponent['manipulator']
+  @Prop(Function, Object, null) manipulator: IModalManipulator & {component: undefined} = {} as ModalComponent['manipulator']
   @Prop(String, Object, Array, Number, Boolean, null) readonly inputValue: any = null
   value: any = null
   
