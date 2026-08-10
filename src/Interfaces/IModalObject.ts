@@ -449,24 +449,24 @@ interface ModalConfig {
    * Функция срабатывающая после открытия окна и монтирования vue элементов
    * @param componentParams
    */
-  onMount(componentParams?: {}): void
+  onMount?(componentParams?: {}): void
   
   /**
    * @alias onMount
    */
-  onOpen(componentParams?: {}): void
+  onOpen?(componentParams?: {}): void
   
   /**
    * Функция срабатывающая при подтверждении
    * @param manipulator
    * @param componentParams
    */
-  onConfirm(manipulator: IModalManipulator, componentParams?: {}): void
+  onConfirm?(manipulator: IModalManipulator, componentParams?: {}): void
   
   /**
    * @alias onCancel так же срабатывает ак onConfirm при открытом окне с одной кнопкой
    */
-  onOk(manipulator: IModalManipulator, componentParams?: {}): void
+  onOk?(manipulator: IModalManipulator, componentParams?: {}): void
   /**
    * Включена ли кнопка подтверждения, если указан onConfirm и confirmEnable не указан явно,
    * то включена, иначе false
@@ -477,14 +477,14 @@ interface ModalConfig {
    * @param returnedValue
    * @param componentParams
    */
-  onCancel(returnedValue: any, componentParams?: {}): void
+  onCancel?(returnedValue: any, componentParams?: {}): void
   
   /**
    * Функция срабатывающая при нажатии на среднюю кнопку
    * @param manipulator
    * @param componentParams
    */
-  onDeny(manipulator: IModalManipulator, componentParams?: {}): void
+  onDeny?(manipulator: IModalManipulator, componentParams?: {}): void
 }
 
 
