@@ -12,6 +12,11 @@ function DT (dateTimeString?: string|number|Temporal.ZonedDateTime|Date, timeZon
     timeZone = $VST.DTTZ ?? Temporal.Now.timeZoneId()
   }
   timeZone = timeZone as string
+  
+  if (typeof dateTimeString === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(dateTimeString)) {
+    return Temporal.Instant.from(dateTimeString).toZonedDateTimeISO(timeZone)
+  }
+  
   if (typeof dateTimeString == 'number') {
     return Temporal.Instant.fromEpochMilliseconds(dateTimeString).toZonedDateTimeISO(timeZone)
   }
