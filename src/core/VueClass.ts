@@ -19,7 +19,7 @@ export default abstract class VueClass implements IVueClass {
     __scopeId?: string
     __file: string
   }
-  declare readonly $parent?: any
+  declare readonly $parent?: VueClass
   declare readonly $props: {[key:string]:any}
   declare readonly $refs: {[key:string]:any}
   readonly $root: {[key:string]:any}|this|any

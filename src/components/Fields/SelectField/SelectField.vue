@@ -433,6 +433,12 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.maxPlaceholderWidth = w - w * 0.25
     }
   }
+  
+  updated() {
+    if (this.value && this.modelValue && this.value != this.modelValue && typeof this.modelValue !== 'boolean') {
+      this.value = this.modelValue
+    }
+  }
 
 
   reset(tag: HTMLElement) {
@@ -510,10 +516,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     })
   }
 
-  @Watch('items', true, true) itemsWatch(items: any) {
+  @Watch({deep: true, immediate: true}) watchItems(items: any) {
     this.itemsInner = JSON.parse(JSON.stringify(items))
     if (this.tagify) {
-      this.tagify.whitelist = this.itemsInner
+      this.tagify.whitelist = []
+      this.nextTick(() => this.tagify.whitelist = this.itemsInner)
     }
   }
   @Watch({deep: true}) watchValue(value: any) {
@@ -522,7 +529,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.$emit('update:modelValue', value)
     }
   }
-  @Watch('modelValue', true) modelValueWatch(modelValue: any) {
+  @Watch({deep: true}) watchModelValue(modelValue: any) {
     if (this.isIgnoreSetTags) return this.isIgnoreSetTags = false
     this.nextTick(() => this.setTags(modelValue), 2)
   }

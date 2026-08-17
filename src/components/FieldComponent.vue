@@ -21,7 +21,9 @@ export default abstract class FieldComponent extends BaseComponent implements IF
   @Prop(String) readonly size: 'sm'|'md'|'lg' = 'lg'
   /** Заполнитель (Текст-подсказка) */
   @Prop(String, Object) readonly placeholder: string|{[k:string]:string} = ''
-
+  /** Название поля */
+  @Prop(String) readonly fieldName: string = null
+  
   /** Динамическое значение поля */
   value: any = null
   constructor() {
