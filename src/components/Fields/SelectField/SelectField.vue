@@ -291,31 +291,42 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         },
 
         // 3. Шаблон тега
-        tag(tagData, { settings: s }) {
+        tag: (tagData, { settings: s }) => {
           const isFocusable = !!s?.a11y?.focusableTags
           const isSelectMode = s.mode === 'select' && s.userInput
 
           return `
             <tag
-                 contenteditable="false"
-                 tabIndex="${isFocusable}"
-                 class="${s.classNames.tag} ${tagData.class || ""}"
-                 ${this.getAttributes(tagData)}>
-
+               ${this.$scopeId}
+               contenteditable="false"
+               tabIndex="${isFocusable}"
+               class="${s.classNames.tag} ${tagData.class || ""}"
+               ${this.tagify.getAttributes(tagData)}
+             >
               <x title=""
-                 tabIndex="${isFocusable}"
-                 class="${s.classNames.tagX}"
-                 role="button"
-                 aria-label="remove tag"
-                 onmousedown="this.closest('.vst-select-field').__vst_select.reset(this)"></x>
+                ${this.$scopeId}
+                tabIndex="${isFocusable}"
+                class="${s.classNames.tagX}"
+                role="button"
+                aria-label="remove tag"
+                onmousedown="this.closest('.vst-select-field').__vst_select.reset(this)"
+              ></x>
 
-              <div>
+              <div ${this.$scopeId}>
                 <span class="${s.classNames.tagText}"
-                      contenteditable="${isSelectMode ? 'true' : 'false'}"
-                      autocapitalize="false"
-                      autocorrect="off"
-                      spellcheck="false">
-                  ${tagData[s.tagTextProp] || tagData.value}
+                  ${this.$scopeId}
+                  contenteditable="${isSelectMode ? 'true' : 'false'}"
+                  autocapitalize="false"
+                  autocorrect="off"
+                  spellcheck="false"
+                >
+                  ${
+                    // tagData.value
+                    tagData.value.replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&gt;/gi, '>')
+                      .replace(/&quot;/gi, '"')
+                    // .replace(/<[^>]*>/g, '').replace(/\s+/g, ' ') // <- убрать html теги
+                    .trim()
+                  }
                 </span>
               </div>
             </tag>
@@ -364,7 +375,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
             } ${item.class || ''}"
              tabindex="0"
              role="option">
-          ${item.mappedValue || item.value}
+          ${item.value}
           </div>`.replace(/\s+/g, ' ').trim()
         },
 
@@ -566,7 +577,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   border-color: #f6f2a7
 
   *
-    color: #fff !important
+    color: inherit !important
 
 .tagify__tag__removeBtn
   @apply h25px! w25px text-stone!

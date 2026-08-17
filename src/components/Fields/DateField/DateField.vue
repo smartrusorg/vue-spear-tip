@@ -72,6 +72,7 @@
       v-if="value"
       :maskPreset
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
+      @input="v => onInput(v)"
       class=`z2`
       :style=`{
         // 'width': '170px !important',
@@ -89,7 +90,7 @@
       @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
       @reset="onReset"
       ref="VSTStringField"
-      @blur="v => onBlur()"
+      @blur="v => onBlur(v)"
       :size
     )
       template(v-if="!disabled" v-slot:start)
@@ -206,6 +207,8 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   preventMaskDateChange = false
   indNeedSendMinMaxUpdate = true
   initTemporalUpdateOut: boolean = false
+  isOnSetValueFromCal: boolean = false
+  pickerInterval: number = 0
   created() {
     if (this.withTime) {
       this.maskPreset = 'datetime'
@@ -349,11 +352,13 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         showAlways: true,
       })] : [],
       onValueUpdate: (dates: any) => {
+        this.isOnSetValueFromCal = true
         if (this.preventMaskDateChange) return this.preventMaskDateChange = false
         const time = dates?.[0]?.getTime?.() ?? 0
         if (time) {
           this.setInputMaskValueByDTStamp(time)
         }
+        setTimeout(() => this.isOnSetValueFromCal = false, 150)
       },
       onDayCreate: (dateObj: any, dateStr: any, fp: any, dayElem: any) => {
         let dt: Temporal.ZonedDateTime|null = null
@@ -420,14 +425,12 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }, 25)
   }
 
-  pickerInterval: number = 0
-
   inputFocus() {
     if (this.fp && !this.fp.isOpen) {
       this.fp.open()
     }
   }
-
+  
   changeInput(val: string, reset: boolean = false) {
     if (!val?.toString?.()?.trim?.()) {
       this.$emit('update:modelValue', this.value = null)
@@ -449,12 +452,16 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     // this._onBlur(val)
   }
 
-  onBlur() {
+  onBlur(v: string) {
     if (!this.withTime && this.asTemporal) { // Обновление даты без времени при ручном вводе
       this.DT = this.VST.DT(this.fp.selectedDates[0])
       this.$emit('update:modelValue', this.DT)
       this.$refs.VSTStringField.setValue(this.DT.toPlainDate().toLocaleString())
     }
+  }
+  
+  onInput(v: Event) {
+    // console.log('onInput', this.isOnSetValueFromCal, v)
   }
 
   onReset() {
@@ -525,6 +532,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   onValueChange() {
     this.initTemporalUpdateOut = true
+    console.log('onValCh', this.value, this.DT)
     this.DT = $VST.DT(this.value || undefined)
     if (!this.value) this.fp?.clear?.()
     if (this.fieldName && this.indNeedSendMinMaxUpdate) {

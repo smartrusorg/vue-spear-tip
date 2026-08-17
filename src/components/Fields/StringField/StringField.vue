@@ -478,10 +478,10 @@ import IMask from 'imask'
             'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
           )
         }
-        if (!this.isDateTime) {
+        // if (!this.isDateTime) {
           this.$refs.selectInput.addEventListener('input', this.onInput)
           this.$refs.selectInput.addEventListener('keydown', this.onKeydown)
-        }
+        // }
       }
       this.initInputMask(this.$refs.selectInput)
     }, 5)
@@ -516,6 +516,7 @@ import IMask from 'imask'
     }
     else if (!this.mask && this.asNumber) {
       this.maskInner = ''
+      const isDecimal = typeof this.asNumber == 'number'
       let inputMaskOptionsPrepare = {...this.inputMaskOptionsPrepare}
       // Используем альтернативные настройки для поддержки группировки и плавающей точки
       inputMaskOptionsPrepare.autoGroup = true
@@ -523,26 +524,35 @@ import IMask from 'imask'
       inputMaskOptionsPrepare.groupSize = 3
       inputMaskOptionsPrepare.groupSeparator = this.thousandsSeparator
       inputMaskOptionsPrepare.radixPoint = this.radix
-      inputMaskOptionsPrepare.digitsOptional = true
+      // inputMaskOptionsPrepare.digitsOptional = true
       inputMaskOptionsPrepare.inputtype = 'text'
+      
       inputMaskOptionsPrepare.numericInput = true
       inputMaskOptionsPrepare.insertMode = true
       inputMaskOptionsPrepare.SetMaxOnOverflow = true
       inputMaskOptionsPrepare.rightAlign = false
       inputMaskOptionsPrepare.allowMinus = false
       inputMaskOptionsPrepare.placeholder = '0'
-
+      inputMaskOptionsPrepare.keepStatic = true
+      if (isDecimal) { // Выделяем всё при дробных числах
+        inputMaskOptionsPrepare.positionCaretOnClick = 'radixFocus'
+        inputMaskOptionsPrepare.digitsOptional = true
+        inputMaskOptionsPrepare.autoUnmask = true
+      }
+      
       // Устанавливаем количество знаков после запятой
-      inputMaskOptionsPrepare.digits = typeof this.asNumber == 'number' && this.asNumber ? this.asNumber : 0
+      inputMaskOptionsPrepare.digits = isDecimal && this.asNumber ? this.asNumber : 0
 
-      if (this.max) inputMaskOptionsPrepare.max = this.max
-      if (this.min) inputMaskOptionsPrepare.min = this.min
+      if (this.max && this.max != Infinity) {
+        inputMaskOptionsPrepare.max = this.max
+      }
+      if (this.min) {
+        inputMaskOptionsPrepare.min = this.min
+      }
       inputMaskOptionsPrepare.allowMinus = (this.min ?? 0) < 0
 
       this.maskInner = 'numeric'
-      if (!this.mask) {
-        inputMaskOptionsPrepare.alias = 'numeric'
-      }
+      inputMaskOptionsPrepare.alias = 'numeric'
       this.inputMaskOptionsPrepare = inputMaskOptionsPrepare
     }
 
@@ -556,11 +566,12 @@ import IMask from 'imask'
         // необходима конвертация для InputMask. В виде строки срабатывает корректно.
         this.value = this.value.toString().replace('.', this.radix)
       }
-      new InputMask(this.mask && this.maskAsRegExp ? {
+      const im = new InputMask(this.mask && this.maskAsRegExp ? {
         regex: this.mask,
       } : this.maskInner, this.inputMaskOptions = JSON.parse(JSON.stringify({
         ...this.inputMaskOptionsPrepare,
-      }))).mask(el)
+      })))
+      im.mask(el)
     }
   }
   keyUp(){ // @ts-ignore
@@ -575,10 +586,10 @@ import IMask from 'imask'
       this.$refs.selectInput.removeEventListener('focus', this.onFocus)
       this.$refs.selectInput.removeEventListener('blur', this.onBlur)
       if (this.wheelNumber) this.$refs.selectInput.removeEventListener('wheel', this.wheelToUnmDel)
-      if (!this.isDateTime) {
+      // if (!this.isDateTime) {
         this.$refs.selectInput.removeEventListener('input', this.onInput)
         this.$refs.selectInput.removeEventListener('keydown', this.onKeydown)
-      }
+      // }
     }
   }
   onAccept(value: string) {
@@ -659,8 +670,7 @@ import IMask from 'imask'
   }
   onInput(event: any, reset: boolean = false) {
     event?.preventDefault?.()
-    const val = event?.target?.value || event
-
+    const val = event?.target?.value ?? event
     if (!['string', 'number'].includes(typeof val)) {
       if (!this.isDateTime) {
         this.isInnerSetValue = true
@@ -676,7 +686,7 @@ import IMask from 'imask'
       let emitVal: string|number = ''
       if ((this.mask || (!this.asNumber && this.maskInner)) && !this.maskAsRegExp) {
         const input = event?.target
-        const oldValue = input?.value
+        const oldValue = input?.value ?? ''
         const totalOld = this.countEditableChars(this.maskInner!, oldValue, oldValue?.length)
         
         const selStart = input?.selectionStart
@@ -720,6 +730,7 @@ import IMask from 'imask'
             }
           }
           if (newPos > newValue.length) newPos = newValue.length
+          
           
           el?.setSelectionRange?.(newPos, newPos)
         }, 5)
@@ -824,7 +835,7 @@ import IMask from 'imask'
       currentValue = parseFloat(currentValue?.toFixed?.(field.asNumber) ?? '0')
     }
     field.$emit('input', currentValue)
-    field.$emit('change' ,currentValue)
+    field.$emit('change', currentValue)
     field.$emit('update:modelValue', currentValue)
     field.isInnerSetValue = true
     field.setValue(currentValue)
@@ -835,8 +846,14 @@ import IMask from 'imask'
   onKeydown(event: any) {
     const isCtrlOrCmd = event?.ctrlKey || event?.metaKey
     // Восстановление при нажатии ctrl + z после нажатия сброса
-    if (this.preResetValue && isCtrlOrCmd && event.key === 'z') {
+    if (this.preResetValue && isCtrlOrCmd && event.key.toLowerCase() === 'z') {
       this.restore()
+    }
+    else if (
+      (isCtrlOrCmd && (['z', 'y'].includes(event.key.toLowerCase())))
+      || (event.shiftKey && isCtrlOrCmd && event.key.toLowerCase() === 'z')
+    ) {
+      setTimeout(() => this.onInput({target: this.$refs.selectInput}), 100)
     }
   }
 

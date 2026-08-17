@@ -16,7 +16,7 @@ export default abstract class VueClass implements IVueClass {
   readonly $data: {[key:string]:any} = {}
   declare readonly $el: HTMLElement // $I.Frontend.HTML.Element
   declare readonly $options: {
-    __scopeId: string
+    __scopeId?: string
     __file: string
   }
   declare readonly $parent?: any

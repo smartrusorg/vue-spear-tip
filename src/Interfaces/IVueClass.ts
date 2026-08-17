@@ -86,7 +86,7 @@ export interface IVueClass {
    * [$options](https://v3.ru.vuejs.org/ru/api/instance-properties.html#options)
    */
   readonly $options: {
-    __scopeId: string
+    __scopeId?: string
     __file: string
   }
   

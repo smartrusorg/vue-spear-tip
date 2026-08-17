@@ -1,7 +1,7 @@
 import VueClass from './VueClass'
 import type {IGlobalVST} from '../Interfaces/IGlobalVST'
 
-import Vue, {
+import {
   defineComponent, reactive, computed, toRef, watch, nextTick, onMounted, onUpdated, onUnmounted, onBeforeMount,
   onBeforeUpdate, onBeforeUnmount, onErrorCaptured, onRenderTracked, onRenderTriggered, onDeactivated, onActivated,
   getCurrentInstance, watchEffect, watchPostEffect, watchSyncEffect, isRef, ComponentOptions
@@ -56,6 +56,8 @@ function createComponent(constructor: any, decoratorParams: any) {
         const vm = getCurrentInstance()! // Получаем внутренний экземпляр Vue
         const instance = new constructor()
         const state = reactive(instance)
+        const ownScopeId = (vm.type as any).__scopeId // @ts-ignore
+        const parentScopeId = vm.parent?.type?.['__scopeId'] || vm.parent?.proxy?.['$scopeId'] || vm.parent?.['$scopeId']
         
         const computedState: any = {}
         const descriptors = getAllDescriptors(instance)
@@ -284,6 +286,19 @@ function createComponent(constructor: any, decoratorParams: any) {
         // onActivated(() => {})
         // onDeactivated(() => {})
         onMounted(function () {
+          if (!ownScopeId && parentScopeId) { // Применение родительского scopeId при отсутствии своего
+            const root = vm.proxy?.$el
+            if (root) {
+              if (root.nodeType === 1) {
+                root.setAttribute(parentScopeId, '')
+              }
+              else if (root.nodeType === 11) {
+                root.childNodes.forEach((child: any) => {
+                  if (child.nodeType === 1) child.setAttribute(parentScopeId, '')
+                })
+              }
+            }
+          }
           if (instance.mountedParent) instance.mountedParent.call(thisProxy)
           if (instance.mounted) instance.mounted.call(thisProxy)
         }.bind(thisProxy))
