@@ -54,7 +54,7 @@
               'user-select-none!' : disabled,
               'rounded-l-3xl border-l-1px! pl25px' : (!startText && !startIcon && !hasStartBlock) || (isDateTime && value),
               'border-l-0! pl12px': startText || startIcon || hasStartBlock,
-              'rounded-r-3xl border-r-1px! border-r-slate! pr35px' : !endText && !endIcon && !hasEndBlock,
+              'rounded-r-3xl border-r-1px! pr35px' : !endText && !endIcon && !hasEndBlock,
               'border-r-0!': endText || endIcon || hasEndBlock,
               // fixme костыль при вставленном блоке даты, переделать когда будет какая-то общая концепция по размерам блоков
               'w100%! pr40px! pt4px!': (isDateTime && (startText || startIcon || hasStartBlock || disabled)) && size != 'md',

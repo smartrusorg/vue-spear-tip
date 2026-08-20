@@ -6,30 +6,30 @@
       'min-h45px' : size == 'lg',
       'min-h24px': size == 'sm',
       'min-h35px': size == 'md',
-      ['vst-select-'+randKey]: true,
+      [randKey]: true,
     }`
   )
-    input(ref="selectInput" :id="`vst-s-${randKey}`" :value="reactiveValue" :autofocus)
+    input(ref="selectInput" class=`vst-s-input` :value="reactiveValue" :autofocus)
     component(is="style" v-if="(size == 'md' || size == 'sm')").
-      .vst-select-field.vst-select-{{randKey}} .tagify {
+      .{{randKey}} .tagify {
         {{ mode != 'select' && value && value?.toString?.()?.trim?.()?.length ? 'min-' : '' }}height: 35px !important;
         min-height: auto !important;
         padding-left: 12px !important;
         padding-top: 2px !important;
         border-color: #a8a29e99 !important;
       }
-      .vst-select-field.vst-select-{{randKey}} .tagify__tag {
+      .{{randKey}} .tagify__tag {
         height: 28px !important;
       }
-      .vst-select-field.vst-select-{{randKey}} .tagify__input {
+      .{{randKey}} .tagify__input {
         height: 20px !important;
         padding: 0 !important;
       }
-      .vst-select-field.vst-select-{{randKey}} .tagify--loading .tagify__input {
+      .{{randKey}} .tagify--loading .tagify__input {
         margin: 0 !important;
         padding: 4px 7px !important;
       }
-      .vst-select-field.vst-select-{{randKey}} .tagify__tag-text {
+      .{{randKey}} .tagify__tag-text {
         padding: 0 0 0 0 !important;
       }
       .vst-select-dropdown-{{randKey}} .tagify__dropdown__item  {
@@ -37,34 +37,34 @@
         line-height: 29px !important;
         padding: 1px 7px 3px  !important;
       }
-      .vst-select-field.vst-select-{{randKey}} .tagify--select tag > div,
-      .vst-select-field.vst-select-{{randKey}} .tagify--select tag,
-      .vst-select-field.vst-select-{{randKey}} .tagify__tag,
+      .{{randKey}} .tagify--select tag > div,
+      .{{randKey}} .tagify--select tag,
+      .{{randKey}} .tagify__tag,
       {
         padding: 0 !important;
         margin: 0 !important;
         height: 20px !important;
       }
     component(is="style" v-if="size == 'lg' && mode == 'select'").
-      .vst-select-{{randKey}} .tagify tag {
+      .{{randKey}} .tagify tag {
         height: 37px !important;
         margin-top: 6px;
         margin-left: 10px;
       }
-      .vst-select-{{randKey}} .tagify tag x {
+      .{{randKey}} .tagify tag x {
         height: 35px !important;
         margin-top: 4px;
         margin-left: 10px;
       }
-      .vst-select-{{randKey}} .tagify span.tagify__input {
+      .{{randKey}} .tagify span.tagify__input {
         height: 10px !important;
       }
     component(is="style" v-if="mode == 'multi'").
-      .vst-select-{{randKey}} .tagify__tag {
+      .{{randKey}} .tagify__tag {
         background: #e5e5e5;
       }
     component(is="style" v-if="mode == 'select'").
-      .vst-select-{{randKey}} .tagify__tag-text {
+      .{{randKey}} .tagify__tag-text {
         white-space: nowrap;
         position: absolute;
         top: 5px;
@@ -72,11 +72,11 @@
         width: 75% !important;
       }
     component(is="style").
-      .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
+      .{{randKey}} .tagify--empty .tagify__input:before {
         max-width: {{ maxPlaceholderWidth ? maxPlaceholderWidth+'px' : 'auto' }};
       }
     component(is="style" v-if="disabled").
-      .vst-select-field.vst-select-{{randKey}} .tagify--empty .tagify__input:before {
+      .{{randKey}} .tagify--empty .tagify__input:before {
         color: #3a3535 !important;
       }
 </template>
@@ -119,9 +119,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   randKey: string = ''
   maxPlaceholderWidth: number = 0
   createdParent() {
+    this.randKey = 'select-rand-' + this.VST.generateRandomKey()
     super.createdParent()
-    this.value = this.inputValue || this.modelValue || null
-    this.randKey = 'vst-select-'+this.VST.generateRandomKey()
   }
   
   setValue(value: any): any {
@@ -244,7 +243,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           }
 
           this.nextTick(() => () => (
-              this.$el?.querySelector(`#${this.randKey}`) as HTMLInputElement
+              this.$el?.querySelector(`.vst-s-input`) as HTMLInputElement
           )?.focus(), 5)
         }
       },
@@ -410,7 +409,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       }
     }
     this.nextTick(() => {
-      this.tagify = new TagifyEsm(this.$el.querySelector(`#vst-s-${this.randKey}`), settings)
+      this.tagify = new TagifyEsm(this.$el.querySelector(`.vst-s-input`), settings)
       this.tagify.setDisabled(this.disabled)
       this.tagify.loading(this.loading)
       this.tagify.on('input', (e:any) => {
@@ -422,7 +421,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
           this.tagify?.setDisabled?.(this.disabled)
         })
       })
-      this.setTags()
+      this.nextTick(this.setTags)
     })
   }
 
