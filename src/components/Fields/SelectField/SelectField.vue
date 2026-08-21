@@ -45,12 +45,13 @@
         margin: 0 !important;
         height: 20px !important;
       }
-    component(is="style" v-if="size == 'lg' && mode == 'select'").
+    component(is="style" v-if="size == 'lg' && mode == 'select' && value !== null").
       .{{randKey}} .tagify tag {
-        height: 37px !important;
+        height: 25px !important;
         margin-top: 6px;
         margin-left: 10px;
       }
+    component(is="style" v-if="size == 'lg' && mode == 'select'").
       .{{randKey}} .tagify tag x {
         height: 35px !important;
         margin-top: 4px;
@@ -634,7 +635,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   .tagify__input
     @apply min-w80px! fs-1rem duration-0!
     transition: 100ms !important
-    padding: .3em .5em !important
+    padding: .3em .5em
     //font-size: 13px
 
   .tagify--empty
