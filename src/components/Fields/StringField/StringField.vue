@@ -276,6 +276,7 @@ import IMask from 'imask'
   @Prop(String) readonly endColor: string = '#a8a29e'
   @Prop(String) readonly endIcon: string|null = null
   @Prop(Boolean) readonly asPassword: boolean = false
+  @Prop(Boolean) readonly returnUnmasked: boolean = false
   
   /** Включена ли кнопка сброса/восстановления значения */
   @Prop(Boolean) readonly resetButton: boolean = true
@@ -331,6 +332,9 @@ import IMask from 'imask'
     //   e => this.clickTap(e.srcEvent, true)
     // )
     super.createdParent()
+    if (this.asNumber && (!this.value || isNaN(this.value))) {
+      this.value = 0
+    }
     this.inputMaskOptionsPrepare = {}
     if (!this.is12hours && this.isDateTime) {
       try {
@@ -694,7 +698,12 @@ import IMask from 'imask'
           ? this.countEditableChars(this.maskInner!, oldValue, selStart - 1)
           : 0
         
-        emitVal = InputMask.unmask(this.maskInner, val, this.inputMaskOptions) || val
+        emitVal = (!this.returnUnmasked || !this.maskInner)
+          ? val
+          : this.$refs?.selectInput?.inputmask?.unmaskedvalue?.() ?? InputMask.unmask(this.maskInner, val, {
+            ...this.inputMaskOptions,
+            mask: this.maskInner,
+          }) ?? val
         
         this.nextTick(() => {
           const el = event?.target
@@ -821,7 +830,6 @@ import IMask from 'imask'
       currentValue -= step
     }
 
-    // console.log('currentValue', currentValue, field.value)
     // Применяем ограничения min/max если они заданы
     if (field.min !== undefined && currentValue < field.min) {
       currentValue = field.min
@@ -890,10 +898,11 @@ import IMask from 'imask'
 
   isInnerSetValue: boolean = false
   setValue(value: string|number|null) {
-    if (this.asNumber && typeof value == 'string') {
+    if (this.asNumber) {
       value = typeof this.asNumber == 'number'
         ? parseFloat(value?.toString?.().replace(this.radix, '.') ?? '0')
-        : parseInt(value)
+        : parseInt(value?.toString?.() ?? '0')
+      if (isNaN(value)) value = 0
     }
     if (this.isDateTime && this.iMaskedInst) {
       this.nextTick(() => {

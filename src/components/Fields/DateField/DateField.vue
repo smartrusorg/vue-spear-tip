@@ -282,7 +282,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
           if (this.$refs?.picker) {
             setTimeout(() => {
               this.showCalendar = true
-              this.$refs.picker.setAttribute('value', this.formatDate(new Date(zonedDate.epochMilliseconds)))
+              this.$refs.picker?.setAttribute?.('value', this.formatDate(new Date(zonedDate.epochMilliseconds)))
               this.fp?.setDate?.(new Date(
                   (this.value instanceof Temporal.ZonedDateTime )
                       ? this.value.epochMilliseconds
@@ -532,7 +532,6 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   onValueChange() {
     this.initTemporalUpdateOut = true
-    console.log('onValCh', this.value, this.DT)
     this.DT = $VST.DT(this.value || undefined)
     if (!this.value) this.fp?.clear?.()
     if (this.fieldName && this.indNeedSendMinMaxUpdate) {

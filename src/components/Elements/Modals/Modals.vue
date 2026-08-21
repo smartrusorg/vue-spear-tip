@@ -446,7 +446,7 @@ interface ModalConfig extends ModalStyles {
     opacity: 1 !important
 
 .sm-modal-title
-  @apply min-w280px
+  @apply min-w280px user-select-none!
   font-size: 17px
   margin: -16px 0 15px -25px
   background: #34bbff

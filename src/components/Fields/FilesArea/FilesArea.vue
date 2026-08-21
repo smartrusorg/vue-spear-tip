@@ -418,6 +418,7 @@ export default class FilesArea extends FieldComponent {
           files.push({
             ...f, ...{
               sizeNamed: this.fileGetSize(f.size),
+              deleted: false,
               found: true,
               loaded: 100,
             },
@@ -428,6 +429,7 @@ export default class FilesArea extends FieldComponent {
         files.push({
           ...f, ...{
             sizeNamed: this.fileGetSize(f.size),
+            deleted: false,
             found: true,
             loaded: 100,
           },
