@@ -491,7 +491,7 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         if (item?.key || item?.key === 0) {
           this.isFirstValueSet = true
           this.value = item.key ?? item.value ?? null
-          this.tagify?.addTags?.((item.value ?? item.key ?? '').toString())
+          this.nextTick(() => this.tagify?.addTags?.((item.value ?? item.key ?? '').toString()))
         }
       }
       else if (this.mode == 'multi'){
