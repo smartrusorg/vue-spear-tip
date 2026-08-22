@@ -186,6 +186,7 @@ function createComponent(constructor: any, decoratorParams: any) {
         Object.assign(state, methods)
         state.name = constructor.name
         
+        let prevValues = {}
         // Обработка прослушивателей
         if ((schema as WatchSchemeReal).watch) {
           for (const methodName in schema.watch) {
@@ -195,7 +196,13 @@ function createComponent(constructor: any, decoratorParams: any) {
               (newValue, oldValue) => {
                 const method = constructor.prototype[methodName]
                 if (typeof method === 'function') {
-                  method.call(thisProxy, newValue, oldValue)
+                  method.call(thisProxy, newValue, prevValues?.[methodName] ?? null)
+                  if (newValue !== null && newValue !== undefined) {
+                    prevValues[methodName] = JSON.parse($VST.safeStringify(newValue))
+                  }
+                  else {
+                    prevValues[methodName] = null
+                  }
                 }
               },
               {
