@@ -274,9 +274,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     setTimeout(() => {
       if (!this.fp) this.initPicker()
       // this.fp.set("position", 'above right')
+      this.fp?.close?.()
       this.nextTick(() => {
-        this.fp?.close?.()
         this.fp?.open?.()
+        this.fp?.close?.()
         this.nextTick(() => {
           if (!this.disabled && !isNewVal) this.$refs.VSTStringField?.focus?.()
           if (this.$refs?.picker) {
