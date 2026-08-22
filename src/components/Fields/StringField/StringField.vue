@@ -17,7 +17,7 @@
       }`
     )
       .vst-string-field-start-block(
-        v-if="(startText || startIcon || hasStartBlock) && !disabled && !(isDateTime && value)"
+        v-if="(startText || startIcon || hasStartBlock) && !disabled && !(isDateTime && value && maskPreset != 'date')"
         class=`rounded-l-3xl flex items-center pl9px pr5px border-color-#c1c7cf border-solid
           border-width-[1px_0_1px_1px]! user-select-none`
         :style=`{
@@ -39,7 +39,7 @@
           i(:class="[startIcon, 'pointer-events-none']")
         div(class="flex items-center whitespace-nowrap px7px pointer-events-none" v-if="startText")
           span(v-html="startText")
-        div(class="flex items-center pointer-events-none" v-show="hasStartBlock")
+        div(class="flex items-center" v-show="hasStartBlock")
           slot(name="start")
       div(
         class="flex h100% w100% relative"
@@ -52,7 +52,7 @@
             :class=`{
               'hover:bg-white!' : !disabled,
               'user-select-none!' : disabled,
-              'rounded-l-3xl border-l-1px! pl25px' : (!startText && !startIcon && !hasStartBlock) || (isDateTime && value),
+              'rounded-l-3xl border-l-1px! pl25px' : (!startText && !startIcon && !hasStartBlock) || (isDateTime && value && maskPreset != 'date'),
               'border-l-0! pl12px': startText || startIcon || hasStartBlock,
               'rounded-r-3xl border-r-1px! pr35px' : !endText && !endIcon && !hasEndBlock,
               'border-r-0!': endText || endIcon || hasEndBlock,
@@ -307,11 +307,11 @@ import IMask from 'imask'
   }
   
   get hasStartBlock(): boolean {
-    return (this.$slots?.start && !!this.$slots?.start?.()?.[0]?.['children']?.length) || false
+    return this.$slots?.start && !!this.$slots?.start?.()?.[0]?.['children']?.length
   }
   
   get hasEndBlock(): boolean {
-    return (this.$slots?.end && !!this.$slots?.end?.()?.[0]?.['children']?.length) || false
+    return this.$slots?.end && !!this.$slots?.end?.()?.[0]?.['children']?.length
   }
   
   /** Является ли маска датой или датой со временем */

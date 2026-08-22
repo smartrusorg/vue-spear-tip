@@ -470,10 +470,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     }
     this.nextTick(() => (this.$el?.querySelector?.(`.tagify__input`) as HTMLDivElement).focus?.(), 3)
     this.nextTick(() => {
-      this.$emit('update:modelValue', this.value)
-      this.$emit('change', this.value)
+      this.isIgnoreSetTags = true
+      this.$emit('update:modelValue', null)
+      this.$emit('change', null)
+      this.$emit('reset')
     }, 4)
-    this.$emit('reset')
   }
 
   onViewPortResize() {

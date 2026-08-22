@@ -37,6 +37,7 @@
               'w24px h24px': size != 'sm',
               'w20px h20px scale-70': size == 'sm',
             }`
+            //@mousedown="value ? inputFocus() : addDate()"
           )
             CalendarDaysIcon(
               @touchstart="!disabled ? (value ? inputFocus() : addDate()) : null"
@@ -57,7 +58,9 @@
           'min-h28px!' : size == 'sm',
         }`
       ) {{ disabled ? '----' : (placeholder?.[localeInner] || placeholder?.en || placeholder) }}
-    .vst-date-field-input-block(class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value")
+    .vst-date-field-input-block(
+      class="cursor-pointer absolute op-0 t-0 l-50% translate-x--50%" v-show="value"
+    )
       input(
         :class=`{
           'bg-stone-200/70!': disabled,
@@ -69,7 +72,7 @@
         @mousedown.prevent
       )
     VSTStringField(
-      v-if="value"
+      v-if="value !== null"
       :maskPreset
       :placeholder="(placeholder?.[localeInner] || placeholder?.en || placeholder)"
       @input="v => onInput(v)"
@@ -89,25 +92,24 @@
       :fontSize="'1rem'"
       @keypress.enter="inputEnter($refs.VSTStringField?.getValue?.())"
       @reset="onReset"
+      @startClickTap="value ? inputFocus() : addDate()"
       ref="VSTStringField"
       @blur="v => onBlur(v)"
       :size
     )
       template(v-if="!disabled" v-slot:start)
         .vst-date-field-calendar-icon(
-          class="w24px h24px text-stone cursor-pointer hover:scale-130 w100% mx5px"
+          class="w24px h24px mt--2px text-stone cursor-pointer! hover:scale-130 w100% mx5px"
           v-if="!disabled"
           :class=`{
             'scale-70' : size == 'sm',
           }`
         )
-          CalendarDaysIcon(
-            @click="value ? inputFocus() : addDate()"
-          )
+          CalendarDaysIcon()
     component(is="style" v-if="!showCalendar") .flatpickr-calendar {display: none !important}
     //component(is="style" v-if="size == 'md'") .vst-date-field input {height: 100%}
     component(is="style") .flatpickr-calendar {box-shadow: 0px 2px 13px var(--un-shadow-color, rgb(193 193 193)) !important}
-    //div {{ value }}
+    //div(class="absolute bottom--25px l-0") {{ value }}
 </template>
 
 
@@ -204,10 +206,8 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   maskPreset: 'date'|'datetime'|'datetimeSec' = 'date'
   showCalendar: boolean = true
   DT: Temporal.ZonedDateTime|null = null
-  preventMaskDateChange = false
   indNeedSendMinMaxUpdate = true
   initTemporalUpdateOut: boolean = false
-  isOnSetValueFromCal: boolean = false
   pickerInterval: number = 0
   created() {
     if (this.withTime) {
@@ -274,9 +274,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     this.showCalendar = false
     setTimeout(() => {
       if (!this.fp) this.initPicker()
+      // this.fp.set("position", 'above right')
       this.nextTick(() => {
-        this.fp?.open?.()
         this.fp?.close?.()
+        this.fp?.open?.()
         this.nextTick(() => {
           if (!this.disabled && !isNewVal) this.$refs.VSTStringField?.focus?.()
           if (this.$refs?.picker) {
@@ -342,6 +343,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       minuteIncrement: this.minuteIncrement,
       secondsIncrement: this.minuteIncrement,
       hoursIncrement: this.hoursIncrement,
+      positionElement: this.$el.querySelector('.vst-date-field-input-block'),
       allowInput: 1,
       closeOnSelect: false,
       className: 'custom-flatpickr-theme', // @ts-ignore
@@ -352,13 +354,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         showAlways: true,
       })] : [],
       onValueUpdate: (dates: any) => {
-        this.isOnSetValueFromCal = true
-        if (this.preventMaskDateChange) return this.preventMaskDateChange = false
         const time = dates?.[0]?.getTime?.() ?? 0
         if (time) {
           this.setInputMaskValueByDTStamp(time)
         }
-        setTimeout(() => this.isOnSetValueFromCal = false, 150)
       },
       onDayCreate: (dateObj: any, dateStr: any, fp: any, dayElem: any) => {
         let dt: Temporal.ZonedDateTime|null = null
@@ -426,9 +425,13 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   }
 
   inputFocus() {
-    if (this.fp && !this.fp.isOpen) {
-      this.fp.open()
-    }
+    this.showCalendar = false
+    this.fp?.close?.()
+    this.showCalendar = true
+    setTimeout(() => {
+      this.showCalendar = true
+        this.fp?.open?.()
+    }, 150)
   }
   
   changeInput(val: string, reset: boolean = false) {
@@ -453,10 +456,13 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   }
 
   onBlur(v: string) {
-    if (!this.withTime && this.asTemporal) { // Обновление даты без времени при ручном вводе
+    if (!this.withTime && this.asTemporal && v) { // Обновление даты без времени при ручном вводе
       this.DT = this.VST.DT(this.fp.selectedDates[0])
       this.$emit('update:modelValue', this.DT)
       this.$refs.VSTStringField.setValue(this.DT.toPlainDate().toLocaleString())
+    }
+    else if (typeof v == 'string' && !v) {
+    
     }
   }
   
@@ -466,13 +472,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   onReset() {
     if (this.withTime) {
-      // this.value = null
-      // this.fp?.open?.()
-      this.nextTick(() => this.fp?.open?.())
-      this.nextTick(() => this.$emit('update:modelValue', this.value = null), 5)
+      this.value = null
     }
     else {
-      this.$emit('update:modelValue', null)
+      this.$emit('update:modelValue', this.value = null)
     }
   }
 
