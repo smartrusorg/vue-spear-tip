@@ -37,7 +37,6 @@
               'w24px h24px': size != 'sm',
               'w20px h20px scale-70': size == 'sm',
             }`
-            //@mousedown="value ? inputFocus() : addDate()"
           )
             CalendarDaysIcon(
               @touchstart="!disabled ? (value ? inputFocus() : addDate()) : null"
