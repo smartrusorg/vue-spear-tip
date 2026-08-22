@@ -46,6 +46,7 @@
         width,
       }, ...style}`
       ref="button"
+      :tabindex
     )
       div(
         v-if="badge"

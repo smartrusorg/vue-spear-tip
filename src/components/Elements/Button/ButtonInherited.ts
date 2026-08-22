@@ -15,6 +15,7 @@ export default abstract class ButtonInherited extends BaseComponent {
     'mousedownOrTouchstart',
     'mouseupOrTouchend',
     'keydownEnter',
+    'keypress.enter',
   ]
   @Prop(String) readonly icon: string = ''
   @Prop(String) readonly iconRight: string = ''
@@ -56,6 +57,7 @@ export default abstract class ButtonInherited extends BaseComponent {
   @Prop(String) readonly link: string|null = null
   /** Для открытия локальных ссылок в новом окне и внешних в текущем, будет проигнорирован при указанном link */
   @Prop(String) readonly linkRevert: string|null = null
+  @Prop(String) readonly tabindex: string|null = null
   
   @Prop(String, null) readonly theme:
     'success'|'default'|'primary'|'warning'|'danger'|'info'|'pink'|'purple'|'indigo'|'grey'|'white' |
@@ -286,12 +288,9 @@ export default abstract class ButtonInherited extends BaseComponent {
   
   keydownEnter(e: Event) {
     if (!this.disabled){
-      // this.$emit('clickOrTouchstart', e, this)
-      // this.$emit('clickOrTouchend', e, this)
-      // this.$emit('mouseupOrTouchend', e, this)
-      // this.$emit('mousedownOrTouchstart', e, this)
-      this.$emit('keydownEnter', e, this)
-      this.$emit('keypress.enter', e, this)
+      this['$emit']('keydownEnter', e, this)
+      this['$emit']('keypress.enter', e, this)
+      this['$emit']('clickTap', e, this)
     }
   }
   
@@ -305,8 +304,8 @@ export default abstract class ButtonInherited extends BaseComponent {
   
   clickTap(e: Event) {
     if (!this.disabled) {
-      this.$emit('click', e, this)
-      this.$emit('clickTap', e, this)
+      this['$emit']('click', e, this)
+      this['$emit']('clickTap', e, this)
     }
   }
   onComponentClickOrTap() {}
