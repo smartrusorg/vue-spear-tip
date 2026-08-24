@@ -580,10 +580,10 @@ import IMask from 'imask'
     }
   }
   keyUp(){ // @ts-ignore
-    this.onWheel({deltaY:-1}, this)
+    this.onWheel({deltaY:-1}, this, true)
   }
   keyDown(){ // @ts-ignore
-    this.onWheel({deltaY:0}, this)
+    this.onWheel({deltaY:0}, this, true)
   }
 
   beforeUnmountParent() {
@@ -811,9 +811,12 @@ import IMask from 'imask'
     this.nextTick(() => this.$emit('blur', this.$refs.selectInput?.value))
     // this.value = this.$refs.selectInput.value
   }
-  onWheel = (event: WheelEvent, field: StringField) => {
+  onWheel = (event: WheelEvent, field: StringField, inner: boolean = false) => {
     if (field.disabled || !field.asNumber) return
-    if ((!this.wheelNumber && !this.wheelNumberAlt) || (this.wheelNumberAlt && !(event.altKey || event.shiftKey))) {
+    if (!inner && (
+      (!this.wheelNumber && !this.wheelNumberAlt)
+      || (this.wheelNumberAlt && !(event.altKey || event.shiftKey))
+    )) {
       return
     }
     event?.preventDefault?.()
