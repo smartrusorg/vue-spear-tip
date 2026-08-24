@@ -252,7 +252,8 @@ import IMask from 'imask'
    * Включить ли увеличение/уменьшение цифрового значения в поле при прокрутке колесом внутри поля
    * @experimental Не стабильно работает пока
    */
-  @Prop(Boolean) readonly wheelNumber: boolean = true
+  @Prop(Boolean) readonly wheelNumber: boolean = false
+  @Prop(Boolean) readonly wheelNumberAlt: boolean = true
   
   @Prop(String) readonly placeholder: string|{[k:string]:string} = 'Введите текст'
   @Prop(String) readonly maskPreset: 'email'|'date'|'datetime'|'datetimeSec'|null = null
@@ -476,7 +477,7 @@ import IMask from 'imask'
         this.$refs.selectInput.value = this.value
         this.$refs.selectInput.addEventListener('focus', this.onFocus)
         this.$refs.selectInput.addEventListener('blur', this.onBlur)
-        if (this.wheelNumber && !this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
+        if (!this.mask /* Есть глюки у цифр с точкой, нужно больше тестов */) {
           const self = this
           this.$refs.selectInput.addEventListener(
             'wheel', this.wheelToUnmDel = (e: any) => this.onWheel.bind(this)(e, self)
@@ -589,7 +590,7 @@ import IMask from 'imask'
     if (this.$refs.selectInput) {
       this.$refs.selectInput.removeEventListener('focus', this.onFocus)
       this.$refs.selectInput.removeEventListener('blur', this.onBlur)
-      if (this.wheelNumber) this.$refs.selectInput.removeEventListener('wheel', this.wheelToUnmDel)
+      this.$refs.selectInput.removeEventListener('wheel', this.wheelToUnmDel)
       // if (!this.isDateTime) {
         this.$refs.selectInput.removeEventListener('input', this.onInput)
         this.$refs.selectInput.removeEventListener('keydown', this.onKeydown)
@@ -812,6 +813,9 @@ import IMask from 'imask'
   }
   onWheel = (event: WheelEvent, field: StringField) => {
     if (field.disabled || !field.asNumber) return
+    if ((!this.wheelNumber && !this.wheelNumberAlt) || (this.wheelNumberAlt && !(event.altKey || event.shiftKey))) {
+      return
+    }
     event?.preventDefault?.()
     let currentValue = parseFloat(
       field.value?.toString()
