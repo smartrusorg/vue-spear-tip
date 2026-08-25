@@ -1022,6 +1022,11 @@ import IMask from 'imask'
   @Watch watchAsPassword() {
     this.initInputMask(this.$refs.selectInput)
   }
+  @Watch watchModelValue(newModelValue: any) {
+    if ((this.value = newModelValue?.toString?.() ?? '')?.length) {
+      this.preResetValue = ''
+    }
+  }
 }
 </script>
 
