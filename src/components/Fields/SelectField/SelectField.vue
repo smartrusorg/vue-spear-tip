@@ -124,6 +124,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
     super.createdParent()
   }
   
+  get uniqueValues() {
+    return this.mode === 'select' ? this.value : [...new Set([...this.value ?? []])]
+  }
+  
   setValue(value: any): any {
     if (['string', 'number'].includes(typeof value) || value === null || Array.isArray(value)) {
       super.setValue(value)
@@ -169,11 +173,10 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                   e.detail?.value?.trim?.()?.startsWith('{') || e.detail?.value?.trim?.()?.startsWith('[')
               )
                 ? JSON.parse(e.detail?.value)?.[0]?.key
-                : (e.detail?.value?.[0]?.key || e.detail?.value?.key)
+                : (e.detail?.value?.[0]?.key || e.detail?.key || e.detail?.value)
               this.nextTick(() => {
-
                 const item = (JSON.parse(JSON.stringify((this.itemsInner.find(
-                  v => (v?.key) === modelValue) ?? null
+                    v => (v?.key) === modelValue) ?? null
                 ))))
                 if (item?.key || item?.key === 0) {
                   this.tagify.addTags(this.reactiveValue = item?.value)
@@ -297,14 +300,14 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
 
           return `
             <tag
-               ${this.$scopeId}
+               ${this.$scopeId ?? ''}
                contenteditable="false"
                tabIndex="${isFocusable}"
                class="${s.classNames.tag} ${tagData.class || ""}"
                ${this.tagify.getAttributes(tagData)}
              >
               <x title=""
-                ${this.$scopeId}
+                ${this.$scopeId ?? ''}
                 tabIndex="${isFocusable}"
                 class="${s.classNames.tagX}"
                 role="button"
@@ -312,9 +315,9 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
                 onmousedown="this.closest('.vst-select-field').__vst_select.reset(this)"
               ></x>
 
-              <div ${this.$scopeId}>
+              <div ${this.$scopeId ?? ''} style="user-select: none !important">
                 <span class="${s.classNames.tagText}"
-                  ${this.$scopeId}
+                  ${this.$scopeId ?? ''}
                   contenteditable="${isSelectMode ? 'true' : 'false'}"
                   autocapitalize="false"
                   autocorrect="off"
@@ -354,10 +357,11 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         dropdownContent(suggestionsHTML) {
           const { templates: t } = this.settings // @ts-ignore
           const suggestions = this.state.dropdown.suggestions
+          const self = this.DOM.originalInput?.closest?.('.vst-select-field')?.__vst_select
 
-          return `<div class="vst-select-dropdown-${ // @ts-expect-error
-              this.DOM.originalInput?.closest?.('.vst-select-field')?.__vst_select?.randKey
-          }">
+          return `<div
+            class="vst-select-dropdown-${self?.randKey}"
+          >
             ${t.dropdownHeader.call(this, suggestions)}
             ${suggestionsHTML}
             ${t.dropdownFooter.call(this, suggestions)}
@@ -368,13 +372,22 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
         dropdownItem(item) {
           const { classNames } = this.settings
           const isSelected = this.isTagDuplicate(item.value)
-
+          
+          const self = this.DOM.originalInput?.closest?.('.vst-select-field')?.__vst_select
           return `<div ${this.getAttributes(item)}
-             class="${classNames.dropdownItem} ${
+            class="${classNames.dropdownItem} ${
               isSelected ? classNames.dropdownItemSelected : ''
             } ${item.class || ''}"
-             tabindex="0"
-             role="option">
+            tabindex="0"
+            role="option"
+            style="touch-action: manipulation"
+            ${
+              item.value?.includes('<')
+              ? `
+                ontouchstart="document.querySelector('.${self?.randKey}')?.__vst_select?.addHtml?.('${item.key}')"
+                onmousedown="document.querySelector('.${self?.randKey}')?.__vst_select?.addHtml?.('${item.key}')"` : ''
+            }
+          >
           ${item.value}
           </div>`.replace(/\s+/g, ' ').trim()
         },
@@ -439,19 +452,46 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.value = this.modelValue
     }
   }
-
+  
+  /**
+   * Добавление тега по клику на html опцию
+   * @param id
+   */
+  addHtml(id) {
+    if (this.mode == 'multi') {
+      const startReactive = JSON.parse(this.reactiveValue ?? '[]')
+      let valUni = startReactive
+      valUni = [...new Set([...valUni?.map?.(
+        v => Engine.isStringAreNumber(v.key) ? parseInt(v.key) : v.key
+      ) ?? []])]
+      valUni.push(Engine.isStringAreNumber(id) ? parseInt(id) : id)
+      const item = this.itemsInner.find(v => v.key == id)
+      startReactive.push(item)
+      this.reactiveValue = JSON.stringify([
+        ...new Set([...startReactive ?? []])
+      ].filter(v => valUni?.includes(v.key)))
+      this.nextTick(() => {
+        this.$emit('update:modelValue', valUni)
+        this.$emit('change', valUni)
+      })
+    }
+  }
 
   reset(tag: HTMLElement) {
     if (this.mode == 'select') {
       this.tagify?.removeAllTags?.()
       this.reactiveValue = null
+      this.nextTick(() => {
+        this.$emit('update:modelValue', null)
+        this.$emit('change', null)
+      })
     }
     else if(this.mode == 'multi') {
       const keyToDelete = tag?.parentElement?.getAttribute?.('key')
       if (keyToDelete) {
         const tagToRemove = this.tagify.value.find((tag: any) => tag.key == keyToDelete)
         if (tagToRemove) {
-            this.tagify?.removeTags(tagToRemove.value)
+          this.tagify?.removeTags(tagToRemove.value)
         }
         this.nextTick(() => {
           if (this.tagify?.value?.length) {
@@ -469,12 +509,8 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
       this.value = []
     }
     this.nextTick(() => (this.$el?.querySelector?.(`.tagify__input`) as HTMLDivElement).focus?.(), 3)
-    this.nextTick(() => {
-      this.isIgnoreSetTags = true
-      this.$emit('update:modelValue', null)
-      this.$emit('change', null)
-      this.$emit('reset')
-    }, 4)
+    // this.isIgnoreSetTags = true
+    this.$emit('reset')
   }
 
   onViewPortResize() {
