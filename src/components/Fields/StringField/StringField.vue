@@ -692,16 +692,17 @@ import IMask from 'imask'
       if ((this.mask || (!this.asNumber && this.maskInner)) && !this.maskAsRegExp) {
         const input = event?.target
         const oldValue = input?.value ?? ''
-        const totalOld = this.countEditableChars(this.maskInner!, oldValue, oldValue?.length)
+        const maskInner = this.maskInner?.toString?.()?.replaceAll('\\', '') ?? ''
+        const totalOld = this.countEditableChars(maskInner, oldValue, oldValue?.length)
         
         const selStart = input?.selectionStart
         const rawBefore = selStart > 0
-          ? this.countEditableChars(this.maskInner!, oldValue, selStart - 1)
+          ? this.countEditableChars(maskInner, oldValue, selStart - 1)
           : 0
         
-        emitVal = (!this.returnUnmasked || !this.maskInner)
+        emitVal = (!this.returnUnmasked || !maskInner)
           ? val
-          : this.$refs?.selectInput?.inputmask?.unmaskedvalue?.() ?? InputMask.unmask(this.maskInner, val, {
+          : this.$refs?.selectInput?.inputmask?.unmaskedvalue?.() ?? InputMask.unmask(maskInner, val, {
             ...this.inputMaskOptions,
             mask: this.maskInner,
           }) ?? val
@@ -709,13 +710,13 @@ import IMask from 'imask'
         this.nextTick(() => {
           const el = event?.target
           const newValue = el.value
-          const totalNew = this.countEditableChars(this.maskInner!, newValue, newValue.length)
+          const totalNew = this.countEditableChars(maskInner!, newValue, newValue.length)
           
           let newPos = newValue.length
           
           // ищем позицию для rawBefore + 1
           for (let i = 1; i <= newValue.length; i++) {
-            if (this.countEditableChars(this.maskInner!, newValue, i) === rawBefore + 1) {
+            if (this.countEditableChars(maskInner!, newValue, i) === rawBefore + 1) {
               newPos = i
               break
             }
@@ -723,7 +724,7 @@ import IMask from 'imask'
           
           // fallback при удалении или отсутствии нового символа
           if (newPos === newValue.length) {
-            const totalSignificant = this.countEditableChars(this.maskInner!, newValue, newValue.length)
+            const totalSignificant = this.countEditableChars(maskInner!, newValue, newValue.length)
             if (rawBefore + 1 > totalSignificant) {
               const lenDiff = newValue.length - oldValue.length
               newPos = Math.min(Math.max(selStart + lenDiff, 0), newValue.length)
@@ -731,7 +732,7 @@ import IMask from 'imask'
           }
           
           // Коррекция: не даём курсору застрять на нередактируемом символе
-          while (newPos < this.maskInner!.length && !this.isEditableByMask(this.maskInner!, newPos)) {
+          while (newPos < maskInner!.length && !this.isEditableByMask(maskInner!, newPos)) {
             if (totalNew >= totalOld) {
               newPos++   // добавление или заполнение группы → вперёд
             } else {
@@ -740,7 +741,6 @@ import IMask from 'imask'
             }
           }
           if (newPos > newValue.length) newPos = newValue.length
-          
           
           el?.setSelectionRange?.(newPos, newPos)
         }, 5)

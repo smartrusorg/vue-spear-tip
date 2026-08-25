@@ -1,6 +1,6 @@
 {
   "name": "vue-spear-tip",
-  "version": "0.6.61",
+  "version": "0.6.62",
   "type": "module",
   "scripts": {
     "build": "vite build --mode examples-build",
