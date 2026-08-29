@@ -45,7 +45,7 @@ export default abstract class FieldComponent extends BaseComponent implements IF
   }
 
   @Watch({deep: true}) watchModelValue(value: any) {
-    this.setValue(value)
+    this.onValueChange(value)
   }
 
   getValue() {

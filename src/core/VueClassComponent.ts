@@ -196,7 +196,7 @@ function createComponent(constructor: any, decoratorParams: any) {
               (newValue, oldValue) => {
                 const method = constructor.prototype[methodName]
                 if (typeof method === 'function') {
-                  method.call(thisProxy, newValue, prevValues?.[methodName] ?? null)
+                  method.call(thisProxy, newValue, prevValues?.[methodName] ?? oldValue ??  null)
                   if (newValue !== null && newValue !== undefined) {
                     prevValues[methodName] = JSON.parse($VST.safeStringify(newValue))
                   }
@@ -214,13 +214,20 @@ function createComponent(constructor: any, decoratorParams: any) {
         }
         
         // Отслеживание v-model
-        watch(() => thisProxy.modelValue, (val, oldVal) => { // @ts-expect-error
+        let _modelValueSyncing = false
+        
+        watch(() => thisProxy.modelValue, (val, oldVal) => {
+          if (_modelValueSyncing) return
           if (val !== oldVal && val !== props?.['modelValue']) {
             context.emit('update:modelValue', val?.value ?? val ?? null)
           }
-        }, {immediate: true}) // @ts-expect-error
+        }, {immediate: true})
+        
         watch(() => props?.modelValue, (val, oldVal) => {
+          if (val === thisProxy.modelValue) return   // уже синхронизировано
+          _modelValueSyncing = true
           thisProxy.modelValue = val
+          _modelValueSyncing = false
         }, {immediate: true})
         
         

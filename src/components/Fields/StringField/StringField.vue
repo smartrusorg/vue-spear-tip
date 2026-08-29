@@ -709,7 +709,7 @@ import IMask from 'imask'
         
         this.nextTick(() => {
           const el = event?.target
-          const newValue = el.value
+          const newValue = el?.value ?? ''
           const totalNew = this.countEditableChars(maskInner!, newValue, newValue.length)
           
           let newPos = newValue.length
