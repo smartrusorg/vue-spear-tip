@@ -85,6 +85,14 @@ import SimpleBar from 'simplebar'
   beforeMount() {
     SimpleBar?.removeObserver?.()
   }
+  
+  scroll(x: number, y: number) {
+    this.$el?.querySelector?.('.simplebar-content-wrapper')?.scrollTo?.({
+      left: x,
+      top: y,
+      behavior: 'smooth',
+    })
+  }
 }
 </script>
 
