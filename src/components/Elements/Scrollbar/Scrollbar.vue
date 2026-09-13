@@ -18,14 +18,14 @@
         margin: {{ margin }} !important;
         cursor: grabbing !important;
         width: {{ width }} !important;
+        opacity: 0.9;
       }
       .{{ randomClass }}
-      > .simplebar-track
-      > .simplebar-scrollbar:hover::before {
-        background-color: {{ color }} !important;
-        margin: {{ margin }} !important;
-        cursor: grab !important;
-        width: {{ width }} !important;
+      > .simplebar-track:hover,
+      .{{ randomClass }}
+      > .simplebar-track:hover
+      > .simplebar-scrollbar::before {
+        cursor: grabbing !important;
       }
       {{ hasHorizontalScrollbar ? `.${randomClass} {padding-bottom: 14px}` : '' }}
 </template>
@@ -44,6 +44,7 @@ import SimpleBar from 'simplebar'
  * @copyright https://smartrus.org
  */
 @Component export default class Scrollbar extends BaseComponent {
+  emits = ['scroll', 'scrollSync']
   @Prop(Boolean) readonly autoHide: boolean = false
   @Prop(String) readonly color: string = '#494747'
   @Prop(String) readonly margin: string = 'auto'
@@ -56,7 +57,34 @@ import SimpleBar from 'simplebar'
   simpleBar: SimpleBar|null = null
   hasHorizontalScrollbar: boolean = false
   hasVerticalScrollbar: boolean = false
-
+  wrapperEl: HTMLDivElement|null = null
+  scrollEvCb: any = null
+  
+  rafPending: boolean = false
+  lastTop: number = 0
+  lastLeft: number = 0
+  
+  created() {
+    this.scrollEvCb = (event: Event) => {
+      const target = event.target as HTMLElement
+      this.lastTop = target.scrollTop
+      this.lastLeft = target.scrollLeft
+      
+      // 1) Синхронный эмит — для прямой манипуляции DOM без Vue.
+      //    Используется для «горячих» элементов (шапка), где важна задержка 0 кадров.
+      this.$emit('scrollSync', this.lastTop, this.lastLeft)
+      
+      // 2) rAF-троттлинг — для реактивного состояния (ячейки опций и т.п.),
+      //    где Vue re-render на 1 кадр позже не критичен.
+      if (this.rafPending) return
+      this.rafPending = true
+      requestAnimationFrame(() => {
+        this.$emit('scroll', this.lastTop, this.lastLeft)
+        this.rafPending = false
+      })
+    }
+  }
+  
   mounted() {
     this.randomClass = 'scrollbar-c' + this.VST.generateRandomKey()
     this.simpleBar = new SimpleBar(this.$refs.scrollContainer, {
@@ -64,8 +92,9 @@ import SimpleBar from 'simplebar'
       direction: this.direction,
     }) as any
     this.nextTick(() => {
-      // 2. Начинаем отслеживать элемент контента
-      const contentEl = this.simpleBar?.el?.querySelector?.('.simplebar-content') as HTMLDivElement
+      // Начинаем отслеживать элемент контента
+      this.wrapperEl = this.simpleBar?.el?.querySelector?.('.simplebar-content-wrapper') as HTMLDivElement
+      const contentEl = this.wrapperEl?.querySelector?.('.simplebar-content') as HTMLDivElement
       if (contentEl) {
         //  Создаем ResizeObserver
         const resizeObserver = new ResizeObserver(() => {
@@ -78,13 +107,15 @@ import SimpleBar from 'simplebar'
         })
         this.hookWhenComponentDestroy(() => resizeObserver?.disconnect?.())
         resizeObserver.observe(contentEl)
+        this.wrapperEl.addEventListener('scroll', this.scrollEvCb);
       }
     }, 10)
   }
 
   beforeMount() {
-    SimpleBar?.removeObserver?.()
+    this.wrapperEl?.removeEventListener?.('scroll', this.scrollEvCb);
   }
+  
   
   scroll(x: number, y: number) {
     this.$el?.querySelector?.('.simplebar-content-wrapper')?.scrollTo?.({
