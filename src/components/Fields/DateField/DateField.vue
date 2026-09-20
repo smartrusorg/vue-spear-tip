@@ -588,7 +588,6 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
     }
     val = val.trim().replace(/\s+/g, ' ')
     if (val && val != this.$refs.VSTStringField?.getValue?.()) {
-      console.log('val', val, this.$refs.VSTStringField?.getValue?.())
       this.$refs.VSTStringField?.setValue?.(val)
     }
   }
