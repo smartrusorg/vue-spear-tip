@@ -232,6 +232,16 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
         if (this.value) {
           this.addDate()
           this.onValueChange()
+          if (this.fieldName) {
+            $VST.$emit(
+              '$VST.components.fields.date.'+btoa(this.fieldName),
+              this.ISO861UTCMode ? (this.value ? (
+                this.value instanceof Temporal.ZonedDateTime
+                  ? this.value.epochMilliseconds
+                  : this.VST.DT(this.value! ?? null).epochMilliseconds
+              ) : 0) : (this.value || 0)
+            )
+          }
         }
       })
     })
@@ -246,11 +256,11 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   onMaxDateFieldChange(stamp: number|Temporal.ZonedDateTime) {
     this.indNeedSendMinMaxUpdate = false
-      this.fp?.set?.('maxDate', stamp ? new Date(
-          (stamp instanceof Temporal.ZonedDateTime)
-              ? stamp.epochMilliseconds
-              : this.VST.DT(stamp).epochMilliseconds
-      ) : null)
+    this.fp?.set?.('maxDate', stamp ? new Date(
+        (stamp instanceof Temporal.ZonedDateTime)
+            ? stamp.epochMilliseconds
+            : this.VST.DT(stamp).epochMilliseconds
+    ) : null)
   }
   onMinDateFieldChange(stamp: number|Temporal.ZonedDateTime) {
     this.indNeedSendMinMaxUpdate = false
@@ -554,14 +564,15 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
 
   setInputMaskValueByDTStamp(stamp: number|string) {
     this.DT = $VST.DT(stamp)
-    this.$emit(
-      'update:modelValue',
-      this.value = this.ISO861UTCMode
-          ? this.DT?.[
-            this.maskPreset == 'date' ? 'toPlainDate' : 'toPlainDateTime'
-          ]?.()?.toString().replace('T', ' ')
-          : (this.asTemporal ? this.DT : this.DT.epochMilliseconds)
-    )
+    this.value = this.ISO861UTCMode
+      ? this.DT?.[
+        this.maskPreset == 'date' ? 'toPlainDate' : 'toPlainDateTime'
+        ]?.()?.toString().replace('T', ' ')
+      : (this.asTemporal ? this.DT : this.DT.epochMilliseconds)
+    
+    if (this.indNeedSendMinMaxUpdate) {
+      this.$emit('update:modelValue', this.value)
+    }
     let val = this.DT.toLocaleString(
       (this.locale || new Intl.DateTimeFormat().resolvedOptions().locale), {
         year: 'numeric',
@@ -576,7 +587,10 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       val = this.extractDateOnly(val) ?? ''
     }
     val = val.trim().replace(/\s+/g, ' ')
-    this.$refs.VSTStringField?.setValue?.(val)
+    if (val && val != this.$refs.VSTStringField?.getValue?.()) {
+      console.log('val', val, this.$refs.VSTStringField?.getValue?.())
+      this.$refs.VSTStringField?.setValue?.(val)
+    }
   }
 
   @Watch({deep: true, immediate: true}) watchDT(DT: Temporal.ZonedDateTime|null) {

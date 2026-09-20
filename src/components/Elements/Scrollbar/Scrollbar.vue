@@ -11,6 +11,15 @@
   )
     slot
     component(is="style").
+      .{{ randomClass }} {padding-bottom: 14px}
+      .{{ randomClass }} .simplebar-track.simplebar-horizontal .simplebar-scrollbar.simplebar-visible {
+        margin-top: 3px !important;
+        height: {{ parseInt(width)-1 }}px !important;
+        border: 0 !important;
+        opacity: 0.8 !important;
+        cursor: grabbing !important;
+      }
+    component(is="style").
       .{{ randomClass }}
       > .simplebar-track
       > .simplebar-scrollbar::before {
@@ -18,7 +27,8 @@
         margin: {{ margin }} !important;
         cursor: grabbing !important;
         width: {{ width }} !important;
-        opacity: 0.9;
+        margin-left: 1px !important;
+        opacity: 0.8;
       }
       .{{ randomClass }}
       > .simplebar-track:hover,
@@ -27,7 +37,6 @@
       > .simplebar-scrollbar::before {
         cursor: grabbing !important;
       }
-      {{ hasHorizontalScrollbar ? `.${randomClass} {padding-bottom: 14px}` : '' }}
 </template>
 
 
