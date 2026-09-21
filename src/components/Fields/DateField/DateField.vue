@@ -422,6 +422,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
       if (this.$refs.VSTStringField?.$el) {
         this.nextTick(() => {
           if (this.value) {
+            this.indNeedSendMinMaxUpdate = true
             this.setInputMaskValueByDTStamp((
               this.value instanceof Temporal.ZonedDateTime
                 ? this.value.epochMilliseconds
@@ -429,7 +430,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
             ) as string)
           }
           clearInterval(this.pickerInterval)
-        })
+        }, 2)
       }
     }, 25)
   }
