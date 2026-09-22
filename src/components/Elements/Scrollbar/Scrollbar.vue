@@ -11,7 +11,7 @@
   )
     slot
     component(is="style").
-      .{{ randomClass }} {padding-bottom: 14px}
+      .{{ randomClass }} {padding-bottom: {{ paddingBottom }}}
       .{{ randomClass }} .simplebar-track.simplebar-horizontal .simplebar-scrollbar.simplebar-visible {
         margin-top: 3px !important;
         height: {{ parseInt(width)-1 }}px !important;
@@ -58,6 +58,7 @@ import SimpleBar from 'simplebar'
   @Prop(String) readonly color: string = '#494747'
   @Prop(String) readonly margin: string = 'auto'
   @Prop(String) readonly width: string = '7px'
+  @Prop(String) readonly paddingBottom: string = '14px'
   @Prop(String) readonly direction: 'rtl'|'ltr' = 'ltr'
 
   declare $refs: {scrollContainer: HTMLDivElement}
