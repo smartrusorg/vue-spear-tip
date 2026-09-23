@@ -482,12 +482,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/solid"
   }
 
   onReset() {
-    if (this.withTime) {
-      this.value = null
-    }
-    else {
-      this.$emit('update:modelValue', this.value = null)
-    }
+    this.$emit('update:modelValue', this.value = null)
   }
 
   /**
