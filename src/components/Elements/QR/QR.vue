@@ -1,5 +1,6 @@
 <template lang="pug">
-  .qrcode
+  div(class="flex items-center justify-center w100% h100%")
+    .qrcode
 </template>
 
 
@@ -14,7 +15,7 @@ import './QRCreator.js'
  * @author CHORNY (created 28.09.2024 2:11)
  * @copyright https://smartrus.org
  */
-@Component export default class QRField extends FieldComponent {
+@Component export default class QR extends FieldComponent {
   declare $refs: {
     qrCode: HTMLInputElement
   }
@@ -35,8 +36,9 @@ import './QRCreator.js'
     this.reCreate(newData)
   }
   reCreate(data: number|string|{[p:string]:any}|any[]) {
-    this.$el.innerHTML = '' // @ts-ignore
-    this.$el.append(window?.['QRCreator'](
+    const qr = this.$el.querySelector('.qrcode')!
+    qr.innerHTML = '' // @ts-ignore
+    qr.append(window?.['QRCreator'](
       ['string', 'number'].includes(typeof data)
         ? data?.toString()
         : JSON.stringify(data)
