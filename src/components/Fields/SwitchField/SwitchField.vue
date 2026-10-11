@@ -20,9 +20,9 @@
       }`
     )
       .switch_box
-        div(@click="!disabled ? (value = !value) : null" class="cursor-pointer fs-1rem mb2px")
+        div(@click="toggle()" class="cursor-pointer fs-1rem mb2px")
           slot
-        input(:id="'switch-'+randomId" type="checkbox" v-model="value" :disabled="disabled")
+        input(:id="'switch-'+randomId" type="checkbox" :checked="value" :disabled="disabled" @change="onInputChange")
         label(:for="'switch-'+randomId" :class=`{
           disabled,
         }`)
@@ -32,7 +32,7 @@
       ['toggler-'+randomId]: true,
     }`
     )
-      input(class="tgl tgl-flip" :id="'toggler-'+randomId" type="checkbox" v-model="value" :disabled="disabled")
+      input(class="tgl tgl-flip" :id="'toggler-'+randomId" type="checkbox" :checked="value" :disabled="disabled" @change="onInputChange")
       label(class="tgl-btn" :data-tg-off="titleTogglerN" :data-tg-on="titleTogglerY" :for="'toggler-'+randomId")
     .typical-checkbox(
       v-else-if="type == 'checkbox'"
@@ -41,7 +41,7 @@
       }`
     )
       span(class="flex items-center justify-center")
-        input(type="checkbox" :id="'checkbox-'+randomId" v-model="value" :disabled="disabled")
+        input(type="checkbox" :id="'checkbox-'+randomId" :checked="value" :disabled="disabled" @change="onInputChange")
         label(
           :for="'checkbox-'+randomId"
           class="check py3px! w20px! p0!"
@@ -69,7 +69,7 @@
             polyline(points="1 9 7 14 15 4")
       span(
         v-if="$slots?.default && $slots?.default?.()?.[0]?.children?.length"
-        @click="!disabled ? (value = !value) : null"
+        @click="toggle()"
         class="cursor-pointer fs-1rem mx15px my2px whitespace-nowrap"
         :class=`{
           'fw-bold underline underline-black': value,
@@ -161,27 +161,64 @@ import FieldComponent from '../../../replaceable/FieldComponent.vue'
   @Prop(String) readonly type: 'switcher'|'toggler'|'checkbox' = 'switcher'
   @Prop(Boolean, null) readonly modelValue: boolean = false
   value: boolean = false
-
-  beforeMount() {
-    this.value = this.inputValue || this.modelValue || false
-    this.randomId = $VST.generateRandomKey(32)
-  }
+  randomId: string = ''
   emits = ['update:modelValue', 'change']
 
-
-  onValueChange() {
-    if (this.ignoreOuter) return this.ignoreOuter = false
-    this.$emit('update:modelValue', this.value)
-    this.$emit('change', this.value)
+  beforeMount() {
+    this.randomId = $VST.generateRandomKey(32)
+    this.value = this.incomingValue ?? false
   }
 
-  randomId: string = ''
+  /**
+   * Внешнее значение переключателя: inputValue в приоритете над modelValue.
+   * null — значение не задано ни одним из входных параметров (пустой переключатель).
+   */
+  get incomingValue(): boolean|null {
+    if (this.inputValue !== null && this.inputValue !== undefined) return !!this.inputValue
+    if (this.modelValue !== null && this.modelValue !== undefined) return !!this.modelValue
+    return null
+  }
 
+  /** Клик по подписи (слот) — ведёт себя как клик по самому переключателю */
+  toggle() {
+    if (this.disabled) return
+    this.applyUserValue(!this.value)
+  }
 
-  ignoreOuter: boolean = false
-  @Watch('modelValue', true) modelValueChanged(value: any) {
-    this.ignoreOuter = true
-    this.setValue(value)
+  /** Нативное изменение скрытого чекбокса (клик по свитчеру/label) */
+  onInputChange(event: Event) {
+    this.applyUserValue(!!(event?.target as HTMLInputElement)?.checked)
+  }
+
+  /**
+   * Значение, изменённое пользователем: обновляем состояние и уведомляем наружу.
+   * Наружу эмитим только здесь — при синхронизации извне (inputValue/modelValue) эмиссии нет,
+   * поэтому нет ни «мусора» на монтировании, ни зацикливания, ни залипания флага.
+   */
+  applyUserValue(value: boolean) {
+    value = !!value
+    if (value === this.value) return
+    this.value = value
+    this.$emit('update:modelValue', value)
+    this.$emit('change', value)
+  }
+
+  /** Синхронизация внешнего значения внутрь без эмиссии наружу */
+  syncOuterValue(value: any) {
+    if (value === null || value === undefined) return
+    const next = !!value
+    if (this.value === next) return
+    this.value = next
+  }
+
+  @Watch('inputValue', true) watchInputValue(value: any) {
+    this.syncOuterValue(value)
+  }
+
+  @Watch('modelValue', true) watchModelValue(value: any) {
+    // inputValue в приоритете: если он задан — modelValue игнорируем
+    if (this.inputValue !== null && this.inputValue !== undefined) return
+    this.syncOuterValue(value)
   }
 }
 </script>
