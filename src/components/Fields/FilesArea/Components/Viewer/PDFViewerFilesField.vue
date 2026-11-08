@@ -43,9 +43,9 @@
 
 
 <script lang="ts">
-import {Prop, BaseComponent, VST} from '../../../../../core'
+import {Prop, BaseComponent, Component} from '../../../../../core'
 
-@VST export default class PdfViewer extends BaseComponent {
+@Component export default class PdfViewer extends BaseComponent {
 
   @Prop(String) readonly uri: string = ''
   @Prop(String) readonly ext: string = ''

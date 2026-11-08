@@ -32,7 +32,7 @@
 
 <script lang="ts">
 
-import {Computed, Prop, VST, Watch, VueClass} from '../../core' // @ts-ignore
+import {Computed, Prop, Component, Watch, VueClass} from '../../core' // @ts-ignore
 
 // https://www.npmjs.com/package/vue-highlight-code?activeTab=readme
 import { HighCode } from 'vue-highlight-code'
@@ -43,7 +43,7 @@ import 'vue-highlight-code/dist/style.css'
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class CodeHighlight extends VueClass {
+@Component export default class CodeHighlight extends VueClass {
   @Prop(String, Object) code: string|null|CodeHighlight['codeBlocks'][number]|CodeHighlight['codeBlocks'] = null
   codeBlocks: {
     // prioritized?: true

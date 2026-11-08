@@ -16,7 +16,7 @@
 
 
 <script lang="ts">
-import {VST, Prop, BaseComponent} from '../../../core'
+import {Component, Prop, BaseComponent} from '../../../core'
 import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
 
 /**
@@ -24,7 +24,7 @@ import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
  * @author CHORNY
  * @copyright https://smartrus.org
  */
-@VST export default class TabsKit extends BaseComponent {
+@Component export default class TabsKit extends BaseComponent {
   components = {GuidesMenu}
 }
 </script>

@@ -30,10 +30,10 @@
 
 <script lang="ts">
 import Zoomable from 'vue-zoomable'
-import {Prop, BaseComponent, VST} from '../../../../../core'
+import {Prop, BaseComponent, Component} from '../../../../../core'
 import "vue-zoomable/dist/style.css"
 
-@VST export default class ImageViewerFilesField extends BaseComponent {
+@Component export default class ImageViewerFilesField extends BaseComponent {
   components = {Zoomable}
   @Prop(String) readonly uri: string = ''
   @Prop(String) readonly ext: string = ''

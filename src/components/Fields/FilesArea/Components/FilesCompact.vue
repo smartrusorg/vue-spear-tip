@@ -1,7 +1,7 @@
 <script lang="ts">
-import {Prop, BaseComponent, VST} from '../../../../core'
+import {Prop, BaseComponent, Component} from '../../../../core'
 
-@VST export default class FilesCompact extends BaseComponent {
+@Component export default class FilesCompact extends BaseComponent {
 
 }
 // Тут компактный компонент файлов, которые загружаются по кнопке, если несколько файлов, то создаётся архив.

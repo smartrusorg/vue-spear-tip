@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, VST } from '../../../core'
+import { Component, Prop } from '../../../core'
 import BaseComponent from '../../BaseComponent.vue'
 
 /**

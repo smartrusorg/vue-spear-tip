@@ -3,12 +3,12 @@
 </template>
 
 <script lang="ts">
-import {Prop, BaseComponent, VST} from '../../../../../core'
+import {Prop, BaseComponent, Component} from '../../../../../core'
 
 // import ExcelViewer from 'excel-viewer'
 import { FileFieldItemInterface } from '../FileItem.vue'
 
-@VST export default class ExcelViewerFilesField extends BaseComponent {
+@Component export default class ExcelViewerFilesField extends BaseComponent {
   @Prop(Object, null) readonly file: FileFieldItemInterface = {} as FileFieldItemInterface
 
   // fixme https://oss.sheetjs.com/ 

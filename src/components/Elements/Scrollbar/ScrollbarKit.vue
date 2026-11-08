@@ -27,14 +27,14 @@
 
 
 <script lang="ts">
-import {VST, Prop, BaseComponent} from '../../../core'
+import {Component, Prop, BaseComponent} from '../../../core'
 import GuidesMenu from '../../../components/Documentation/GuidesMenu.vue'
 /**
  * Button documentation with examples
  * @author CHORNY (created 11.01.2026 19:22
  * @copyright https://smartrus.org
  */
-@VST export default class ScrollbarKit extends BaseComponent {
+@Component export default class ScrollbarKit extends BaseComponent {
   components = {GuidesMenu}
 }
 </script>
