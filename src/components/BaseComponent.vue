@@ -3,6 +3,7 @@ import {reactive, computed, ref} from 'vue'
 import {IBaseVueComponent, BaseComponentEventInput, BaseComponentEvents} from '../Interfaces/IBaseVueComponent'
 import {VueClass} from '../core'
 import {IGlobalVST} from '../Interfaces/IGlobalVST'
+import type {IViewPortInfo} from '../core/Helpers/ViewPort'
 import {IHammerManager} from '../Interfaces/IHammer'
 
 /** Base component */
@@ -92,7 +93,13 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
 
   createdParent() {
     this.VST.$on('$VST.viewPortResize', this.onViewPortResize)
-    this.hookWhenComponentDestroy(() => this.VST.$off('$VST.viewPortResize', this.onViewPortResize))
+    this.VST.$on('$VST.viewPortModeChange', this.onViewPortModeChange)
+    this.VST.$on('$VST.viewPortSettled', this.onViewPortSettled)
+    this.hookWhenComponentDestroy(() => {
+      this.VST.$off('$VST.viewPortResize', this.onViewPortResize)
+      this.VST.$off('$VST.viewPortModeChange', this.onViewPortModeChange)
+      this.VST.$off('$VST.viewPortSettled', this.onViewPortSettled)
+    })
   }
 
   mountedParent() {
@@ -160,6 +167,13 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
   onViewPortResize() {
 
   }
+
+  /** Сменился режим экрана (mobile/tablet/notebook/desktop) или ориентация. */
+  onViewPortModeChange(info?: IViewPortInfo) {}
+
+  /** Размеры окна устоялись: можно мерить DOM и писать inline-высоты. */
+  onViewPortSettled(info?: IViewPortInfo) {}
+
   onComponentClickOrTap() {}
 
   hookWhenComponentDestroy(end: () => any): void {

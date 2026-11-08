@@ -14,6 +14,7 @@ export * from '../Interfaces/IVSTContext'
 
 export * from './VueClassComponent'
 export * from './VueClass'
+export * from './Helpers/ViewPort'
 export * from './Decorators/Props'
 export * from './Decorators/Watch'
 export * from './Decorators/Computed'

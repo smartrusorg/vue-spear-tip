@@ -235,11 +235,17 @@ import Hammer from './Helpers/Hammer' // @ts-ignore
 VSTLib['Hammer'] = Hammer
 
 // -----------------------
-// Глобальная, единоразовая подписка на изменения размера окна, для рекативных вычислений внутри базового
+// Вьюпорт: геометрия окна и «устоявшийся» сигнал (см. core/Helpers/ViewPort.ts)
 // -----------------------
-window.addEventListener('resize', (event: Event) =>
-  VSTLib.$emit('$VST.viewPortResize'),
-) // @ts-ignore
+import ViewPort from './Helpers/ViewPort'
+
+/**
+ * `$VST.viewPort.info()` — размеры в двух системах координат (visual/layout viewport).
+ * События: `$VST.viewPortResize` (как было) → `$VST.viewPortModeChange` (смена режима/ориентации)
+ * → `$VST.viewPortSettled` (можно мерить DOM и писать высоты).
+ */
+VSTLib.viewPort = new ViewPort((event: string, payload?: any) => VSTLib.$emit(event, payload))
+VSTLib.viewPort.start()
 
 // -----------------------
 // Регистрация горячих клавиш в компонентах

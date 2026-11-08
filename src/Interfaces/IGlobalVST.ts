@@ -3,10 +3,17 @@ import IDeviceInfo from './IDeviceInfo'
 import IHammer from './IHammer'
 import Modals from '../components/Elements/Modals'
 import IModalObject from './IModalObject'
+import type {IViewPort} from '../core/Helpers/ViewPort'
 
 export interface IGlobalVST {
   /** Параметры, которые будут отработаны реактивно внутри шаблонов */
   $reactive: IGlobalReactiveElements
+
+  /**
+   * Геометрия вьюпорта: `info()` (visual и layout viewport), подписка на `$VST.viewPortSettled`.
+   * Единственный правильный источник размеров окна — см. `core/Helpers/ViewPort.ts`.
+   */
+  viewPort: IViewPort
   
   // TODO Подумать над langs
   $lang: {[key: string]: string}

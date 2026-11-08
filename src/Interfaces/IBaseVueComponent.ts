@@ -1,13 +1,26 @@
 // biome-ignore assist/source/organizeImports: <Нужно для глобального экспорта>
 import type {IVueClass} from './IVueClass'
 import type {IGlobalVST} from './IGlobalVST'
+import type {IViewPortInfo} from '../core/Helpers/ViewPort'
 import {HammerEvents, HammerInput} from './IHammer'
 
 export interface IBaseVueComponent extends IVueClass {
   readonly VST: IGlobalVST
   /** Event on window change */
   onViewPortResize(): void
-  
+
+  /**
+   * Сменился режим экрана (mobile/tablet/notebook/desktop) или ориентация.
+   * Здесь сбрасываются состояния панелей/оверлеев: мобильные ветки UI больше не активны.
+   */
+  onViewPortModeChange(info?: IViewPortInfo): void
+
+  /**
+   * Размеры окна устоялись (после поворота/ресайза) и Vue применил классы режима.
+   * Только здесь можно мерить DOM и писать inline-высоты.
+   */
+  onViewPortSettled(info?: IViewPortInfo): void
+
   /** Event when user click or tap on component. Generate @clickTap event by default. */
   onComponentClickOrTap(): void
   
