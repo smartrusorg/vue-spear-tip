@@ -1,6 +1,7 @@
 // @ts-ignore
 import '../MIT/ua-parser-v.1.0.41.mit.pack'
 import IDeviceInfo from '../../Interfaces/IDeviceInfo' // @ts-ignore
+import {safeNavigator} from './Env'
 
 const UAParser = globalThis.UAParser // @ts-ignore
 delete globalThis.UAParser
@@ -9,14 +10,14 @@ export default class DeviceInfo implements IDeviceInfo {
   #userAgent: string
   #parser: any
   constructor() {
-    this.#userAgent = navigator.userAgent
-    this.#parser = new UAParser(navigator.userAgent ?? 'unknown').getResult()
+    this.#userAgent = safeNavigator.userAgent
+    this.#parser = new UAParser(safeNavigator.userAgent ?? 'unknown').getResult()
     this.#inst = this
   }
   
   #inst: DeviceInfo|null = null
   #instance(): DeviceInfo {
-    if (!this.#inst || this.#inst.#userAgent != navigator.userAgent) {
+    if (!this.#inst || this.#inst.#userAgent != safeNavigator.userAgent) {
       this.#inst = new DeviceInfo
     }
     return this.#inst

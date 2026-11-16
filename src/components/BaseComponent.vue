@@ -4,6 +4,7 @@ import {IBaseVueComponent, BaseComponentEventInput, BaseComponentEvents} from '.
 import {VueClass} from '../core'
 import {IGlobalVST} from '../Interfaces/IGlobalVST'
 import type {IViewPortInfo} from '../core/Helpers/ViewPort'
+import {isBrowser, safeNavigator, viewportSize} from '../core/Helpers/Env'
 import {IHammerManager} from '../Interfaces/IHammer'
 
 /** Base component */
@@ -19,11 +20,14 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
     super()
     this.VST = globalThis.$VST
     if (!this.VST.$reactive) { // Единоразовая настройка реактивных параметров
-      const windowWidth = ref(window.innerWidth)
-      const windowHeight = ref(window.innerHeight)
+      // SSR: размеры окна и медиа-признаки недоступны — нейтральные значения до гидратации (ED-58)
+      const size = viewportSize()
+      const windowWidth = ref(size.width)
+      const windowHeight = ref(size.height)
       const isAndroid = this.VST.device().osName()?.toLowerCase().includes('android')
       const isApple = this.VST.device().deviceVendor() == 'Apple'
-      const hasTouchpad = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0
+      const hasTouchpad = () => isBrowser
+        && ('ontouchstart' in window || safeNavigator.maxTouchPoints > 0 || (safeNavigator as any).msMaxTouchPoints > 0)
       const isIphone =
       this.VST.device().osName()?.toLowerCase().includes('ios')
         || this.VST.device().deviceModel()?.toLowerCase().includes('iphone')
@@ -33,7 +37,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
         )
 
       this.VST.$reactive = reactive({
-        locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : navigator.language) || 'en',
+        locale: (Intl ? ((new Intl.DateTimeFormat())?.resolvedOptions?.()?.locale) : safeNavigator.language) || 'en',
         timezone: Intl ? Intl?.DateTimeFormat?.()?.resolvedOptions?.()?.timeZone ?? 'UTC' : 'UTC',
         isMobile: computed(() => windowWidth.value < 768 || (windowHeight.value < 768 && windowWidth.value < 1000)),
         isMobileHorizontal: computed(() => windowHeight.value < windowWidth.value && windowHeight.value < 768 && windowWidth.value < 1000),
@@ -72,7 +76,7 @@ abstract class BaseComponent extends VueClass implements IBaseVueComponent {
         viewPortHeight: computed(() => windowHeight.value),
       }) as any
 
-      window.addEventListener('resize', () => {
+      if (isBrowser) window.addEventListener('resize', () => {
         windowWidth.value = window.innerWidth
         windowHeight.value = window.innerHeight
       })

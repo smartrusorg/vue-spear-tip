@@ -20,9 +20,9 @@
  * в одной формуле (высота от `innerHeight`, а верх — от `rect.top`) нельзя.
  */
 
+import {isBrowser} from './Env'
 /** Режим экрана — по тем же порогам, что `$reactive.isMobile/isTablet/isNotebook/isDesktop` */
 export type ViewPortMode = 'mobile' | 'tablet' | 'notebook' | 'desktop'
-
 /** Ориентация окна */
 export type ViewPortOrientation = 'portrait' | 'landscape'
 
@@ -100,7 +100,7 @@ export default class ViewPort implements IViewPort {
   }
 
   start(): void {
-    if (this.started || typeof window === 'undefined') return
+    if (this.started || !isBrowser) return
     this.started = true
     this.listen(window, 'resize', () => this.onEvent())
     // iOS: `orientationchange` приходит до/вместо resize, размеры к этому моменту уже новые.
@@ -130,6 +130,18 @@ export default class ViewPort implements IViewPort {
   }
 
   private read(): Omit<IViewPortInfo, 'sequence'> {
+    // SSR: DOM нет — отдаём «неизвестные» размеры, режим определит клиент после гидратации
+    if (!isBrowser) {
+      return {
+        width: 0,
+        height: 0,
+        layoutWidth: 0,
+        layoutHeight: 0,
+        mode: 'desktop',
+        orientation: 'landscape',
+      }
+    }
+
     const width = window.innerWidth
     const height = window.innerHeight
     const root = document.documentElement

@@ -225,6 +225,7 @@ VSTLib.safeStringify = (
 // Информация об устройстве
 // -----------------------
 import DeviceInfo from './Helpers/DeviceInfo'
+import {isBrowser} from './Helpers/Env'
 
 VSTLib.device = () => new DeviceInfo()
 
@@ -251,7 +252,8 @@ VSTLib.viewPort.start()
 // Регистрация горячих клавиш в компонентах
 // -----------------------
 VSTLib['__REGISTERED_HOTKEYS'] = {}
-window.addEventListener('keydown', (e: KeyboardEvent) => {
+// SSR: подписка на window/document только в браузере (ED-58)
+if (isBrowser) window.addEventListener('keydown', (e: KeyboardEvent) => {
   let keyName: string = ''
   let isCtrlOrCmdPressed: boolean =
     (e.key == 'Meta' && /Mac OS/.test(navigator.userAgent)) || e.ctrlKey
